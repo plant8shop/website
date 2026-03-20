@@ -1,0 +1,100 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>プラントショップ</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body data-page="home">
+  <header class="site-header">
+    <nav class="nav">
+      <a href="#top">プラントショップ</a>
+      <a href="#about">概要</a>
+      <a href="#works">作品</a>
+      <a href="#board">掲示板</a>
+      <a href="#contact">連絡先・SNS</a>
+    </nav>
+  </header>
+
+  <main>
+    <section id="top" class="hero section">
+      <h1>プラントショップ</h1>
+      <p class="lead">
+        建築・映像・アート・デザインを横断しながら、ものの見方や「生産」を問い直すコレクティブ。
+      </p>
+    </section>
+
+    <section id="about" class="section">
+      <h2>概要</h2>
+      <div id="aboutContent"></div>
+    </section>
+
+    <section id="works" class="section">
+      <h2>作品</h2>
+      <p class="subnote">
+        左が作品、右が参加者です。交点に近づくと、その参加者がその作品で何をしたか表示されます。帯の部分では参加者名が表示されます。
+      </p>
+      <div id="worksGraph"></div>
+    </section>
+
+    <section id="board" class="section">
+      <div class="section-head">
+        <h2>掲示板</h2>
+        <button id="openPostModalBtn" class="button">投稿する</button>
+      </div>
+
+      <div class="board-note">
+        <p>メンバー投稿は共有Googleフォームから、一般投稿はこのサイト上のフォームから送信できます。</p>
+      </div>
+
+      <div id="boardList"></div>
+    </section>
+
+    <section id="contact" class="section">
+      <h2>連絡先・SNS</h2>
+      <div id="contactContent"></div>
+    </section>
+  </main>
+
+  <div id="tooltip" class="tooltip" hidden></div>
+
+  <div id="postModal" class="modal" hidden>
+    <div class="modal-backdrop" id="modalBackdrop"></div>
+    <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="postModalTitle">
+      <div class="modal-header">
+        <h3 id="postModalTitle">掲示板に投稿</h3>
+        <button id="closePostModalBtn" class="icon-button" type="button">×</button>
+      </div>
+
+      <form id="guestPostForm" class="post-form">
+        <label>
+          <span>名前</span>
+          <input type="text" name="name" maxlength="40" required />
+        </label>
+
+        <label>
+          <span>言及する作品</span>
+          <div id="guestWorkCheckboxes" class="checkbox-list"></div>
+          <small class="muted">作品なしでも投稿できます。複数選択可。</small>
+        </label>
+
+        <label>
+          <span>コメント</span>
+          <textarea name="comment" rows="5" maxlength="500" required></textarea>
+        </label>
+
+        <div class="form-actions">
+          <button type="submit" class="button">送信</button>
+        </div>
+
+        <p id="guestPostStatus" class="muted"></p>
+      </form>
+    </div>
+  </div>
+
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

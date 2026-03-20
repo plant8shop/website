@@ -37,8 +37,6 @@
       post.createdAt ||
       post.datetime ||
       post.dateTime ||
-      post.time ||
-      post.date ||
       "";
 
     const t = new Date(raw).getTime();

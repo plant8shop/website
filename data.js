@@ -51,7 +51,7 @@ const SITE_DATA = {
       id: "production",
       title: "生産",
       period: "2026.03–",
-      thumbnail: "https://placehold.jp/600x380.png?text=%E7%94%9F%E7%94%A3",
+      thumbnail: "assets/20260308_164209.jpg",
       summary: "「生産」と呼ばれていない生産を、写真・文章・映像を通して観察し直すプロジェクト。",
       participantIds: ["umeda", "aoki", "akiyama"],
       contributions: {
@@ -60,39 +60,5 @@ const SITE_DATA = {
         akiyama: "概念整理と言語化をしました。"
       }
     },
-    {
-      id: "liminal-map",
-      title: "リミナルマップ",
-      period: "2026.01–",
-      thumbnail: "https://placehold.jp/600x380.png?text=%E3%83%AA%E3%83%9F%E3%83%8A%E3%83%AB",
-      summary: "リミナルな空間を収集し、マッピングして提示する構想。",
-      participantIds: ["umeda", "aoki"],
-      contributions: {
-        umeda: "企画構想とウェブ展開の方向性を考えました。",
-        aoki: "写真収集と発見共有をしました。"
-      }
-    },
-    {
-      id: "backyard-study",
-      title: "バックヤード収集",
-      period: "2026.01–",
-      thumbnail: "https://placehold.jp/600x380.png?text=%E3%83%90%E3%83%83%E3%82%AF%E3%83%A4%E3%83%BC%E3%83%89",
-      summary: "搬入口や工場、鉄塔などのバックヤード的空間を収集・分析するワークショップ案。",
-      participantIds: ["umeda"],
-      contributions: {
-        umeda: "企画提案をしました。"
-      }
-    },
-    {
-      id: "radio-box",
-      title: "電話ボックス型ラジオドラマ販売",
-      period: "2026.01–",
-      thumbnail: "https://placehold.jp/600x380.png?text=%E9%9B%BB%E8%A9%B1%E3%83%9C%E3%83%83%E3%82%AF%E3%82%B9",
-      summary: "電話ボックスをラジオドラマ機へ転用する企画案。",
-      participantIds: ["aoki"],
-      contributions: {
-        aoki: "企画提案をしました。"
-      }
-    }
   ]
 };

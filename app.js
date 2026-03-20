@@ -200,11 +200,7 @@
     if (!wrap) return;
 
     wrap.innerHTML = `
-      <p>メール: <a href="mailto:${data.site.contact.email}">${data.site.contact.email}</a></p>
-      <p>メンバー投稿フォーム: <a href="${data.site.memberFormUrl}" target="_blank" rel="noopener noreferrer">Googleフォームを開く</a></p>
-      <div class="inline-list">
-        ${data.site.contact.sns.map(s => `<a class="person-chip" href="${s.url}">${s.name}</a>`).join("")}
-      </div>
+        <p>メール: <a href="mailto:${data.site.contact.email}">${data.site.contact.email}</a></p>
     `;
   }
 

@@ -31,6 +31,27 @@
     return dateStr.replaceAll("-", ".");
   }
 
+  function getPostTimeValue(post) {
+    const raw =
+      post.timestamp ||
+      post.createdAt ||
+      post.datetime ||
+      post.dateTime ||
+      post.time ||
+      post.date ||
+      "";
+
+    const t = new Date(raw).getTime();
+    if (!Number.isNaN(t)) return t;
+
+    if (post.date) {
+      const fallback = new Date(`${post.date}T00:00:00`).getTime();
+      if (!Number.isNaN(fallback)) return fallback;
+    }
+
+    return 0;
+  }
+
   function escapeHtml(str) {
     return String(str)
       .replaceAll("&", "&amp;")
@@ -229,7 +250,9 @@
   function renderBoard(container, posts, mode = "home") {
     container.innerHTML = "";
 
-    const sorted = [...posts].sort((a, b) => (a.date < b.date ? 1 : -1));
+    const sorted = [...posts].sort((a, b) => {
+      return getPostTimeValue(b) - getPostTimeValue(a);
+    });
 
     if (!sorted.length) {
       container.innerHTML = `<p class="muted">まだ投稿がありません。</p>`;

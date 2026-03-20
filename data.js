@@ -21,7 +21,7 @@ const SITE_DATA = {
       ]
     },
 
-    apiBaseUrl: "https://script.google.com/macros/s/AKfycbwTbGHWHAQ7wKYW-OFJzhaxe_WoI97P8PaEoQbT767WubU-oDgsH25A1pjInihw7KfMzA/exec",
+    apiBaseUrl: "https://script.google.com/macros/s/AKfycbwf3i8RJZPmo5UeXs-Sm_LVgYcOa4LblQ6igTZEH1L3mzdqRDhjnhxy7mw7GDMxLZ2PEA/exec",
     memberFormUrl: "#"
   },
 

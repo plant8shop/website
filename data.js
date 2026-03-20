@@ -1,4 +1,3 @@
-// data.js
 const SITE_DATA = {
   site: {
     name: "プラントショップ",
@@ -22,10 +21,7 @@ const SITE_DATA = {
       ]
     },
 
-    // ここをあなたのApps Script WebアプリURLに置き換える
-    apiBaseUrl: "YOUR_APPS_SCRIPT_WEB_APP_URL",
-
-    // メンバー投稿用Googleフォームの回答URLに置き換える
+    apiBaseUrl: "https://script.google.com/macros/s/AKfycbwTbGHWHAQ7wKYW-OFJzhaxe_WoI97P8PaEoQbT767WubU-oDgsH25A1pjInihw7KfMzA/exec",
     memberFormUrl: "#"
   },
 

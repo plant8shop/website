@@ -1,4 +1,3 @@
-// app.js
 (function () {
   const data = SITE_DATA;
   const page = document.body.dataset.page;
@@ -92,8 +91,9 @@
   }
 
   async function fetchBoardPosts() {
-    const api = data.site.apiBaseUrl;
-    if (!api || api === "https://script.google.com/macros/s/AKfycbwTbGHWHAQ7wKYW-OFJzhaxe_WoI97P8PaEoQbT767WubU-oDgsH25A1pjInihw7KfMzA/exec") {
+    const api = (data.site.apiBaseUrl || "").trim();
+
+    if (!api || api === "YOUR_APPS_SCRIPT_WEB_APP_URL") {
       console.warn("Apps Script URLが未設定です");
       boardPostsCache = [];
       return [];
@@ -124,7 +124,6 @@
 
     sorted.forEach(post => {
       const item = el("div", "board-item");
-
       const member = post.memberId ? getMember(post.memberId) : null;
 
       let worksHtml = "";
@@ -618,8 +617,9 @@
   }
 
   async function submitGuestPost(payload) {
-    const api = data.site.apiBaseUrl;
-    if (!api || api === "https://script.google.com/macros/s/AKfycbwTbGHWHAQ7wKYW-OFJzhaxe_WoI97P8PaEoQbT767WubU-oDgsH25A1pjInihw7KfMzA/exec") {
+    const api = (data.site.apiBaseUrl || "").trim();
+
+    if (!api || api === "YOUR_APPS_SCRIPT_WEB_APP_URL") {
       throw new Error("Apps Script URLが未設定です。");
     }
 

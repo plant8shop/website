@@ -3,6 +3,7 @@
   const page = document.body.dataset.page;
 
   let boardPostsCache = [];
+  let activeBubbleTrigger = null;
 
   const $ = (sel, root = document) => root.querySelector(sel);
   const el = (tag, className, html) => {
@@ -39,38 +40,154 @@
       .replaceAll("'", "&#039;");
   }
 
-  function showTooltip(evt, html) {
-    const tip = $("#tooltip");
-    if (!tip) return;
-    tip.innerHTML = html;
-    tip.hidden = false;
+  function getTooltip() {
+    return $("#tooltip");
+  }
 
-    const offset = 14;
-    let left = evt.clientX + offset;
-    let top = evt.clientY + offset;
+  function hideBubble() {
+    const tip = getTooltip();
+    if (!tip) return;
+    tip.hidden = true;
+    tip.innerHTML = "";
+    if (activeBubbleTrigger) {
+      activeBubbleTrigger.classList.remove("bubble-open");
+      activeBubbleTrigger.removeAttribute("data-bubble-open");
+      activeBubbleTrigger = null;
+    }
+  }
+
+  function positionBubble(tip, x, y) {
+    const offset = 16;
+    let left = x + offset;
+    let top = y + offset;
 
     requestAnimationFrame(() => {
       const rect = tip.getBoundingClientRect();
-      if (left + rect.width > window.innerWidth - 10) {
-        left = evt.clientX - rect.width - offset;
+
+      if (left + rect.width > window.innerWidth - 12) {
+        left = x - rect.width - offset;
       }
-      if (top + rect.height > window.innerHeight - 10) {
-        top = evt.clientY - rect.height - offset;
+      if (top + rect.height > window.innerHeight - 12) {
+        top = y - rect.height - offset;
       }
+
       tip.style.left = `${Math.max(10, left)}px`;
       tip.style.top = `${Math.max(10, top)}px`;
     });
   }
 
-  function hideTooltip() {
-    const tip = $("#tooltip");
-    if (!tip) return;
-    tip.hidden = true;
+  function showBubble({ html, x, y, trigger = null }) {
+    const tip = getTooltip();
+    if (!tip || !html) return;
+
+    if (activeBubbleTrigger && activeBubbleTrigger !== trigger) {
+      activeBubbleTrigger.classList.remove("bubble-open");
+      activeBubbleTrigger.removeAttribute("data-bubble-open");
+    }
+
+    tip.innerHTML = html;
+    tip.hidden = false;
+    tip.classList.add("is-bubble");
+
+    if (trigger) {
+      activeBubbleTrigger = trigger;
+      trigger.classList.add("bubble-open");
+      trigger.setAttribute("data-bubble-open", "1");
+    } else {
+      activeBubbleTrigger = null;
+    }
+
+    positionBubble(tip, x, y);
   }
 
-  function attachTooltip(node, html) {
-    node.addEventListener("mousemove", e => showTooltip(e, html));
-    node.addEventListener("mouseleave", hideTooltip);
+  function showBubbleForEvent(evt, html, trigger = null) {
+    showBubble({
+      html,
+      x: evt.clientX,
+      y: evt.clientY,
+      trigger
+    });
+  }
+
+  function showBubbleForElement(node, html, trigger = null) {
+    const rect = node.getBoundingClientRect();
+    showBubble({
+      html,
+      x: rect.left + rect.width / 2,
+      y: rect.top + rect.height / 2,
+      trigger: trigger || node
+    });
+  }
+
+  function setupBubbleSystem() {
+    const tip = getTooltip();
+    if (!tip) return;
+
+    tip.addEventListener("click", e => {
+      e.stopPropagation();
+    });
+
+    document.addEventListener("click", e => {
+      const target = e.target;
+      if (!target.closest(".bubble-trigger") && !target.closest("#tooltip")) {
+        hideBubble();
+      }
+    });
+
+    document.addEventListener("keydown", e => {
+      if (e.key === "Escape") {
+        hideBubble();
+      }
+    });
+
+    window.addEventListener("scroll", () => {
+      if (!tip.hidden) hideBubble();
+    }, { passive: true });
+
+    window.addEventListener("resize", () => {
+      if (!tip.hidden) hideBubble();
+    });
+  }
+
+  function attachInfoBubble(node, html, options = {}) {
+    const {
+      isLink = false
+    } = options;
+
+    node.classList.add("bubble-trigger");
+    node.setAttribute("tabindex", node.getAttribute("tabindex") || "0");
+
+    node.addEventListener("click", e => {
+      const isOpen = node.getAttribute("data-bubble-open") === "1";
+
+      if (isLink && !isOpen) {
+        e.preventDefault();
+      }
+
+      e.stopPropagation();
+
+      if (isLink && isOpen) {
+        hideBubble();
+        return;
+      }
+
+      showBubbleForEvent(e, html, node);
+    });
+
+    node.addEventListener("keydown", e => {
+      if (e.key !== "Enter" && e.key !== " ") return;
+
+      const isOpen = node.getAttribute("data-bubble-open") === "1";
+      e.preventDefault();
+      e.stopPropagation();
+
+      if (isLink && isOpen && node.href) {
+        window.location.href = node.href;
+        return;
+      }
+
+      showBubbleForElement(node, html, node);
+    });
   }
 
   function renderAbout() {
@@ -81,6 +198,7 @@
   function renderContact() {
     const wrap = $("#contactContent");
     if (!wrap) return;
+
     wrap.innerHTML = `
       <p>メール: <a href="mailto:${data.site.contact.email}">${data.site.contact.email}</a></p>
       <p>メンバー投稿フォーム: <a href="${data.site.memberFormUrl}" target="_blank" rel="noopener noreferrer">Googleフォームを開く</a></p>
@@ -243,8 +361,10 @@
 
   function splitTitle(title, maxPerLine = 7) {
     if (title.length <= maxPerLine) return [title];
+
     const lines = [];
     let current = "";
+
     for (const ch of title) {
       current += ch;
       if (current.length >= maxPerLine) {
@@ -252,8 +372,24 @@
         current = "";
       }
     }
+
     if (current) lines.push(current);
     return lines.slice(0, 3);
+  }
+
+  function bubbleHtmlForContribution({ memberName, memberIcon, workTitle, contribution }) {
+    return `
+      <div class="bubble-card">
+        <div class="bubble-card-head">
+          <span class="avatar">${escapeHtml(memberIcon)}</span>
+          <div>
+            <div class="bubble-card-name">${escapeHtml(memberName)}</div>
+            <div class="bubble-card-meta">作品：${escapeHtml(workTitle)}</div>
+          </div>
+        </div>
+        <div class="bubble-card-text">${escapeHtml(contribution || "記述なし")}</div>
+      </div>
+    `;
   }
 
   function renderWorksGraph() {
@@ -270,10 +406,10 @@
     const railStartX = 390;
     const memberGap = 120;
     const memberTopY = 34;
+    const memberLabelY = 66;
     const rowTopPad = 78;
     const rowGap = 132;
     const railEndPadding = 90;
-    const bandWidth = 20;
     const nodeRadius = 11;
 
     const width = railStartX + memberGap * members.length + railEndPadding;
@@ -361,23 +497,18 @@
       const yMin = ys[0];
       const yMax = ys[ys.length - 1];
 
-      const band = document.createElementNS(svgNS, "rect");
-      band.setAttribute("x", x - bandWidth / 2);
-      band.setAttribute("y", yMin);
-      band.setAttribute("width", bandWidth);
-      band.setAttribute("height", yMax - yMin);
-      band.setAttribute("rx", bandWidth / 2);
-      band.setAttribute("fill", "#fff");
-      band.setAttribute("stroke", "#222");
-      band.setAttribute("stroke-width", "2");
-      band.style.cursor = "pointer";
-      svg.appendChild(band);
+      const startY = Math.max(memberLabelY + 12, yMin);
+      const endY = yMax;
 
-      band.addEventListener("mousemove", e => showTooltip(e, `${member.name}`));
-      band.addEventListener("mouseleave", hideTooltip);
-      band.addEventListener("click", () => {
-        location.href = `member.html?id=${member.id}`;
-      });
+      const shaft = document.createElementNS(svgNS, "line");
+      shaft.setAttribute("x1", x);
+      shaft.setAttribute("y1", startY);
+      shaft.setAttribute("x2", x);
+      shaft.setAttribute("y2", endY);
+      shaft.setAttribute("stroke", "#222");
+      shaft.setAttribute("stroke-width", "4");
+      shaft.setAttribute("stroke-linecap", "round");
+      svg.appendChild(shaft);
 
       const iconLink = document.createElementNS(svgNS, "a");
       iconLink.setAttribute("href", `member.html?id=${member.id}`);
@@ -401,7 +532,7 @@
 
       svg.appendChild(iconLink);
 
-      addSvgText(svg, x, memberTopY + 30, member.name, {
+      addSvgText(svg, x, memberLabelY, member.name, {
         fontSize: 12,
         anchor: "middle"
       });
@@ -414,6 +545,20 @@
         const member = getMember(memberId);
         const x = xByMember[memberId];
 
+        const nodeButton = document.createElementNS(svgNS, "g");
+        nodeButton.setAttribute("class", "graph-node-button bubble-trigger");
+        nodeButton.setAttribute("tabindex", "0");
+        nodeButton.setAttribute("role", "button");
+        nodeButton.setAttribute("aria-label", `${member.name}が${work.title}でやったことを表示`);
+        svg.appendChild(nodeButton);
+
+        const hitArea = document.createElementNS(svgNS, "circle");
+        hitArea.setAttribute("cx", x);
+        hitArea.setAttribute("cy", y);
+        hitArea.setAttribute("r", 18);
+        hitArea.setAttribute("fill", "transparent");
+        nodeButton.appendChild(hitArea);
+
         const node = document.createElementNS(svgNS, "circle");
         node.setAttribute("cx", x);
         node.setAttribute("cy", y);
@@ -421,18 +566,25 @@
         node.setAttribute("fill", "#fff");
         node.setAttribute("stroke", "#222");
         node.setAttribute("stroke-width", "1.6");
-        node.style.cursor = "pointer";
-        svg.appendChild(node);
+        nodeButton.appendChild(node);
 
-        const message = `
-          <strong>${member.name}</strong><br>
-          ${work.contributions[memberId]}
-        `;
+        const html = bubbleHtmlForContribution({
+          memberName: member.name,
+          memberIcon: member.icon,
+          workTitle: work.title,
+          contribution: work.contributions[memberId]
+        });
 
-        node.addEventListener("mousemove", e => showTooltip(e, message));
-        node.addEventListener("mouseleave", hideTooltip);
-        node.addEventListener("click", () => {
-          location.href = `member.html?id=${memberId}`;
+        nodeButton.addEventListener("click", e => {
+          e.stopPropagation();
+          showBubbleForEvent(e, html, nodeButton);
+        });
+
+        nodeButton.addEventListener("keydown", e => {
+          if (e.key !== "Enter" && e.key !== " ") return;
+          e.preventDefault();
+          e.stopPropagation();
+          showBubbleForElement(nodeButton, html, nodeButton);
         });
       });
     });
@@ -487,7 +639,15 @@
         `
       );
       link.href = `member.html?id=${member.id}`;
-      attachTooltip(link, `<strong>${member.name}</strong><br>${work.contributions[member.id]}`);
+
+      const html = bubbleHtmlForContribution({
+        memberName: member.name,
+        memberIcon: member.icon,
+        workTitle: work.title,
+        contribution: work.contributions[member.id]
+      });
+
+      attachInfoBubble(link, html, { isLink: true });
       memberList.appendChild(link);
     });
 
@@ -556,7 +716,20 @@
           <div class="muted">${work.period}</div>
         </div>
       `;
-      attachTooltip(tile, `${work.contributions[member.id]}`);
+
+      const html = `
+        <div class="bubble-card">
+          <div class="bubble-card-head">
+            <div>
+              <div class="bubble-card-name">${escapeHtml(work.title)}</div>
+              <div class="bubble-card-meta">${escapeHtml(work.period)}</div>
+            </div>
+          </div>
+          <div class="bubble-card-text">${escapeHtml(work.contributions[member.id] || "記述なし")}</div>
+        </div>
+      `;
+
+      attachInfoBubble(tile, html, { isLink: true });
       worksWrap.appendChild(tile);
     });
 
@@ -581,7 +754,7 @@
 
     wrap.innerHTML = data.works.map(work => `
       <label class="checkbox-row">
-        <input type="checkbox" name="workIds" value="${work.id}">
+        <input class="checkbox-input" type="checkbox" name="workIds" value="${work.id}">
         <span>${escapeHtml(work.title)}</span>
       </label>
     `).join("");
@@ -642,7 +815,7 @@
     const form = $("#guestPostForm");
     if (!form) return;
 
-    form.addEventListener("submit", async (e) => {
+    form.addEventListener("submit", async e => {
       e.preventDefault();
 
       const status = $("#guestPostStatus");
@@ -685,6 +858,8 @@
       }
     });
   }
+
+  setupBubbleSystem();
 
   if (page === "home") {
     renderAbout();

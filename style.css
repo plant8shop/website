@@ -1,4 +1,3 @@
-/* style.css */
 :root {
   --border: #222;
   --bg: #fff;
@@ -67,7 +66,9 @@ textarea {
   justify-content: center;
 }
 
-h1, h2, h3 {
+h1,
+h2,
+h3 {
   margin: 0 0 12px;
   font-weight: 700;
 }
@@ -109,6 +110,7 @@ h1, h2, h3 {
   justify-content: center;
   font-size: 12px;
   background: #fff;
+  flex: 0 0 auto;
 }
 
 .thumb {
@@ -175,14 +177,56 @@ h1, h2, h3 {
 .tooltip {
   position: fixed;
   z-index: 9999;
-  max-width: 280px;
-  padding: 8px 10px;
+  max-width: min(320px, calc(100vw - 24px));
+  padding: 10px 12px;
   background: #fff;
   border: 1px solid var(--border);
-  pointer-events: none;
-  font-size: 0.9rem;
-  line-height: 1.5;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+  border-radius: 10px;
+  font-size: 0.92rem;
+  line-height: 1.6;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.14);
+}
+
+.tooltip[hidden] {
+  display: none;
+}
+
+.tooltip.is-bubble::after {
+  content: "";
+  position: absolute;
+  left: -7px;
+  top: 16px;
+  width: 12px;
+  height: 12px;
+  background: #fff;
+  border-left: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  transform: rotate(45deg);
+}
+
+.bubble-card {
+  display: grid;
+  gap: 10px;
+}
+
+.bubble-card-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.bubble-card-name {
+  font-weight: 700;
+}
+
+.bubble-card-meta {
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
+.bubble-card-text {
+  white-space: pre-wrap;
+  line-height: 1.7;
 }
 
 .page-hero {
@@ -242,6 +286,22 @@ h1, h2, h3 {
   background: #fff;
 }
 
+.graph-node-button {
+  cursor: pointer;
+}
+
+.graph-node-button:focus-visible {
+  outline: none;
+}
+
+.bubble-trigger {
+  cursor: pointer;
+}
+
+.bubble-open {
+  position: relative;
+}
+
 .modal[hidden] {
   display: none;
 }
@@ -255,17 +315,17 @@ h1, h2, h3 {
 .modal-backdrop {
   position: absolute;
   inset: 0;
-  background: rgba(0,0,0,0.28);
+  background: rgba(0, 0, 0, 0.28);
 }
 
 .modal-panel {
   position: relative;
   z-index: 1;
-  width: min(560px, calc(100vw - 24px));
+  width: min(640px, calc(100vw - 24px));
   margin: 40px auto;
   background: #fff;
   border: 1px solid var(--border);
-  padding: 16px;
+  padding: 24px;
 }
 
 .modal-header {
@@ -281,7 +341,7 @@ h1, h2, h3 {
   gap: 14px;
 }
 
-.post-form label {
+.form-field {
   display: grid;
   gap: 6px;
 }
@@ -296,13 +356,24 @@ h1, h2, h3 {
 
 .checkbox-list {
   display: grid;
-  gap: 6px;
+  gap: 10px;
+  margin-top: 4px;
 }
 
 .checkbox-row {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
+  width: fit-content;
+  cursor: pointer;
+}
+
+.checkbox-row input[type="checkbox"],
+.checkbox-input {
+  margin: 0;
+  width: 16px;
+  height: 16px;
+  flex: 0 0 auto;
 }
 
 .form-actions {
@@ -319,5 +390,9 @@ h1, h2, h3 {
   .section-head {
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  .tooltip {
+    max-width: calc(100vw - 20px);
   }
 }

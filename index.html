@@ -9,51 +9,61 @@
 <body data-page="home">
   <header class="site-header">
     <nav class="nav">
-      <a href="#top">プラントショップ</a>
+      <a href="index.html" class="nav-home">プラントショップ</a>
       <a href="#about">概要</a>
-      <a href="#works">作品</a>
-      <a href="#contact">連絡先</a>
+      <a href="#works">活動・参加者</a>
       <a href="#board">掲示板</a>
+      <a href="#contact">連絡先</a>
     </nav>
   </header>
 
   <main>
     <section id="top" class="hero section">
-      <h1>プラントショップ</h1>
-      <p class="lead">
-        建築・映像・アート・デザインを横断しながら、ものの見方や「生産」を問い直すコレクティブ。
-      </p>
+      <div class="section-inner">
+        <h1>プラントショップ</h1>
+        <p class="lead">
+          建築、映像、写真、文章などを横断しながら、ものの見方と生産のあり方を考える。
+        </p>
+      </div>
     </section>
 
     <section id="about" class="section">
-      <h2>概要</h2>
-      <div id="aboutContent"></div>
+      <div class="section-inner">
+        <h2>概要</h2>
+        <div id="aboutContent"></div>
+      </div>
     </section>
 
     <section id="works" class="section">
-      <h2>作品</h2>
-      <p class="subnote">
-        左が作品、右が参加者です。作品の横線と参加者の縦線の交点を押すと、その参加者がその作品で何をしたかポップアップで表示されます。
-      </p>
-      <div id="worksGraph"></div>
-    </section>
-
-    <section id="contact" class="section">
-      <h2>連絡先</h2>
-      <div id="contactContent"></div>
+      <div class="section-inner">
+        <h2>活動・参加者</h2>
+        <p class="subnote">
+          左が活動一覧、右が参加者です。交点を押すと参加内容が表示されます。
+        </p>
+        <div id="worksGraph"></div>
+      </div>
     </section>
 
     <section id="board" class="section">
-      <div class="section-head">
-        <h2>掲示板</h2>
-        <button id="openPostModalBtn" class="button">投稿する</button>
-      </div>
+      <div class="section-inner">
+        <div class="section-head">
+          <h2>掲示板</h2>
+          <button id="openPostModalBtn" class="button">投稿する</button>
+        </div>
 
-      <div class="board-note">
-        <p>一般投稿は「投稿する」ボタンから送信できます。</p>
-      </div>
+        <div class="board-note">
+          <p>「投稿する」から送信できます。</p>
+        </div>
 
-      <div id="boardList"></div>
+        <div id="boardList"></div>
+      </div>
+    </section>
+
+    <section id="contact" class="section">
+      <div class="section-inner">
+        <h2>連絡先</h2>
+        <div id="contactContent"></div>
+      </div>
     </section>
   </main>
 
@@ -90,22 +100,6 @@
 
         <p id="guestPostStatus" class="muted"></p>
       </form>
-    </div>
-  </div>
-
-  <div id="graphPopup" class="modal" hidden>
-    <div class="modal-backdrop" id="graphPopupBackdrop"></div>
-    <div
-      class="modal-panel graph-popup-panel"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="graphPopupTitle"
-    >
-      <div class="modal-header">
-        <h3 id="graphPopupTitle">参加内容</h3>
-        <button id="closeGraphPopupBtn" class="icon-button" type="button">×</button>
-      </div>
-      <div id="graphPopupBody"></div>
     </div>
   </div>
 

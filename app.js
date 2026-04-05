@@ -61,14 +61,13 @@
     return Number.isNaN(fallback) ? 0 : fallback;
   }
 
-  function bubbleHtml({ memberName, memberIcon, workTitle, contribution }) {
+  function bubbleHtml({ memberName, memberIcon, contribution }) {
     return `
       <div class="bubble-card">
         <div class="bubble-card-head">
           <span class="avatar">${escapeHtml(memberIcon)}</span>
           <div>
             <div class="bubble-card-name">${escapeHtml(memberName)}</div>
-            <div class="bubble-card-meta">作品：${escapeHtml(workTitle)}</div>
           </div>
         </div>
         <div class="bubble-card-text">${escapeHtml(contribution || "記述なし")}</div>
@@ -253,7 +252,11 @@
   function renderContact() {
     const wrap = $("#contactContent");
     if (!wrap) return;
-    wrap.innerHTML = `<p>メール: <a href="mailto:${data.site.contact.email}">${data.site.contact.email}</a></p>`;
+
+    wrap.innerHTML = `
+      ${data.site.contact.text || ""}
+      <p>メール: <a href="mailto:${data.site.contact.email}">${data.site.contact.email}</a></p>
+    `;
   }
 
   async function fetchBoardPosts() {
@@ -774,6 +777,18 @@
           <h3>概要</h3>
           <p>${escapeHtml(work.summary)}</p>
         </div>
+        ${
+          work.detailHtml
+            ? `
+              <div>
+                <h3>詳細</h3>
+                <div class="work-detail-content">
+                  ${work.detailHtml}
+                </div>
+              </div>
+            `
+            : ""
+        }
         <div>
           <h3>掲示板</h3>
           <div id="workBoard"></div>
@@ -789,7 +804,6 @@
 
     await loadBoard($("#workBoard"), post => (post.workIds || []).includes(work.id), "work");
   }
-
   async function renderMemberPage() {
     const wrap = $("#memberPage");
     if (!wrap) return;
@@ -802,14 +816,33 @@
     wrap.innerHTML = `
       <div class="page-hero">
         <h1>${escapeHtml(member.name)}</h1>
-        <div class="person-chip" style="width: fit-content;">
+        <div class="member-page-icon">
           <span class="avatar">${member.icon}</span>
-          <span>${escapeHtml(member.name)}</span>
         </div>
         <div>
           <h3>情報</h3>
           <p>${escapeHtml(member.bio)}</p>
         </div>
+        ${
+          Array.isArray(member.links) && member.links.length
+            ? `
+              <div>
+                <div class="member-links">
+                  ${member.links.map(link => `
+                    <a
+                      class="member-external-link"
+                      href="${escapeHtml(link.url)}"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      ${escapeHtml(link.label)}
+                    </a>
+                  `).join("")}
+                </div>
+              </div>
+            `
+            : ""
+        }
         <div>
           <h3>参加作品</h3>
           <div class="work-list-grid" id="memberWorks"></div>

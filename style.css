@@ -19,7 +19,7 @@ html {
 
 body {
   margin: 0;
-  font-family: Arial, "Helvetica Neue", "Hiragino Sans", "Yu Gothic", sans-serif;
+  font-family: "Noto Sans JP", "Hiragino Sans", "Yu Gothic", sans-serif;
   color: var(--text);
   background: var(--bg);
   line-height: 1.78;
@@ -1060,4 +1060,46 @@ p {
   .member-detail-link {
     max-width: 100%;
   }
+}
+
+.member-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.member-external-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  padding: 8px 12px;
+  border: 1px solid var(--line);
+  background: #fff;
+  transition:
+    border-color 0.18s ease,
+    background 0.18s ease,
+    color 0.18s ease;
+}
+
+.member-external-link:hover {
+  border-color: var(--line-strong);
+  background: #fcfcfc;
+}
+
+.member-icon-chip {
+  padding: 6px;
+}
+
+.member-icon-chip .avatar {
+  width: 30px;
+  height: 30px;
+}
+
+.member-page-icon {
+  width: fit-content;
+}
+
+.member-page-icon .avatar {
+  width: 30px;
+  height: 30px;
 }

@@ -844,7 +844,7 @@
             : ""
         }
         <div>
-          <h3>参加作品</h3>
+          <h3>参加活動</h3>
           <div class="work-list-grid" id="memberWorks"></div>
         </div>
         <div>

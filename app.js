@@ -3,11 +3,11 @@
   const page = document.body.dataset.page;
 
   const GRAPH = {
-    leftX: 20,
+    leftX: 0,
     cardW: 244,
     cardH: 92,
-    railX: 360,
-    memberGap: 108,
+    railX: 340,
+    memberGap: 82,
     memberTopY: 36,
     memberLabelY: 12,
     rowTop: 92,
@@ -15,6 +15,8 @@
     endPad: 72,
     nodeR: 10
   };
+
+  const MOBILE_BREAKPOINT = 640;
 
   const $ = (sel, root = document) => root.querySelector(sel);
   const svgNS = "http://www.w3.org/2000/svg";
@@ -24,6 +26,7 @@
 
   let boardPostsCache = [];
   let activeBubbleTrigger = null;
+  let lastIsMobile = window.innerWidth <= MOBILE_BREAKPOINT;
 
   function el(tag, className = "", html = "") {
     const node = document.createElement(tag);
@@ -93,6 +96,8 @@
     tip.innerHTML = "";
     tip.style.left = "";
     tip.style.top = "";
+    tip.style.right = "";
+    tip.style.bottom = "";
 
     clearActiveBubbleTrigger();
   }
@@ -111,6 +116,21 @@
       activeBubbleTrigger = trigger;
       trigger.classList.add("bubble-open");
       trigger.setAttribute("data-bubble-open", "1");
+    }
+
+    const isMobile = window.innerWidth <= MOBILE_BREAKPOINT;
+
+    if (isMobile) {
+      tip.style.left = "12px";
+      tip.style.right = "12px";
+      tip.style.bottom = "12px";
+      tip.style.top = "auto";
+      tip.classList.remove("is-left", "is-right");
+
+      requestAnimationFrame(() => {
+        tip.classList.add("is-visible");
+      });
+      return;
     }
 
     const gap = 18;
@@ -136,6 +156,8 @@
 
       tip.style.left = `${left}px`;
       tip.style.top = `${top}px`;
+      tip.style.right = "";
+      tip.style.bottom = "";
       tip.classList.remove("is-left", "is-right");
       tip.classList.add(side === "right" ? "is-right" : "is-left");
 
@@ -148,15 +170,14 @@
   function showBubbleAtEvent(html, event, trigger = null) {
     const x = event.clientX;
     const y = event.clientY;
-    const fakeRect = {
+    showBubbleAtRect(html, {
       left: x,
       right: x,
       top: y,
       bottom: y,
       width: 0,
       height: 0
-    };
-    showBubbleAtRect(html, fakeRect, trigger);
+    }, trigger);
   }
 
   function attachInfoBubble(node, html, isLink = false) {
@@ -179,8 +200,7 @@
         return;
       }
 
-      const rect = node.getBoundingClientRect();
-      showBubbleAtRect(html, rect, node);
+      showBubbleAtRect(html, node.getBoundingClientRect(), node);
     });
 
     node.addEventListener("keydown", event => {
@@ -195,8 +215,7 @@
         return;
       }
 
-      const rect = node.getBoundingClientRect();
-      showBubbleAtRect(html, rect, node);
+      showBubbleAtRect(html, node.getBoundingClientRect(), node);
     });
   }
 
@@ -204,15 +223,17 @@
     const tip = getTooltip();
     if (!tip) return;
 
-    tip.addEventListener("click", e => e.stopPropagation());
+    tip.addEventListener("click", event => event.stopPropagation());
 
-    document.addEventListener("click", e => {
-      const t = e.target;
-      if (!t.closest(".bubble-trigger") && !t.closest("#tooltip")) hideBubble();
+    document.addEventListener("click", event => {
+      const target = event.target;
+      if (!target.closest(".bubble-trigger") && !target.closest("#tooltip")) {
+        hideBubble();
+      }
     });
 
-    document.addEventListener("keydown", e => {
-      if (e.key === "Escape") hideBubble();
+    document.addEventListener("keydown", event => {
+      if (event.key === "Escape") hideBubble();
     });
 
     addEventListener("scroll", () => {
@@ -255,49 +276,108 @@
   function personHtml(post) {
     const member = post.memberId ? membersById[post.memberId] : null;
 
-    return member
-      ? `
-        <a class="person-chip" href="member.html?id=${member.id}">
-          <span class="avatar">${member.icon}</span>
-          <span>${escapeHtml(member.name)}</span>
+    if (member) {
+      return `
+        <a class="board-member-link" href="member.html?id=${member.id}" aria-label="${escapeHtml(member.name)}のページへ">
+          <span class="avatar board-member-avatar">${escapeHtml(member.icon)}</span>
+          <span class="board-member-name">${escapeHtml(member.name)}</span>
         </a>
-      `
-      : `
-        <span class="person-chip guest-chip">
-          <span>${escapeHtml(post.name || "投稿者")}</span>
-        </span>
       `;
+    }
+
+    return `
+    <span class="board-guest">
+      <span class="board-guest-name">${escapeHtml((post.name || "投稿者").slice(0, 1))}</span>
+      <span class="board-member-name">${escapeHtml(post.name || "投稿者")}</span>
+    </span>
+  `;
   }
 
   function worksHtml(post) {
     if (!post.workIds?.length) return "";
 
-    return post.workIds.map(id => {
+    const itemsHtml = post.workIds.map(id => {
       const work = worksById[id];
       if (!work) return "";
 
       return `
-        <a class="work-ref" href="work.html?id=${work.id}">
-          <span class="work-ref-thumb-wrap">
-            <img class="thumb" src="${work.thumbnail}" alt="${escapeHtml(work.title)}">
-          </span>
-          <span class="work-ref-text">に関して</span>
+        <a class="work-ref" href="work.html?id=${work.id}" aria-label="${escapeHtml(work.title)}">
+          ${work.thumbnail
+            ? `<img class="thumb" src="${work.thumbnail}" alt="${escapeHtml(work.title)}">`
+            : `<span class="thumb thumb-placeholder" aria-hidden="true"></span>`
+          }
         </a>
       `;
     }).join("");
+
+    if (!itemsHtml) return "";
+
+    return `
+      <div class="board-works-group">
+        <div class="board-works-items">
+          ${itemsHtml}
+        </div>
+        <div class="board-works-note">に関して</div>
+      </div>
+    `;
+  }
+
+  function boardImagesHtml(post) {
+    if (!Array.isArray(post.imageUrls) || !post.imageUrls.length) return "";
+
+    const items = post.imageUrls.map(url => `
+      <a class="board-image-link" href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer">
+        <img class="board-image" src="${escapeHtml(url)}" alt="投稿画像">
+      </a>
+    `).join("");
+
+    return `<div class="board-images">${items}</div>`;
   }
 
   function boardItemHtml(post, mode) {
-    const cols = {
-      person: `<div class="board-person">${personHtml(post)}</div>`,
-      works: `<div class="board-works">${worksHtml(post)}</div>`,
-      date: `<div class="board-date">${formatDate(post.date)}</div>`,
-      comment: `<div class="board-comment">${escapeHtml(post.comment || "")}</div>`
-    };
+    const person = personHtml(post);
+    const works = worksHtml(post);
+    const images = boardImagesHtml(post);
+    const date = formatDate(post.date);
+    const comment = escapeHtml(post.comment || "");
 
-    if (mode === "home") return [cols.person, cols.works, cols.date, cols.comment].join("");
-    if (mode === "work") return [cols.person, cols.date, cols.comment].join("");
-    return [cols.works, cols.date, cols.comment].join("");
+    if (mode === "home") {
+      return `
+        <article class="board-card">
+          <div class="board-card-head">
+            <div class="board-person">${person}</div>
+            <div class="board-date">${date}</div>
+          </div>
+          ${works ? `<div class="board-works">${works}</div>` : ""}
+          ${images}
+          <div class="board-comment">${comment}</div>
+        </article>
+      `;
+    }
+
+    if (mode === "work") {
+      return `
+        <article class="board-card">
+          <div class="board-card-head">
+            <div class="board-person">${person}</div>
+            <div class="board-date">${date}</div>
+          </div>
+          ${images}
+          <div class="board-comment">${comment}</div>
+        </article>
+      `;
+    }
+
+    return `
+      <article class="board-card">
+        <div class="board-card-head">
+          <div class="board-works">${works}</div>
+          <div class="board-date">${date}</div>
+        </div>
+        ${images}
+        <div class="board-comment">${comment}</div>
+      </article>
+    `;
   }
 
   function renderBoard(container, posts, mode = "home") {
@@ -310,12 +390,13 @@
 
     container.innerHTML = "";
     sorted.forEach(post => {
-      const item = el("div", "board-item", boardItemHtml(post, mode));
-      container.appendChild(item);
+      container.appendChild(el("div", "board-item", boardItemHtml(post, mode)));
     });
   }
 
   async function loadBoard(container, filterFn, mode) {
+    if (!container) return;
+
     container.innerHTML = `<p class="muted">読み込み中...</p>`;
 
     try {
@@ -404,10 +485,10 @@
     });
 
     const xByMember = Object.fromEntries(
-      members.map((m, i) => [m.id, GRAPH.railX + i * GRAPH.memberGap])
+      members.map((member, i) => [member.id, GRAPH.railX + i * GRAPH.memberGap])
     );
     const yByWork = Object.fromEntries(
-      works.map((w, i) => [w.id, GRAPH.rowTop + i * GRAPH.rowGap])
+      works.map((work, i) => [work.id, GRAPH.rowTop + i * GRAPH.rowGap])
     );
 
     works.forEach(work => {
@@ -427,15 +508,17 @@
         class: "graph-work-link"
       });
 
-      link.appendChild(svgEl("image", {
-        href: work.thumbnail,
-        x: GRAPH.leftX,
-        y: y - GRAPH.cardH / 2,
-        width: GRAPH.cardW,
-        height: GRAPH.cardH,
-        preserveAspectRatio: "xMidYMid slice",
-        class: "graph-work-image"
-      }));
+      if (work.thumbnail) {
+        link.appendChild(svgEl("image", {
+          href: work.thumbnail,
+          x: GRAPH.leftX,
+          y: y - GRAPH.cardH / 2,
+          width: GRAPH.cardW,
+          height: GRAPH.cardH,
+          preserveAspectRatio: "xMidYMid slice",
+          class: "graph-work-image"
+        }));
+      }
 
       link.appendChild(svgEl("rect", {
         x: GRAPH.leftX,
@@ -563,16 +646,14 @@
 
         group.addEventListener("click", event => {
           event.stopPropagation();
-          const rect = group.getBoundingClientRect();
-          showBubbleAtRect(html, rect, group);
+          showBubbleAtRect(html, group.getBoundingClientRect(), group);
         });
 
         group.addEventListener("keydown", event => {
           if (event.key !== "Enter" && event.key !== " ") return;
           event.preventDefault();
           event.stopPropagation();
-          const rect = group.getBoundingClientRect();
-          showBubbleAtRect(html, rect, group);
+          showBubbleAtRect(html, group.getBoundingClientRect(), group);
         });
 
         svg.appendChild(group);
@@ -581,6 +662,45 @@
 
     container.innerHTML = "";
     container.appendChild(svg);
+  }
+
+  function renderWorksListMobile() {
+    const container = $("#worksGraph");
+    if (!container) return;
+
+    container.innerHTML = `
+      <div class="works-mobile-list">
+        ${data.works.map(work => `
+          <article class="works-mobile-card">
+            <a href="work.html?id=${work.id}" class="works-mobile-thumb">
+              ${work.thumbnail
+                ? `<img src="${work.thumbnail}" alt="${escapeHtml(work.title)}">`
+                : `<div class="works-mobile-thumb-placeholder"></div>`
+              }
+            </a>
+            <div class="works-mobile-body">
+              <div class="works-mobile-period">${escapeHtml(work.period)}</div>
+              <h3 class="works-mobile-title">
+                <a href="work.html?id=${work.id}">${escapeHtml(work.title)}</a>
+              </h3>
+              <p class="works-mobile-summary">${escapeHtml(work.summary)}</p>
+              <div class="works-mobile-members">
+                ${work.participantIds.map(id => {
+                  const member = membersById[id];
+                  if (!member) return "";
+                  return `
+                    <a class="member-detail-link" href="member.html?id=${member.id}">
+                      <span class="avatar">${member.icon}</span>
+                      <span>${escapeHtml(member.name)}</span>
+                    </a>
+                  `;
+                }).join("")}
+              </div>
+            </div>
+          </article>
+        `).join("")}
+      </div>
+    `;
   }
 
   function renderNotFound(wrap, label) {
@@ -607,7 +727,10 @@
 
   function workTile(work, member) {
     const tile = el("a", "work-tile", `
-      <img src="${work.thumbnail}" alt="${escapeHtml(work.title)}">
+      ${work.thumbnail
+        ? `<img src="${work.thumbnail}" alt="${escapeHtml(work.title)}">`
+        : `<div class="work-tile-placeholder"></div>`
+      }
       <div class="caption">
         <div>${escapeHtml(work.title)}</div>
         <div class="muted">${work.period}</div>
@@ -640,16 +763,16 @@
 
     wrap.innerHTML = `
       <div class="page-hero">
-        <h1>${work.title}</h1>
-        <img src="${work.thumbnail}" alt="${escapeHtml(work.title)}">
-        <div class="meta">期間: ${work.period}</div>
+        <h1>${escapeHtml(work.title)}</h1>
+        ${work.thumbnail ? `<img src="${work.thumbnail}" alt="${escapeHtml(work.title)}">` : ""}
+        <div class="meta">期間: ${escapeHtml(work.period)}</div>
         <div>
           <h3>参加者</h3>
           <div class="member-detail-list" id="workMemberList"></div>
         </div>
         <div>
           <h3>概要</h3>
-          <p>${work.summary}</p>
+          <p>${escapeHtml(work.summary)}</p>
         </div>
         <div>
           <h3>掲示板</h3>
@@ -678,14 +801,14 @@
 
     wrap.innerHTML = `
       <div class="page-hero">
-        <h1>${member.name}</h1>
+        <h1>${escapeHtml(member.name)}</h1>
         <div class="person-chip" style="width: fit-content;">
           <span class="avatar">${member.icon}</span>
           <span>${escapeHtml(member.name)}</span>
         </div>
         <div>
           <h3>情報</h3>
-          <p>${member.bio}</p>
+          <p>${escapeHtml(member.bio)}</p>
         </div>
         <div>
           <h3>参加作品</h3>
@@ -732,6 +855,7 @@
     openBtn.addEventListener("click", () => {
       modal.hidden = false;
     });
+
     closeBtn.addEventListener("click", close);
     backdrop.addEventListener("click", close);
 
@@ -799,9 +923,17 @@
     });
   }
 
+  function renderWorksAreaForViewport() {
+    if (window.innerWidth <= MOBILE_BREAKPOINT) {
+      renderWorksListMobile();
+    } else {
+      renderWorksGraph();
+    }
+  }
+
   function initHome() {
     renderAbout();
-    renderWorksGraph();
+    renderWorksAreaForViewport();
     renderContact();
     buildGuestWorkCheckboxes();
     setupPostModal();
@@ -809,7 +941,21 @@
     loadBoard($("#boardList"), () => true, "home");
   }
 
+  function setupResponsiveRerender() {
+    window.addEventListener("resize", () => {
+      const isMobile = window.innerWidth <= MOBILE_BREAKPOINT;
+      if (isMobile === lastIsMobile) return;
+      lastIsMobile = isMobile;
+
+      if (document.body.dataset.page === "home") {
+        renderWorksAreaForViewport();
+      }
+    });
+  }
+
   setupBubbleSystem();
+  setupResponsiveRerender();
+
   if (page === "home") initHome();
   if (page === "work") renderWorkPage();
   if (page === "member") renderMemberPage();

@@ -78,7 +78,7 @@ const SITE_DATA = {
     {
       id: "start",
       title: "立ち上げ",
-      period: "2026.02-04",
+      period: "2026.02-2026.04",
       thumbnail: "",
       summary: "制作を行う団体というかプラットフォームというか……を作ろうと、大学の知り合い同士でとりあえずDiscordサーバーを作るところから始めました。",
       participantIds: ["aoki", "umeda", "akiyama", "yoshimura"],

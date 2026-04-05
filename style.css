@@ -7,6 +7,7 @@
   --line-strong: #cfcfcf;
   --content-width: 760px;
   --section-pad-x: 20px;
+  --anchor-offset: 130px;
 }
 
 * {
@@ -1037,6 +1038,26 @@ p {
   .board-image-link {
     width: calc(50% - 4px);
   }
+
+  .works-mobile-members .member-detail-link {
+    min-height: 36px;
+    padding: 6px 10px;
+    gap: 7px;
+    font-size: 0.84rem;
+    color: var(--muted);
+  }
+
+  .works-mobile-members .member-detail-link .avatar {
+    width: 22px;
+    height: 22px;
+    font-size: 11px;
+  }
+
+  .works-mobile-members .member-detail-link span:last-child {
+    font-size: 0.84rem;
+    line-height: 1.4;
+    color: #7f7f7f;
+  }
 }
 
 @media (max-width: 520px) {
@@ -1102,4 +1123,8 @@ p {
 .member-page-icon .avatar {
   width: 30px;
   height: 30px;
+}
+
+section[id] {
+  scroll-margin-top: var(--anchor-offset);
 }

@@ -55,6 +55,12 @@ const SITE_DATA = {
       icon: "吉",
       bio: ""
     },
+    {
+      id: "minami",
+      name: "南 佳步",
+      icon: "南",
+      bio: "2004年生まれ京都府出身。現在は龍谷大学文学部哲学科教育学専攻に所属。近畿大学理工学部にも在籍していました。幅広く芸術や哲学などを好んでいます。"
+    },
   ],
 
   works: [
@@ -67,11 +73,12 @@ const SITE_DATA = {
       detailHtml: `
         <p>Under Construction......</p>
       `,
-      participantIds: ["aoki", "umeda", "akiyama"],
+      participantIds: ["aoki", "umeda", "akiyama", "minami"],
       contributions: {
         aoki: "実際に制作するものを模索しています。",
         umeda: "企画を立案し、実際に制作するものを模索しています。",
-        akiyama: "実際に制作するものを模索しています。"
+        akiyama: "実際に制作するものを模索しています。",
+        minami: "実際に制作するものを模索しています。"
       }
     },
 
@@ -81,10 +88,10 @@ const SITE_DATA = {
       period: "2026.02-2026.04",
       thumbnail: "",
       summary: "制作を行う団体というかプラットフォームというか……を作ろうと、大学の知り合い同士でとりあえずDiscordサーバーを作るところから始めました。",
-      participantIds: ["aoki", "umeda", "akiyama", "yoshimura"],
+      participantIds: ["aoki", "umeda", "akiyama", "yoshimura",],
       contributions: {
         aoki: "学生団体よりもう少し社会に接続したコレクティブのような存在をを提案しました。",
-        umeda: "青木からの相談を受け、コレクティブの基本的な考え方や進め方を整理しました。",
+        umeda: "青木からの相談を受け、コレクティブの基本的な考え方や進め方を整理しました。このウェブサイトを作りました。",
         akiyama: "青木や梅田の関心に近く、活動の背景や批評性の整理担当として参加しました。",
         yoshimura:  "外部との連絡方法や、マーケティングに関してのアドバイザーとして参加しました。"
       }

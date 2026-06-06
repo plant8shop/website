@@ -468,6 +468,12 @@
         if (!member) return;
 
         const x = xByMember[memberId];
+
+        const html = bubbleHtml({
+          memberName: member.name,
+          contribution: work.contributions?.[member.id]
+        });
+
         const group = svgEl("g", {
           class: "graph-node-button bubble-trigger",
           tabindex: "0",

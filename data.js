@@ -3,27 +3,25 @@ const SITE_DATA = {
     name: "プラントショップ",
     about: `
       <p>
-        プラントショップは、建築・映像・アート・デザインなどを横断しながら、制作・展示・販売を行うためのコレクティブです。
+        プラントショップは、建築・美術・映像・デザインなどを横断しながら、共同で持続的に制作を行うためのコレクティブです。
       </p>
       <p>
-        1人では難しいことを実現したり、活動を通じてコミュニケーションを持つことを目指しています。
+        現在は、そこに存在するもののから想像するフィクションと、それを共有することについて話すことが多いです。
       </p>
     `,
     contact: {
-      email: "plant8shop@gmail.com",
       text: `
         <p>
-          ご連絡は、下記のメール・SNSよりお願いします。基本的には、なんでも積極的に対応いたします。
+          何かありましたら、下記のメール・SNSよりご連絡ください。私たちとしても、さまざまな方とコミュニケーションを持ちたいと思っていますので、お気軽にどうぞ。
         </p>
       `,
+      email: "plant8shop@gmail.com",
       sns: [
-        { name: "X", url: "#" },
-        { name: "Instagram", url: "#" },
-        { name: "YouTube", url: "#" }
+        { name: "X", url: "https://x.com/plant8shop" },
+        { name: "Instagram", url: "https://www.instagram.com/plant8shop/" },
       ]
     },
 
-    apiBaseUrl: "https://script.google.com/macros/s/AKfycbwf3i8RJZPmo5UeXs-Sm_LVgYcOa4LblQ6igTZEH1L3mzdqRDhjnhxy7mw7GDMxLZ2PEA/exec",
     memberFormUrl: "#"
   },
 
@@ -31,7 +29,6 @@ const SITE_DATA = {
     {
       id: "aoki",
       name: "青木志央理",
-      icon: "青",
       bio: "2004年、洛中生まれ・洛中育ち・洛中在住。京都工芸繊維大学・建築専攻在籍。ものづくりが好きで、小中高では小説、大学からは映画と建築もつくっている。猫派か犬派か聞かれたらすずめ派と答えるくらいすずめが好き。リミナルスペースに関心が強い。",
       links: [
         { label: "note", url: "https://note.com/popo2510" },
@@ -41,7 +38,6 @@ const SITE_DATA = {
     {
       id: "umeda",
       name: "梅田航輝",
-      icon: "梅",
       bio: "2001年新潟市生まれ。現在は京都工芸繊維大学建築学専攻修士課程に在籍。建築、映像、美術に関心があり、関連した活動や作品制作を行っています。",
       links: [
         { label: "ウェブサイト", url: "https://umedakouki.github.io" },
@@ -50,19 +46,16 @@ const SITE_DATA = {
     {
       id: "akiyama",
       name: "秋山",
-      icon: "秋",
       bio: ""
     },
     {
       id: "yoshimura",
       name: "吉村",
-      icon: "吉",
       bio: ""
     },
     {
       id: "minami",
       name: "南 佳步",
-      icon: "南",
       bio: "2004年生まれ京都府出身。現在は龍谷大学文学部哲学科教育学専攻に所属。近畿大学理工学部にも在籍していました。幅広く芸術や哲学などを好んでいます。"
     },
   ],
@@ -72,17 +65,20 @@ const SITE_DATA = {
       id: "production",
       title: "生産",
       period: "2026.03–",
-      thumbnail: "assets/20260308_164209.jpg",
-      summary: "プラントショップは、持続的に制作・展示・販売するコレクティブとして活動を始めました。まずは、作るということを考えてみます。すると、作ることは主に「生産」という名前で社会にありふれていて、その概念すらも拡張可能なものだということに気づきました。ありふれた「生産」の中で、いったい何を作品にできるのかを考えていきます。",
+      thumbnail: "assets/thumb-seisan.png",
+      summary: "プラントショップは、分野を横断し、共同で持続的をするコレクティブとして活動を始めました。1回目の活動として、まずは作るということを見つめなおしました。そして、何かしらの作品を作って展示することを活動の成果に設定しました。2026年6月26日～30日に、京都・岡崎道の「ALC Library&Gallery」にて展示予定です。（2026年6月6日更新）",
       detailHtml: `
-        <p>Under Construction......</p>
+      <section>
+        <h4>展示のステートメント</h4>  
+        <p>作ることは主に「生産」という名前で社会にありふれていて、その概念すらも拡張可能なものだということに気づきました。ありふれた「生産」のうち、私たちは日々繰り返している小さなことに注目しました。それは、刹那的な手の動きであったり、ペットボトルであったり、歯磨き粉であったり、パイプやダクトであったりします。これらへの見方を少し変えることで、「生産」的な日常の内側と外側と、その中間にあるものを提示します。</p>
+        </section>
       `,
       participantIds: ["aoki", "umeda", "akiyama", "minami"],
       contributions: {
-        aoki: "実際に制作するものを模索しています。",
-        umeda: "企画を立案し、実際に制作するものを模索しています。",
-        akiyama: "実際に制作するものを模索しています。",
-        minami: "実際に制作するものを模索しています。"
+        aoki: "建築物の内部空間にあるパイプに注目し、制作しています",
+        umeda: "歯磨き粉が飛び散った跡に注目し、制作しています",
+        akiyama: "日常的に使い捨てていくペットボトルに注目し、制作しています",
+        minami: "日常で繰り返している瞬間的な手の動きに注目し、制作しています"
       }
     },
 
@@ -92,6 +88,13 @@ const SITE_DATA = {
       period: "2026.02-2026.04",
       thumbnail: "",
       summary: "制作を行う団体というかプラットフォームというか……を作ろうと、大学の知り合い同士でとりあえずDiscordサーバーを作るところから始めました。",
+      detailHtml: `
+      <section>
+        <p>
+          立ち上げに関しては、<a href="https://umedakouki.github.io/practice/2026_plantshop.html">梅田航輝によるブログ</a>に少し書かれています。
+        </p>
+      </section>
+      `,
       participantIds: ["aoki", "umeda", "akiyama", "yoshimura",],
       contributions: {
         aoki: "学生団体よりもう少し社会に接続したコレクティブのような存在をを提案しました。",

@@ -24,7 +24,6 @@
   const membersById = Object.fromEntries(data.members.map(m => [m.id, m]));
   const worksById = Object.fromEntries(data.works.map(w => [w.id, w]));
 
-  let boardPostsCache = [];
   let activeBubbleTrigger = null;
   let lastIsMobile = window.innerWidth <= MOBILE_BREAKPOINT;
 
@@ -39,10 +38,6 @@
     return new URL(location.href).searchParams.get(name);
   }
 
-  function formatDate(dateStr) {
-    return dateStr ? dateStr.replaceAll("-", ".") : "";
-  }
-
   function escapeHtml(str) {
     return String(str)
       .replaceAll("&", "&amp;")
@@ -52,20 +47,10 @@
       .replaceAll("'", "&#039;");
   }
 
-  function postTime(post) {
-    const raw = post.timestamp || post.createdAt || post.datetime || post.dateTime || "";
-    const t = new Date(raw).getTime();
-    if (!Number.isNaN(t)) return t;
-
-    const fallback = post.date ? new Date(`${post.date}T00:00:00`).getTime() : 0;
-    return Number.isNaN(fallback) ? 0 : fallback;
-  }
-
-  function bubbleHtml({ memberName, memberIcon, contribution }) {
+  function bubbleHtml({ memberName, contribution }) {
     return `
       <div class="bubble-card">
         <div class="bubble-card-head">
-          <span class="avatar">${escapeHtml(memberIcon)}</span>
           <div>
             <div class="bubble-card-name">${escapeHtml(memberName)}</div>
           </div>
@@ -253,162 +238,30 @@
     const wrap = $("#contactContent");
     if (!wrap) return;
 
+    const sns = data.site.contact.sns || [];
+
     wrap.innerHTML = `
       ${data.site.contact.text || ""}
       <p>メール: <a href="mailto:${data.site.contact.email}">${data.site.contact.email}</a></p>
+      ${
+        sns.length
+          ? `
+            <div class="contact-sns">
+              ${sns.map(item => `
+                <a
+                  class="contact-sns-link"
+                  href="${item.url}"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  ${item.name}
+                </a>
+              `).join("")}
+            </div>
+          `
+          : ""
+      }
     `;
-  }
-
-  async function fetchBoardPosts() {
-    const api = (data.site.apiBaseUrl || "").trim();
-
-    if (!api || api === "YOUR_APPS_SCRIPT_WEB_APP_URL") {
-      console.warn("Apps Script URLが未設定です");
-      boardPostsCache = [];
-      return [];
-    }
-
-    const res = await fetch(`${api}?mode=posts`);
-    if (!res.ok) throw new Error("投稿データの取得に失敗しました。");
-
-    const json = await res.json();
-    boardPostsCache = Array.isArray(json.posts) ? json.posts : [];
-    return boardPostsCache;
-  }
-
-  function personHtml(post) {
-    const member = post.memberId ? membersById[post.memberId] : null;
-
-    if (member) {
-      return `
-        <a class="board-member-link" href="member.html?id=${member.id}" aria-label="${escapeHtml(member.name)}のページへ">
-          <span class="avatar board-member-avatar">${escapeHtml(member.icon)}</span>
-          <span class="board-member-name">${escapeHtml(member.name)}</span>
-        </a>
-      `;
-    }
-
-    return `
-    <span class="board-guest">
-      <span class="board-guest-name">${escapeHtml((post.name || "投稿者").slice(0, 1))}</span>
-      <span class="board-member-name">${escapeHtml(post.name || "投稿者")}</span>
-    </span>
-  `;
-  }
-
-  function worksHtml(post) {
-    if (!post.workIds?.length) return "";
-
-    const itemsHtml = post.workIds.map(id => {
-      const work = worksById[id];
-      if (!work) return "";
-
-      return `
-        <a class="work-ref" href="work.html?id=${work.id}" aria-label="${escapeHtml(work.title)}">
-          ${work.thumbnail
-            ? `<img class="thumb" src="${work.thumbnail}" alt="${escapeHtml(work.title)}">`
-            : `<span class="thumb thumb-placeholder" aria-hidden="true"></span>`
-          }
-        </a>
-      `;
-    }).join("");
-
-    if (!itemsHtml) return "";
-
-    return `
-      <div class="board-works-group">
-        <div class="board-works-items">
-          ${itemsHtml}
-        </div>
-        <div class="board-works-note">に関して</div>
-      </div>
-    `;
-  }
-
-  function boardImagesHtml(post) {
-    if (!Array.isArray(post.imageUrls) || !post.imageUrls.length) return "";
-
-    const items = post.imageUrls.map(url => `
-      <a class="board-image-link" href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer">
-        <img class="board-image" src="${escapeHtml(url)}" alt="投稿画像">
-      </a>
-    `).join("");
-
-    return `<div class="board-images">${items}</div>`;
-  }
-
-  function boardItemHtml(post, mode) {
-    const person = personHtml(post);
-    const works = worksHtml(post);
-    const images = boardImagesHtml(post);
-    const date = formatDate(post.date);
-    const comment = escapeHtml(post.comment || "");
-
-    if (mode === "home") {
-      return `
-        <article class="board-card">
-          <div class="board-card-head">
-            <div class="board-person">${person}</div>
-            <div class="board-date">${date}</div>
-          </div>
-          ${works ? `<div class="board-works">${works}</div>` : ""}
-          ${images}
-          <div class="board-comment">${comment}</div>
-        </article>
-      `;
-    }
-
-    if (mode === "work") {
-      return `
-        <article class="board-card">
-          <div class="board-card-head">
-            <div class="board-person">${person}</div>
-            <div class="board-date">${date}</div>
-          </div>
-          ${images}
-          <div class="board-comment">${comment}</div>
-        </article>
-      `;
-    }
-
-    return `
-      <article class="board-card">
-        <div class="board-card-head">
-          <div class="board-works">${works}</div>
-          <div class="board-date">${date}</div>
-        </div>
-        ${images}
-        <div class="board-comment">${comment}</div>
-      </article>
-    `;
-  }
-
-  function renderBoard(container, posts, mode = "home") {
-    const sorted = [...posts].sort((a, b) => postTime(b) - postTime(a));
-
-    if (!sorted.length) {
-      container.innerHTML = `<p class="muted">まだ投稿がありません。</p>`;
-      return;
-    }
-
-    container.innerHTML = "";
-    sorted.forEach(post => {
-      container.appendChild(el("div", "board-item", boardItemHtml(post, mode)));
-    });
-  }
-
-  async function loadBoard(container, filterFn, mode) {
-    if (!container) return;
-
-    container.innerHTML = `<p class="muted">読み込み中...</p>`;
-
-    try {
-      const posts = boardPostsCache.length ? boardPostsCache : await fetchBoardPosts();
-      renderBoard(container, posts.filter(filterFn), mode);
-    } catch (error) {
-      console.error(error);
-      container.innerHTML = `<p class="muted">投稿の読み込みに失敗しました。</p>`;
-    }
   }
 
   function addSvgText(svg, x, y, options = {}) {
@@ -578,35 +431,33 @@
         class: "graph-member-shaft"
       }));
 
-      const iconLink = svgEl("a", {
+      const nameLink = svgEl("a", {
         href: `member.html?id=${member.id}`,
         class: "graph-member-link"
       });
 
-      iconLink.appendChild(svgEl("circle", {
-        cx: x,
-        cy: GRAPH.memberTopY,
-        r: 16,
+      const labelW = 64;
+      const labelH = 28;
+
+      nameLink.appendChild(svgEl("rect", {
+        x: x - labelW / 2,
+        y: GRAPH.memberTopY - labelH / 2,
+        width: labelW,
+        height: labelH,
         fill: "#ffffff",
-        stroke: "#bbbbbb",
-        class: "graph-member-circle"
+        stroke: "#d6d6d6",
+        class: "graph-member-name-box"
       }));
 
-      addSvgText(iconLink, x, GRAPH.memberTopY + 5, {
-        text: member.icon,
-        fontSize: 12,
+      addSvgText(nameLink, x, GRAPH.memberTopY + 4, {
+        text: member.name,
+        fontSize: 11,
         fill: "#444",
         anchor: "middle"
       });
 
-      svg.appendChild(iconLink);
+      svg.appendChild(nameLink);
 
-      addSvgText(svg, x, GRAPH.memberLabelY, {
-        text: member.name,
-        fontSize: 11,
-        fill: "#666",
-        anchor: "middle"
-      });
     });
 
     works.forEach(work => {
@@ -639,13 +490,6 @@
           stroke: "#bcbcbc",
           "stroke-width": "1.2"
         }));
-
-        const html = bubbleHtml({
-          memberName: member.name,
-          memberIcon: member.icon,
-          workTitle: work.title,
-          contribution: work.contributions[member.id]
-        });
 
         group.addEventListener("click", event => {
           event.stopPropagation();
@@ -693,7 +537,6 @@
                   if (!member) return "";
                   return `
                     <a class="member-detail-link" href="member.html?id=${member.id}">
-                      <span class="avatar">${member.icon}</span>
                       <span>${escapeHtml(member.name)}</span>
                     </a>
                   `;
@@ -714,14 +557,13 @@
     const link = el(
       "a",
       "member-detail-link",
-      `<span class="avatar">${member.icon}</span><span>${escapeHtml(member.name)}</span>`
+      `<span>${escapeHtml(member.name)}</span>`
     );
     link.href = `member.html?id=${member.id}`;
 
     attachInfoBubble(link, bubbleHtml({
       memberName: member.name,
       memberIcon: member.icon,
-      workTitle: work.title,
       contribution: work.contributions[member.id]
     }), true);
 
@@ -736,7 +578,7 @@
       }
       <div class="caption">
         <div>${escapeHtml(work.title)}</div>
-        <div class="muted">${work.period}</div>
+        <div class="muted">${escapeHtml(work.period)}</div>
       </div>
     `);
 
@@ -757,7 +599,7 @@
     return tile;
   }
 
-  async function renderWorkPage() {
+  function renderWorkPage() {
     const wrap = $("#workPage");
     if (!wrap) return;
 
@@ -789,10 +631,6 @@
             `
             : ""
         }
-        <div>
-          <h3>掲示板</h3>
-          <div id="workBoard"></div>
-        </div>
       </div>
     `;
 
@@ -801,10 +639,9 @@
       .map(id => membersById[id])
       .filter(Boolean)
       .forEach(member => memberList.appendChild(memberLink(member, work)));
-
-    await loadBoard($("#workBoard"), post => (post.workIds || []).includes(work.id), "work");
   }
-  async function renderMemberPage() {
+
+  function renderMemberPage() {
     const wrap = $("#memberPage");
     if (!wrap) return;
 
@@ -816,9 +653,6 @@
     wrap.innerHTML = `
       <div class="page-hero">
         <h1>${escapeHtml(member.name)}</h1>
-        <div class="member-page-icon">
-          <span class="avatar">${member.icon}</span>
-        </div>
         <div>
           <h3>情報</h3>
           <p>${escapeHtml(member.bio)}</p>
@@ -847,113 +681,11 @@
           <h3>参加活動</h3>
           <div class="work-list-grid" id="memberWorks"></div>
         </div>
-        <div>
-          <h3>投稿</h3>
-          <div id="memberBoard"></div>
-        </div>
       </div>
     `;
 
     const worksWrap = $("#memberWorks");
     memberWorks.forEach(work => worksWrap.appendChild(workTile(work, member)));
-
-    await loadBoard($("#memberBoard"), post => post.memberId === member.id, "member");
-  }
-
-  function buildGuestWorkCheckboxes() {
-    const wrap = $("#guestWorkCheckboxes");
-    if (!wrap) return;
-
-    wrap.innerHTML = data.works.map(work => `
-      <label class="checkbox-row">
-        <input class="checkbox-input" type="checkbox" name="workIds" value="${work.id}">
-        <span>${escapeHtml(work.title)}</span>
-      </label>
-    `).join("");
-  }
-
-  function setupPostModal() {
-    const modal = $("#postModal");
-    const openBtn = $("#openPostModalBtn");
-    const closeBtn = $("#closePostModalBtn");
-    const backdrop = $("#modalBackdrop");
-    if (!modal || !openBtn || !closeBtn || !backdrop) return;
-
-    const close = () => {
-      modal.hidden = true;
-      const status = $("#guestPostStatus");
-      if (status) status.textContent = "";
-    };
-
-    openBtn.addEventListener("click", () => {
-      modal.hidden = false;
-    });
-
-    closeBtn.addEventListener("click", close);
-    backdrop.addEventListener("click", close);
-
-    document.addEventListener("keydown", event => {
-      if (event.key === "Escape" && !modal.hidden) close();
-    });
-  }
-
-  async function submitGuestPost(payload) {
-    const api = (data.site.apiBaseUrl || "").trim();
-    if (!api || api === "YOUR_APPS_SCRIPT_WEB_APP_URL") {
-      throw new Error("Apps Script URLが未設定です。");
-    }
-
-    const res = await fetch(api, {
-      method: "POST",
-      headers: { "Content-Type": "text/plain;charset=utf-8" },
-      body: JSON.stringify(payload)
-    });
-
-    if (!res.ok) throw new Error("送信に失敗しました。");
-    return res.json();
-  }
-
-  function setupGuestPostForm() {
-    const form = $("#guestPostForm");
-    if (!form) return;
-
-    form.addEventListener("submit", async event => {
-      event.preventDefault();
-
-      const status = $("#guestPostStatus");
-      if (status) status.textContent = "";
-
-      const fd = new FormData(form);
-      const name = String(fd.get("name") || "").trim();
-      const comment = String(fd.get("comment") || "").trim();
-      const workIds = fd.getAll("workIds").map(String);
-
-      if (!name || !comment) {
-        if (status) status.textContent = "名前とコメントを入力してください。";
-        return;
-      }
-
-      if (!confirm("本当に送信しますか？")) return;
-
-      try {
-        if (status) status.textContent = "送信中...";
-
-        await submitGuestPost({ type: "guestPost", name, comment, workIds });
-
-        form.reset();
-        if (status) status.textContent = "送信しました。";
-
-        await loadBoard($("#boardList"), () => true, "home");
-
-        const modal = $("#postModal");
-        setTimeout(() => {
-          if (modal) modal.hidden = true;
-        }, 500);
-      } catch (error) {
-        console.error(error);
-        if (status) status.textContent = "送信に失敗しました。";
-      }
-    });
   }
 
   function renderWorksAreaForViewport() {
@@ -968,10 +700,6 @@
     renderAbout();
     renderWorksAreaForViewport();
     renderContact();
-    buildGuestWorkCheckboxes();
-    setupPostModal();
-    setupGuestPostForm();
-    loadBoard($("#boardList"), () => true, "home");
   }
 
   function setupResponsiveRerender() {

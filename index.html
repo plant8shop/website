@@ -13,7 +13,6 @@
       <a href="#about">概要</a>
       <a href="#works">活動・参加者</a>
       <a href="#contact">連絡先</a>
-      <a href="#board">掲示板</a>
     </nav>
   </header>
 
@@ -47,58 +46,9 @@
         <div id="contactContent"></div>
       </div>
     </section>
-
-    <section id="board" class="section">
-      <div class="section-inner">
-        <div class="section-head">
-          <h2>掲示板</h2>
-          <button id="openPostModalBtn" class="button">投稿する</button>
-        </div>
-
-        <div class="board-note">
-          <p>「投稿する」から送信できます。</p>
-        </div>
-
-        <div id="boardList"></div>
-      </div>
-    </section>
   </main>
 
   <div id="tooltip" class="tooltip" hidden></div>
-
-  <div id="postModal" class="modal" hidden>
-    <div class="modal-backdrop" id="modalBackdrop"></div>
-    <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="postModalTitle">
-      <div class="modal-header">
-        <h3 id="postModalTitle">掲示板に投稿</h3>
-        <button id="closePostModalBtn" class="icon-button" type="button">×</button>
-      </div>
-
-      <form id="guestPostForm" class="post-form">
-        <label class="form-field">
-          <span>名前</span>
-          <input type="text" name="name" maxlength="40" required />
-        </label>
-
-        <div class="form-field">
-          <span>言及する作品</span>
-          <div id="guestWorkCheckboxes" class="checkbox-list"></div>
-          <small class="muted">作品なしでも投稿できます。複数選択可。</small>
-        </div>
-
-        <label class="form-field">
-          <span>コメント</span>
-          <textarea name="comment" rows="5" maxlength="500" required></textarea>
-        </label>
-
-        <div class="form-actions">
-          <button type="submit" class="button">送信</button>
-        </div>
-
-        <p id="guestPostStatus" class="muted"></p>
-      </form>
-    </div>
-  </div>
 
   <script src="data.js"></script>
   <script src="app.js"></script>

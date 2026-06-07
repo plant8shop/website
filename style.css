@@ -78,6 +78,25 @@ main {
   font-weight: 600;
 }
 
+.nav-logo-link {
+  display: flex;
+  align-items: center;
+  flex: 0 0 auto;
+}
+
+.nav-logo {
+  width: 150px;
+  height: auto;
+  display: block;
+}
+
+.about-logo {
+  width: 100%;
+  max-width: 760px;
+  height: auto;
+  margin: 0 0 32px;
+}
+
 .section {
   padding: 64px var(--section-pad-x);
 }

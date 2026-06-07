@@ -17,8 +17,9 @@ const SITE_DATA = {
       `,
       email: "plant8shop@gmail.com",
       sns: [
-        { name: "X", url: "https://x.com/plant8shop" },
+        { name: " X ", url: "https://x.com/plant8shop" },
         { name: "Instagram", url: "https://www.instagram.com/plant8shop/" },
+        { name: "note", url: "https://note.com/plant8shop" },
       ]
     },
 

@@ -47,6 +47,38 @@
       .replaceAll("'", "&#039;");
   }
 
+  function setMeta({ title, description, image, url }) {
+    if (title) {
+      document.title = title;
+      setMetaContent("property", "og:title", title);
+    }
+
+    if (description) {
+      setMetaContent("name", "description", description);
+      setMetaContent("property", "og:description", description);
+    }
+
+    if (image) {
+      setMetaContent("property", "og:image", image);
+    }
+
+    if (url) {
+      setMetaContent("property", "og:url", url);
+    }
+  }
+
+  function setMetaContent(attr, key, content) {
+    let tag = document.querySelector(`meta[${attr}="${key}"]`);
+
+    if (!tag) {
+      tag = document.createElement("meta");
+      tag.setAttribute(attr, key);
+      document.head.appendChild(tag);
+    }
+
+    tag.setAttribute("content", content);
+  }
+
   function bubbleHtml({ memberName, contribution }) {
     return `
       <div class="bubble-card">
@@ -231,7 +263,9 @@
 
   function renderAbout() {
     const about = $("#aboutContent");
-    if (about) about.innerHTML = data.site.about;
+    if (!about) return;
+    if (about.innerHTML.trim()) return;
+    about.innerHTML = data.site.about;
   }
 
   function renderContact() {
@@ -612,6 +646,15 @@
     const work = worksById[getQueryParam("id")];
     if (!work) return renderNotFound(wrap, "作品");
 
+    setMeta({
+      title: `${work.title}｜活動｜プラントショップ`,
+      description: `${work.summary}`.slice(0, 120),
+      image: work.thumbnail
+        ? new URL(work.thumbnail, location.origin).href
+        : "https://plantshop.work/assets/ogp.jpg",
+      url: location.href
+    });
+
     wrap.innerHTML = `
       <div class="page-hero">
         <h1>${escapeHtml(work.title)}</h1>
@@ -653,6 +696,15 @@
 
     const member = membersById[getQueryParam("id")];
     if (!member) return renderNotFound(wrap, "参加者");
+
+    setMeta({
+      title: `${member.name}｜参加者｜プラントショップ`,
+      description: member.bio
+        ? `${member.bio}`.slice(0, 120)
+        : `${member.name}のプロフィールと参加活動を掲載しています。`,
+      image: "https://plantshop.work/assets/ogp.jpg",
+      url: location.href
+    });
 
     const memberWorks = data.works.filter(work => work.participantIds.includes(member.id));
 

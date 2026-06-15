@@ -614,22 +614,26 @@ a.news-item:hover {
 
 .works-mobile-list {
   display: grid;
-  gap: 24px;
+  gap: 16px;
 }
 
 .works-mobile-card {
   display: grid;
   grid-template-columns: 104px minmax(0, 1fr);
-  border: 0;
-  background: transparent;
-  transition: border-color 0.2s ease;
+  overflow: hidden;
+  border: 1px solid rgba(116, 109, 184, 0.34);
+  background: rgba(250, 255, 253, 0.72);
+  transition:
+    border-color 0.18s ease,
+    background 0.18s ease;
   cursor: pointer;
 }
 
 .works-mobile-card:hover,
 .works-mobile-card:focus-visible {
-  outline: 1px solid var(--violet);
-  outline-offset: 2px;
+  border-color: var(--line-strong);
+  background: rgba(245, 255, 251, 0.94);
+  outline: none;
 }
 
 .works-mobile-card.is-without-image {
@@ -643,7 +647,6 @@ a.news-item:hover {
 .works-mobile-thumb {
   display: block;
   min-height: 148px;
-  border: 1px solid var(--line);
 }
 
 .works-mobile-thumb img {
@@ -683,8 +686,7 @@ a.news-item:hover {
   grid-template-columns: 52px 1fr;
   gap: 10px;
   align-items: start;
-  padding: 9px 12px;
-  border-top: 1px solid var(--line);
+  padding: 4px 12px 12px;
   background: transparent;
 }
 

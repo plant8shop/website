@@ -716,7 +716,7 @@
 
     tile.href = `work.html?id=${work.id}`;
 
-    attachInfoBubble(tile, `
+    attachTwoStepNavigation(tile, `
       <div class="bubble-card">
         <div class="bubble-card-head">
           <div>
@@ -725,8 +725,9 @@
           </div>
         </div>
         <div class="bubble-card-text">${escapeHtml(work.contributions[member.id] || "記述なし")}</div>
+        <div class="bubble-card-action">もう一度押すと活動ページへ移動します</div>
       </div>
-    `, true);
+    `, tile.href);
 
     return tile;
   }

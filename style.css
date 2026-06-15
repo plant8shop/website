@@ -412,6 +412,7 @@ a.news-item:focus-visible {
 .graph-member-link,
 .graph-node-button {
   cursor: pointer;
+  outline: none;
 }
 
 .graph-work-image,
@@ -447,7 +448,8 @@ a.news-item:focus-visible {
 }
 
 .graph-work-link:hover .graph-work-overlay,
-.graph-work-link:focus-visible .graph-work-overlay {
+.graph-work-link:focus-visible .graph-work-overlay,
+.graph-work-link.bubble-open .graph-work-overlay {
   fill: rgba(191, 244, 223, 0.38);
   stroke: var(--violet);
 }
@@ -470,20 +472,33 @@ a.news-item:focus-visible {
 
 .tooltip {
   position: fixed;
+  left: 50%;
+  right: auto;
+  bottom: 16px;
+  top: auto;
   z-index: 9999;
-  max-width: min(340px, calc(100vw - 24px));
-  padding: 14px 16px;
-  background: rgba(248, 255, 252, 0.98);
-  border: 1px solid var(--line-strong);
-  border-radius: 14px;
+  width: min(680px, calc(100vw - 32px));
+  max-width: none;
+  max-height: min(70vh, 560px);
+  overflow-y: auto;
+  padding: 20px 22px;
+  background: linear-gradient(
+    135deg,
+    rgba(245, 241, 253, 0.88) 0%,
+    rgba(239, 255, 249, 0.86) 100%
+  );
+  border: 0;
+  border-radius: 18px;
+  backdrop-filter: blur(18px) saturate(1.08);
+  -webkit-backdrop-filter: blur(18px) saturate(1.08);
   font-size: var(--font-size-sm);
   line-height: 1.7;
   opacity: 0;
-  transform: translateX(10px) scale(0.985);
-  transform-origin: left center;
+  transform: translate(-50%, calc(100% + 32px));
+  transform-origin: center bottom;
   transition:
-    opacity 0.18s ease,
-    transform 0.2s ease;
+    opacity 0.24s ease,
+    transform 0.34s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .tooltip[hidden] {
@@ -492,41 +507,7 @@ a.news-item:focus-visible {
 
 .tooltip.is-visible {
   opacity: 1;
-}
-
-.tooltip.is-right.is-visible {
-  transform: translateX(0) scale(1);
-}
-
-.tooltip.is-left {
-  transform: translateX(-10px) scale(0.985);
-  transform-origin: right center;
-}
-
-.tooltip.is-left.is-visible {
-  transform: translateX(0) scale(1);
-}
-
-.tooltip.is-bubble::after {
-  content: "";
-  position: absolute;
-  top: 50%;
-  width: 10px;
-  height: 10px;
-  background: #f8fffc;
-  transform: translateY(-50%) rotate(45deg);
-}
-
-.tooltip.is-right::after {
-  left: -6px;
-  border-left: 1px solid var(--line-strong);
-  border-bottom: 1px solid var(--line-strong);
-}
-
-.tooltip.is-left::after {
-  right: -6px;
-  border-right: 1px solid var(--line-strong);
-  border-top: 1px solid var(--line-strong);
+  transform: translate(-50%, 0);
 }
 
 .bubble-card {
@@ -863,29 +844,26 @@ a.news-item:focus-visible {
   }
 
   .tooltip {
-    left: 12px !important;
-    right: 12px;
+    left: 50% !important;
+    right: auto;
     bottom: 12px;
     top: auto !important;
     max-width: none;
-    width: auto;
-    transform: translateY(10px) scale(0.985);
+    width: calc(100vw - 24px);
+    padding: 18px 16px;
+    transform: translate(-50%, calc(100% + 24px));
     transform-origin: center bottom;
   }
 
   .tooltip.is-left,
   .tooltip.is-right {
-    transform: translateY(10px) scale(0.985);
+    transform: translate(-50%, calc(100% + 24px));
   }
 
   .tooltip.is-visible,
   .tooltip.is-left.is-visible,
   .tooltip.is-right.is-visible {
-    transform: translateY(0) scale(1);
-  }
-
-  .tooltip.is-bubble::after {
-    display: none;
+    transform: translate(-50%, 0);
   }
 
   .works-mobile-members .member-detail-link {

@@ -150,52 +150,14 @@
       trigger.setAttribute("data-bubble-open", "1");
     }
 
-    const isMobile = window.innerWidth <= MOBILE_BREAKPOINT;
-
-    if (isMobile) {
-      tip.style.left = "12px";
-      tip.style.right = "12px";
-      tip.style.bottom = "12px";
-      tip.style.top = "auto";
-      tip.classList.remove("is-left", "is-right");
-
-      requestAnimationFrame(() => {
-        tip.classList.add("is-visible");
-      });
-      return;
-    }
-
-    const gap = 18;
-    const centerY = rect.top + rect.height / 2;
+    tip.style.left = "";
+    tip.style.top = "";
+    tip.style.right = "";
+    tip.style.bottom = "";
+    tip.classList.remove("is-left", "is-right");
 
     requestAnimationFrame(() => {
-      const tipRect = tip.getBoundingClientRect();
-
-      let left = rect.right + gap;
-      let side = "right";
-
-      if (left + tipRect.width > window.innerWidth - 16) {
-        left = rect.left - tipRect.width - gap;
-        side = "left";
-      }
-
-      let top = centerY - tipRect.height / 2;
-
-      if (top < 12) top = 12;
-      if (top + tipRect.height > window.innerHeight - 12) {
-        top = window.innerHeight - tipRect.height - 12;
-      }
-
-      tip.style.left = `${left}px`;
-      tip.style.top = `${top}px`;
-      tip.style.right = "";
-      tip.style.bottom = "";
-      tip.classList.remove("is-left", "is-right");
-      tip.classList.add(side === "right" ? "is-right" : "is-left");
-
-      requestAnimationFrame(() => {
-        tip.classList.add("is-visible");
-      });
+      tip.classList.add("is-visible");
     });
   }
 

@@ -585,12 +585,12 @@
 
     container.innerHTML = `
       <div class="works-mobile-list">
-        ${data.works.map(work => `
+        ${data.works.map((work, index) => `
           <article class="works-mobile-card">
             <a href="work.html?id=${work.id}" class="works-mobile-thumb">
               ${work.thumbnail
                 ? `<img src="${work.thumbnail}" alt="${escapeHtml(work.title)}" loading="lazy" decoding="async">`
-                : `<div class="works-mobile-thumb-placeholder"></div>`
+                : `<div class="works-mobile-thumb-placeholder"><span>${String(index + 1).padStart(2, "0")}</span></div>`
               }
             </a>
             <div class="works-mobile-body">
@@ -599,6 +599,10 @@
                 <a href="work.html?id=${work.id}">${escapeHtml(work.title)}</a>
               </h3>
               <p class="works-mobile-summary">${escapeHtml(work.summary)}</p>
+              <a class="works-mobile-more" href="work.html?id=${work.id}">活動の詳細</a>
+            </div>
+            <div class="works-mobile-participants">
+              <span class="works-mobile-members-label">参加者</span>
               <div class="works-mobile-members">
                 ${work.participantIds.map(id => {
                   const member = membersById[id];

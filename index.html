@@ -80,35 +80,17 @@
           <span class="section-index">02</span>
           <h2>最新情報</h2>
         </div>
-        <div class="news-layout">
-          <div class="news-column">
+        <div class="news-column">
+          <div class="news-column-header">
             <p class="section-note">展示や活動についてのお知らせ</p>
-            <div id="newsList" class="news-list"></div>
+            <a
+              class="text-link"
+              href="https://x.com/plant8shop"
+              target="_blank"
+              rel="noopener noreferrer"
+            >Xの最新投稿を見る</a>
           </div>
-          <aside class="x-column" aria-labelledby="xTimelineTitle">
-            <div class="x-column-header">
-              <div>
-                <p class="section-note">リアルタイムの更新</p>
-                <h3 id="xTimelineTitle">X / @plant8shop</h3>
-              </div>
-              <a
-                class="text-link"
-                href="https://x.com/plant8shop"
-                target="_blank"
-                rel="noopener noreferrer"
-              >Xで見る</a>
-            </div>
-            <div class="x-timeline-frame">
-              <a
-                class="twitter-timeline"
-                data-height="520"
-                data-theme="light"
-                data-chrome="noheader nofooter noborders transparent"
-                data-dnt="true"
-                href="https://twitter.com/plant8shop"
-              >@plant8shopの投稿をXで見る</a>
-            </div>
-          </aside>
+          <div id="newsList" class="news-list"></div>
         </div>
       </div>
     </section>
@@ -138,6 +120,5 @@
 
   <script src="data.js"></script>
   <script src="app.js"></script>
-  <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
 </body>
 </html>

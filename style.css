@@ -634,7 +634,12 @@ a.news-item:focus-visible {
   overflow: hidden;
   padding: 10px 10px 12px;
   border: 0;
-  background: var(--card-gradient);
+  background: linear-gradient(
+    135deg,
+    rgba(235, 231, 249, 0.92) 0%,
+    rgba(241, 246, 248, 0.9) 48%,
+    rgba(224, 248, 239, 0.9) 100%
+  );
   transition:
     transform 0.18s ease,
     background 0.18s ease,

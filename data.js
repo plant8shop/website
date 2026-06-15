@@ -9,6 +9,14 @@ const SITE_DATA = {
         現在は、そこに存在するものから想像することと、それを共有することについて話すことが多いです。
       </p>
     `,
+    news: [
+      {
+        date: "2026.06.15",
+        title: "展覧会「生産」を開催します",
+        body: "2026年6月26日から30日まで、京都・岡崎道のALC Library&Galleryで開催します。",
+        url: "work.html?id=production"
+      }
+    ],
     contact: {
       text: `
         <p>
@@ -66,11 +74,11 @@ const SITE_DATA = {
       id: "production",
       title: "生産",
       period: "2026.03–",
-      thumbnail: "assets/thumb-seisan.png",
+      thumbnail: "assets/thumb-seisan-display.webp",
       summary: "プラントショップは、分野を横断し、共同で持続的に制作するコレクティブとして活動を始めました。1回目の活動として、まずは作るということを見つめなおしました。そして、何かしらの作品を作って展示することを活動の成果に設定しました。2026年6月26日～30日に、京都・岡崎道の「ALC Library&Gallery」にて展示予定です。（2026年6月6日更新）",
       detailHtml: `
       <section>
-        <img src="assets/detail-seisan.png">
+        <img src="assets/detail-seisan-display.webp" alt="展覧会「生産」の詳細ビジュアル" loading="lazy" decoding="async">
       </section>
       <section>
         <h4>展示のステートメント</h4>  

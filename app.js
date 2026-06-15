@@ -268,6 +268,34 @@
     about.innerHTML = data.site.about;
   }
 
+  function renderNews() {
+    const wrap = $("#newsList");
+    if (!wrap) return;
+
+    const news = [...(data.site.news || [])]
+      .sort((a, b) => String(b.date).localeCompare(String(a.date)));
+
+    if (!news.length) {
+      wrap.innerHTML = `<p class="news-empty">現在、お知らせはありません。</p>`;
+      return;
+    }
+
+    wrap.innerHTML = news.map(item => {
+      const content = `
+        <time class="news-date" datetime="${escapeHtml(item.date.replaceAll(".", "-"))}">
+          ${escapeHtml(item.date)}
+        </time>
+        <h3 class="news-title">${escapeHtml(item.title)}</h3>
+        <p class="news-body">${escapeHtml(item.body)}</p>
+        ${item.url ? `<span class="news-more">詳しく見る</span>` : ""}
+      `;
+
+      return item.url
+        ? `<a class="news-item" href="${escapeHtml(item.url)}">${content}</a>`
+        : `<article class="news-item">${content}</article>`;
+    }).join("");
+  }
+
   function renderContact() {
     const wrap = $("#contactContent");
     if (!wrap) return;
@@ -561,7 +589,7 @@
           <article class="works-mobile-card">
             <a href="work.html?id=${work.id}" class="works-mobile-thumb">
               ${work.thumbnail
-                ? `<img src="${work.thumbnail}" alt="${escapeHtml(work.title)}">`
+                ? `<img src="${work.thumbnail}" alt="${escapeHtml(work.title)}" loading="lazy" decoding="async">`
                 : `<div class="works-mobile-thumb-placeholder"></div>`
               }
             </a>
@@ -613,7 +641,7 @@
   function workTile(work, member) {
     const tile = el("a", "work-tile", `
       ${work.thumbnail
-        ? `<img src="${work.thumbnail}" alt="${escapeHtml(work.title)}">`
+        ? `<img src="${work.thumbnail}" alt="${escapeHtml(work.title)}" loading="lazy" decoding="async">`
         : `<div class="work-tile-placeholder"></div>`
       }
       <div class="caption">
@@ -651,14 +679,14 @@
       description: `${work.summary}`.slice(0, 120),
       image: work.thumbnail
         ? new URL(work.thumbnail, location.origin).href
-        : "https://plantshop.work/assets/ogp.jpg",
+        : "https://plantshop.work/assets/logo-full.png",
       url: location.href
     });
 
     wrap.innerHTML = `
       <div class="page-hero">
         <h1>${escapeHtml(work.title)}</h1>
-        ${work.thumbnail ? `<img src="${work.thumbnail}" alt="${escapeHtml(work.title)}">` : ""}
+        ${work.thumbnail ? `<img src="${work.thumbnail}" alt="${escapeHtml(work.title)}" decoding="async">` : ""}
         <div class="meta">期間: ${escapeHtml(work.period)}</div>
         <div>
           <h3>参加者</h3>
@@ -702,7 +730,7 @@
       description: member.bio
         ? `${member.bio}`.slice(0, 120)
         : `${member.name}のプロフィールと参加活動を掲載しています。`,
-      image: "https://plantshop.work/assets/ogp.jpg",
+      image: "https://plantshop.work/assets/logo-full.png",
       url: location.href
     });
 
@@ -756,6 +784,7 @@
 
   function initHome() {
     renderAbout();
+    renderNews();
     renderWorksAreaForViewport();
     renderContact();
   }

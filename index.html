@@ -37,10 +37,10 @@
         <img src="assets/logo-text-display.webp" alt="プラントショップ" class="nav-logo" width="480" height="157">
       </a>
       <div class="nav-links">
-        <a href="#about">概要</a>
-        <a href="#news">最新情報</a>
-        <a href="#works">活動・参加者</a>
-        <a href="#contact">連絡先</a>
+        <a href="#aboutHeading">概要</a>
+        <a href="#newsHeading">最新情報</a>
+        <a href="#worksHeading">活動・参加者</a>
+        <a href="#contactHeading">連絡先</a>
       </div>
     </nav>
   </header>
@@ -59,7 +59,7 @@
             fetchpriority="high"
           >
         </picture>
-        <div class="section-heading">
+        <div id="aboutHeading" class="section-heading">
           <span class="section-index">01</span>
           <h2>概要</h2>
         </div>
@@ -76,19 +76,24 @@
 
     <section id="news" class="section news-section">
       <div class="section-inner section-inner-wide">
-        <div class="section-heading">
+        <div id="newsHeading" class="section-heading">
           <span class="section-index">02</span>
           <h2>最新情報</h2>
         </div>
         <div class="news-column">
-          <div class="news-column-header">
-            <p class="section-note">展示や活動についてのお知らせ</p>
+          <div class="news-actions">
             <a
-              class="text-link"
+              class="contact-sns-link"
               href="https://x.com/plant8shop"
               target="_blank"
               rel="noopener noreferrer"
-            >Xの最新投稿を見る</a>
+            >X</a>
+            <a
+              class="contact-sns-link"
+              href="https://www.instagram.com/plant8shop/"
+              target="_blank"
+              rel="noopener noreferrer"
+            >Instagram</a>
           </div>
           <div id="newsList" class="news-list"></div>
         </div>
@@ -97,7 +102,7 @@
 
     <section id="works" class="section">
       <div class="section-inner section-inner-wide">
-        <div class="section-heading">
+        <div id="worksHeading" class="section-heading">
           <span class="section-index">03</span>
           <h2>活動・参加者</h2>
         </div>
@@ -107,7 +112,7 @@
 
     <section id="contact" class="section">
       <div class="section-inner">
-        <div class="section-heading">
+        <div id="contactHeading" class="section-heading">
           <span class="section-index">04</span>
           <h2>連絡先</h2>
         </div>

@@ -88,6 +88,22 @@
           </div>
         </div>
         <div class="bubble-card-text">${escapeHtml(contribution || "記述なし")}</div>
+        <div class="bubble-card-action">もう一度押すと参加者ページへ移動します</div>
+      </div>
+    `;
+  }
+
+  function workBubbleHtml(work) {
+    return `
+      <div class="bubble-card">
+        <div class="bubble-card-head">
+          <div>
+            <div class="bubble-card-name">${escapeHtml(work.title)}</div>
+            <div class="bubble-card-meta">${escapeHtml(work.period)}</div>
+          </div>
+        </div>
+        <div class="bubble-card-text">${escapeHtml(work.summary)}</div>
+        <div class="bubble-card-action">もう一度押すと活動ページへ移動します</div>
       </div>
     `;
   }
@@ -266,6 +282,34 @@
     if (!about) return;
     if (about.innerHTML.trim()) return;
     about.innerHTML = data.site.about;
+  }
+
+  function attachTwoStepNavigation(node, html, href, options = {}) {
+    const { ignoreNestedLinks = false } = options;
+    node.classList.add("bubble-trigger");
+    node.setAttribute("tabindex", node.getAttribute("tabindex") || "0");
+
+    const activate = event => {
+      const nestedLink = event.target.closest?.("a");
+      if (ignoreNestedLinks && nestedLink && nestedLink !== node) return;
+
+      const isOpen = node.getAttribute("data-bubble-open") === "1";
+      event.preventDefault();
+      event.stopImmediatePropagation();
+
+      if (isOpen) {
+        location.href = href;
+        return;
+      }
+
+      showBubbleAtRect(html, node.getBoundingClientRect(), node);
+    };
+
+    node.addEventListener("click", activate);
+    node.addEventListener("keydown", event => {
+      if (event.key !== "Enter" && event.key !== " ") return;
+      activate(event);
+    });
   }
 
   function renderNews() {
@@ -448,6 +492,8 @@
         class: "graph-work-overlay"
       }));
 
+      attachTwoStepNavigation(link, workBubbleHtml(work), `work.html?id=${work.id}`);
+
       svg.appendChild(link);
 
       svg.appendChild(svgEl("rect", {
@@ -539,8 +585,8 @@
         const group = svgEl("g", {
           class: "graph-node-button bubble-trigger",
           tabindex: "0",
-          role: "button",
-          "aria-label": `${member.name}が${work.title}でやったことを表示`
+          role: "link",
+          "aria-label": `${member.name}が${work.title}でやった内容を表示。もう一度押すと参加者ページへ移動`
         });
 
         group.appendChild(svgEl("circle", {
@@ -559,17 +605,7 @@
           "stroke-width": "1.2"
         }));
 
-        group.addEventListener("click", event => {
-          event.stopPropagation();
-          showBubbleAtRect(html, group.getBoundingClientRect(), group);
-        });
-
-        group.addEventListener("keydown", event => {
-          if (event.key !== "Enter" && event.key !== " ") return;
-          event.preventDefault();
-          event.stopPropagation();
-          showBubbleAtRect(html, group.getBoundingClientRect(), group);
-        });
+        attachTwoStepNavigation(group, html, `member.html?id=${member.id}`);
 
         svg.appendChild(group);
       });
@@ -594,17 +630,14 @@
             aria-label="${escapeHtml(work.title)}の活動詳細を見る"
           >
             ${work.thumbnail ? `
-              <a href="work.html?id=${work.id}" class="works-mobile-thumb">
+              <div class="works-mobile-thumb">
                 <img src="${work.thumbnail}" alt="${escapeHtml(work.title)}" loading="lazy" decoding="async">
-              </a>
+              </div>
             ` : ""}
             <div class="works-mobile-body">
               <div class="works-mobile-period">${escapeHtml(work.period)}</div>
-              <h3 class="works-mobile-title">
-                <a href="work.html?id=${work.id}">${escapeHtml(work.title)}</a>
-              </h3>
-              <p class="works-mobile-summary">${escapeHtml(work.summary)}</p>
-              <a class="works-mobile-more" href="work.html?id=${work.id}">活動の詳細</a>
+              <h3 class="works-mobile-title">${escapeHtml(work.title)}</h3>
+              <span class="works-mobile-more">概要を見る</span>
             </div>
             <div class="works-mobile-participants">
               <span class="works-mobile-members-label">参加者</span>
@@ -613,7 +646,12 @@
                   const member = membersById[id];
                   if (!member) return "";
                   return `
-                    <a class="member-detail-link" href="member.html?id=${member.id}">
+                    <a
+                      class="member-detail-link"
+                      href="member.html?id=${member.id}"
+                      data-member-id="${member.id}"
+                      data-work-id="${work.id}"
+                    >
                       <span>${escapeHtml(member.name)}</span>
                     </a>
                   `;
@@ -626,21 +664,20 @@
     `;
 
     container.querySelectorAll(".works-mobile-card").forEach(card => {
-      const openDetail = () => {
-        location.href = card.dataset.href;
-      };
-
-      card.addEventListener("click", event => {
-        if (event.target.closest("a")) return;
-        openDetail();
+      const workId = new URL(card.dataset.href, location.href).searchParams.get("id");
+      const work = worksById[workId];
+      attachTwoStepNavigation(card, workBubbleHtml(work), card.dataset.href, {
+        ignoreNestedLinks: true
       });
+    });
 
-      card.addEventListener("keydown", event => {
-        if (event.key !== "Enter" && event.key !== " ") return;
-        if (event.target.closest("a")) return;
-        event.preventDefault();
-        openDetail();
-      });
+    container.querySelectorAll(".works-mobile-members .member-detail-link").forEach(link => {
+      const work = worksById[link.dataset.workId];
+      const member = membersById[link.dataset.memberId];
+      attachTwoStepNavigation(link, bubbleHtml({
+        memberName: member.name,
+        contribution: work.contributions?.[member.id]
+      }), link.getAttribute("href"));
     });
   }
 

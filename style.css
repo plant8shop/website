@@ -22,7 +22,7 @@
   --content-width: 800px;
   --wide-width: 1120px;
   --section-pad-x: 28px;
-  --anchor-offset: 88px;
+  --anchor-offset: 76px;
 }
 
 * {
@@ -282,16 +282,11 @@ p {
   max-width: 820px;
 }
 
-.news-column-header {
+.news-actions {
   display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 24px;
+  flex-wrap: wrap;
+  gap: 10px;
   margin-bottom: 18px;
-}
-
-.news-column-header .section-note {
-  margin-bottom: 0;
 }
 
 .news-list {
@@ -541,6 +536,14 @@ a.news-item:hover {
   font-size: var(--font-size-xs);
 }
 
+.bubble-card-action {
+  padding-top: 9px;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: var(--font-size-xs);
+  line-height: 1.6;
+}
+
 .bubble-card-text {
   white-space: pre-wrap;
   line-height: 1.75;
@@ -604,21 +607,20 @@ a.news-item:hover {
 
 .works-mobile-list {
   display: grid;
-  gap: 12px;
+  gap: 24px;
 }
 
 .works-mobile-card {
   display: grid;
   grid-template-columns: 104px minmax(0, 1fr);
-  border: 1px solid var(--line);
-  background: var(--surface);
+  border: 0;
+  background: transparent;
   transition: border-color 0.2s ease;
   cursor: pointer;
 }
 
 .works-mobile-card:hover,
 .works-mobile-card:focus-visible {
-  border-color: var(--line-strong);
   outline: 1px solid var(--violet);
   outline-offset: 2px;
 }
@@ -634,7 +636,7 @@ a.news-item:hover {
 .works-mobile-thumb {
   display: block;
   min-height: 148px;
-  border-right: 1px solid var(--line);
+  border: 1px solid var(--line);
 }
 
 .works-mobile-thumb img {
@@ -660,17 +662,6 @@ a.news-item:hover {
   font-size: var(--font-size-subheading);
 }
 
-.works-mobile-summary {
-  display: -webkit-box;
-  overflow: hidden;
-  margin-bottom: 8px;
-  color: var(--text-soft);
-  font-size: var(--font-size-sm);
-  line-height: 1.65;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 4;
-}
-
 .works-mobile-more {
   display: inline-block;
   padding-bottom: 1px;
@@ -687,7 +678,7 @@ a.news-item:hover {
   align-items: start;
   padding: 9px 12px;
   border-top: 1px solid var(--line);
-  background: rgba(223, 248, 239, 0.34);
+  background: transparent;
 }
 
 .works-mobile-members-label {
@@ -766,6 +757,7 @@ a.news-item:hover {
 @media (max-width: 640px) {
   :root {
     --section-pad-x: 14px;
+    --anchor-offset: 57px;
   }
 
   .site-header {
@@ -884,11 +876,6 @@ a.news-item:hover {
     margin-bottom: 8px;
   }
 
-  .news-column-header {
-    display: grid;
-    gap: 8px;
-  }
-
   #worksGraph {
     padding: 0;
     border: 0;
@@ -933,12 +920,13 @@ a.news-item:hover {
     color 0.18s ease;
 }
 
-.member-external-link:hover {
+.member-external-link:hover,
+.contact-sns-link:hover {
   border-color: var(--line-strong);
   background: var(--mint-soft);
 }
 
-section[id] {
+.section-heading[id] {
   scroll-margin-top: var(--anchor-offset);
 }
 

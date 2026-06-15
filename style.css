@@ -139,22 +139,19 @@ main {
 .intro-section {
   padding-top: clamp(48px, 8vw, 96px);
   border-top: 0;
-  background: linear-gradient(180deg, #fbfffd 0%, #effbf7 100%);
+  background: linear-gradient(145deg, #fcfffe 0%, #effbf7 58%, #e5f8f3 100%);
 }
 
 .news-section {
-  background:
-    linear-gradient(115deg, rgba(89, 231, 183, 0.2), transparent 44%),
-    linear-gradient(300deg, rgba(116, 109, 184, 0.13), transparent 48%),
-    #e8faf4;
+  background: linear-gradient(125deg, #dff9ef 0%, #ecfaf8 52%, #e6e8f7 100%);
 }
 
 #works {
-  background: #f4fffb;
+  background: linear-gradient(155deg, #f7fffc 0%, #e2f9f1 55%, #d9f4ec 100%);
 }
 
 #contact {
-  background: #f3f4fc;
+  background: linear-gradient(135deg, #f8fbff 0%, #edf0fb 52%, #e4e1f4 100%);
 }
 
 .section-heading {
@@ -608,10 +605,14 @@ a.news-item:hover {
   border: 1px solid var(--line);
   background: var(--surface);
   transition: border-color 0.2s ease;
+  cursor: pointer;
 }
 
-.works-mobile-card:hover {
+.works-mobile-card:hover,
+.works-mobile-card:focus-visible {
   border-color: var(--line-strong);
+  outline: 1px solid var(--violet);
+  outline-offset: 2px;
 }
 
 .works-mobile-card.is-without-image {

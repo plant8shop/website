@@ -586,7 +586,13 @@
     container.innerHTML = `
       <div class="works-mobile-list">
         ${data.works.map(work => `
-          <article class="works-mobile-card${work.thumbnail ? "" : " is-without-image"}">
+          <article
+            class="works-mobile-card${work.thumbnail ? "" : " is-without-image"}"
+            data-href="work.html?id=${work.id}"
+            tabindex="0"
+            role="link"
+            aria-label="${escapeHtml(work.title)}の活動詳細を見る"
+          >
             ${work.thumbnail ? `
               <a href="work.html?id=${work.id}" class="works-mobile-thumb">
                 <img src="${work.thumbnail}" alt="${escapeHtml(work.title)}" loading="lazy" decoding="async">
@@ -618,6 +624,24 @@
         `).join("")}
       </div>
     `;
+
+    container.querySelectorAll(".works-mobile-card").forEach(card => {
+      const openDetail = () => {
+        location.href = card.dataset.href;
+      };
+
+      card.addEventListener("click", event => {
+        if (event.target.closest("a")) return;
+        openDetail();
+      });
+
+      card.addEventListener("keydown", event => {
+        if (event.key !== "Enter" && event.key !== " ") return;
+        if (event.target.closest("a")) return;
+        event.preventDefault();
+        openDetail();
+      });
+    });
   }
 
   function renderNotFound(wrap, label) {

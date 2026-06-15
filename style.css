@@ -888,10 +888,6 @@ a.news-item:hover {
     color: var(--violet-dark);
   }
 
-  .works-mobile-members .member-detail-link:nth-child(even) {
-    background: rgba(232, 229, 248, 0.72);
-  }
-
   .news-item {
     grid-template-columns: 1fr;
     gap: 0;

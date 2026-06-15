@@ -417,7 +417,7 @@
         y1: y,
         x2: width - 28,
         y2: y,
-        stroke: "#cfcfcf",
+        stroke: "#bbb5d7",
         "stroke-width": "1.2"
       }));
 
@@ -443,8 +443,8 @@
         y: y - GRAPH.cardH / 2,
         width: GRAPH.cardW,
         height: GRAPH.cardH,
-        fill: "rgba(255,255,255,0.52)",
-        stroke: "#d6d6d6",
+        fill: "rgba(239,255,248,0.62)",
+        stroke: "#aaa3cf",
         class: "graph-work-overlay"
       }));
 
@@ -455,7 +455,7 @@
         y: y - 30,
         width: 118,
         height: 60,
-        fill: "rgba(255,255,255,0.88)",
+        fill: "rgba(245,255,251,0.9)",
         class: "graph-work-label-bg"
       }));
 
@@ -463,13 +463,13 @@
         lines: splitTitle(work.title),
         fontSize: 16,
         fontWeight: "600",
-        fill: "#333"
+        fill: "#4d477f"
       });
 
       addSvgText(svg, GRAPH.leftX + 18, y + 20, {
         text: work.period,
         fontSize: 13,
-        fill: "#666"
+        fill: "#706b88"
       });
     });
 
@@ -487,7 +487,7 @@
         y1: Math.max(GRAPH.memberTopY + 18, ys[0]),
         x2: x,
         y2: ys.at(-1),
-        stroke: "#d8d8d8",
+        stroke: "#b9b2d6",
         "stroke-width": "2.2",
         "stroke-linecap": "round",
         class: "graph-member-shaft"
@@ -506,15 +506,15 @@
         y: GRAPH.memberTopY - labelH / 2,
         width: labelW,
         height: labelH,
-        fill: "#ffffff",
-        stroke: "#d6d6d6",
+        fill: "#f7fffc",
+        stroke: "#aaa3cf",
         class: "graph-member-name-box"
       }));
 
       addSvgText(nameLink, x, GRAPH.memberTopY + 4, {
         text: member.name,
         fontSize: 11,
-        fill: "#444",
+        fill: "#4d477f",
         anchor: "middle"
       });
 
@@ -554,8 +554,8 @@
           cx: x,
           cy: y,
           r: GRAPH.nodeR,
-          fill: "#ffffff",
-          stroke: "#bcbcbc",
+          fill: "#f7fffc",
+          stroke: "#746db8",
           "stroke-width": "1.2"
         }));
 

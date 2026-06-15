@@ -1,4 +1,10 @@
 :root {
+  --font-sans: "Noto Sans JP", "Hiragino Sans", "Yu Gothic UI", "Yu Gothic", sans-serif;
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.875rem;
+  --font-size-body: 1rem;
+  --font-size-subheading: 1.0625rem;
+  --font-size-heading: clamp(1.5rem, 2.2vw, 1.875rem);
   --bg: #effbf7;
   --surface: #fafffd;
   --surface-soft: #dff8ef;
@@ -29,7 +35,8 @@ html {
 
 body {
   margin: 0;
-  font-family: "Noto Sans JP", "Hiragino Sans", "Yu Gothic", sans-serif;
+  font-family: var(--font-sans);
+  font-size: var(--font-size-body);
   color: var(--text);
   background: var(--bg);
   line-height: 1.82;
@@ -68,7 +75,7 @@ main {
   width: min(100%, var(--wide-width));
   margin: 0 auto;
   padding: 14px var(--section-pad-x);
-  font-size: 0.82rem;
+  font-size: var(--font-size-xs);
   line-height: 1.4;
   letter-spacing: 0.08em;
 }
@@ -166,8 +173,8 @@ main {
 
 .section-index {
   color: var(--violet);
-  font-family: Arial, sans-serif;
-  font-size: 0.72rem;
+  font-family: var(--font-sans);
+  font-size: var(--font-size-xs);
   line-height: 1;
   letter-spacing: 0.12em;
 }
@@ -175,7 +182,7 @@ main {
 .section-note {
   margin-bottom: 18px;
   color: var(--muted);
-  font-size: 0.75rem;
+  font-size: var(--font-size-xs);
   letter-spacing: 0.1em;
 }
 
@@ -194,8 +201,8 @@ main {
 
 h1 {
   margin: 0 0 22px;
-  font-size: 1.5rem;
-  line-height: 1.45;
+  font-size: var(--font-size-heading);
+  line-height: 1.35;
   font-weight: 600;
   letter-spacing: 0.02em;
   color: var(--violet-dark);
@@ -207,7 +214,7 @@ h1 {
 
 h2 {
   margin: 0;
-  font-size: clamp(1.35rem, 2.4vw, 2rem);
+  font-size: var(--font-size-heading);
   line-height: 1.25;
   font-weight: 500;
   letter-spacing: 0.06em;
@@ -216,7 +223,7 @@ h2 {
 
 h3 {
   margin: 0 0 12px;
-  font-size: 0.98rem;
+  font-size: var(--font-size-subheading);
   line-height: 1.5;
   font-weight: 600;
   color: var(--violet-dark);
@@ -228,7 +235,7 @@ p {
 
 .lead {
   max-width: none;
-  font-size: 0.98rem;
+  font-size: var(--font-size-body);
   line-height: 1.78;
   color: var(--text-soft);
 }
@@ -240,7 +247,7 @@ p {
 .meta,
 .muted {
   color: var(--muted);
-  font-size: 0.9rem;
+  font-size: var(--font-size-sm);
   line-height: 1.7;
 }
 
@@ -261,14 +268,14 @@ p {
 
 #aboutContent,
 #contactContent {
-  font-size: 1rem;
+  font-size: var(--font-size-body);
   color: var(--text-soft);
 }
 
 #aboutContent {
   max-width: 690px;
-  font-size: clamp(1.05rem, 1.8vw, 1.26rem);
-  line-height: 2;
+  font-size: var(--font-size-body);
+  line-height: 1.9;
 }
 
 .news-column {
@@ -312,20 +319,20 @@ a.news-item:hover {
   grid-row: 1 / span 3;
   padding-top: 3px;
   color: var(--muted);
-  font-family: Arial, sans-serif;
-  font-size: 0.75rem;
+  font-family: var(--font-sans);
+  font-size: var(--font-size-xs);
   letter-spacing: 0.08em;
 }
 
 .news-title {
   margin-bottom: 8px;
-  font-size: 1.08rem;
+  font-size: var(--font-size-subheading);
 }
 
 .news-body {
   margin-bottom: 14px;
   color: var(--text-soft);
-  font-size: 0.92rem;
+  font-size: var(--font-size-sm);
   line-height: 1.8;
 }
 
@@ -334,7 +341,7 @@ a.news-item:hover {
   width: fit-content;
   padding-bottom: 2px;
   border-bottom: 1px solid currentColor;
-  font-size: 0.78rem;
+  font-size: var(--font-size-xs);
   letter-spacing: 0.06em;
   color: var(--violet-dark);
 }
@@ -381,6 +388,7 @@ a.news-item:hover {
 }
 
 #worksGraph svg text {
+  font-family: var(--font-sans);
   letter-spacing: 0.01em;
   pointer-events: none;
 }
@@ -457,7 +465,7 @@ a.news-item:hover {
   background: rgba(248, 255, 252, 0.98);
   border: 1px solid var(--line-strong);
   border-radius: 14px;
-  font-size: 0.9rem;
+  font-size: var(--font-size-sm);
   line-height: 1.7;
   opacity: 0;
   transform: translateX(10px) scale(0.985);
@@ -523,14 +531,14 @@ a.news-item:hover {
 
 .bubble-card-name {
   font-weight: 600;
-  font-size: 0.98rem;
+  font-size: var(--font-size-subheading);
   line-height: 1.35;
   color: var(--violet-dark);
 }
 
 .bubble-card-meta {
   color: var(--muted);
-  font-size: 0.83rem;
+  font-size: var(--font-size-xs);
 }
 
 .bubble-card-text {
@@ -584,7 +592,7 @@ a.news-item:hover {
 
 .work-tile .caption {
   padding: 10px;
-  font-size: 0.92rem;
+  font-size: var(--font-size-sm);
   line-height: 1.6;
 }
 
@@ -642,14 +650,14 @@ a.news-item:hover {
 }
 
 .works-mobile-period {
-  font-size: 0.72rem;
+  font-size: var(--font-size-xs);
   color: var(--muted);
   margin-bottom: 4px;
 }
 
 .works-mobile-title {
   margin-bottom: 6px;
-  font-size: 1.02rem;
+  font-size: var(--font-size-subheading);
 }
 
 .works-mobile-summary {
@@ -657,7 +665,7 @@ a.news-item:hover {
   overflow: hidden;
   margin-bottom: 8px;
   color: var(--text-soft);
-  font-size: 0.78rem;
+  font-size: var(--font-size-sm);
   line-height: 1.65;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 4;
@@ -668,7 +676,7 @@ a.news-item:hover {
   padding-bottom: 1px;
   border-bottom: 1px solid currentColor;
   color: var(--violet-dark);
-  font-size: 0.72rem;
+  font-size: var(--font-size-xs);
 }
 
 .works-mobile-participants {
@@ -685,7 +693,7 @@ a.news-item:hover {
 .works-mobile-members-label {
   padding-top: 5px;
   color: var(--muted);
-  font-size: 0.68rem;
+  font-size: var(--font-size-xs);
   letter-spacing: 0.08em;
 }
 
@@ -730,7 +738,7 @@ a.news-item:hover {
   .nav {
     gap: 22px;
     padding: 12px 16px;
-    font-size: 0.78rem;
+    font-size: var(--font-size-xs);
   }
 
   .nav-home {
@@ -774,7 +782,6 @@ a.news-item:hover {
 
   .nav-home {
     margin-right: 0;
-    font-size: 0.98rem;
   }
 
   .nav-logo {
@@ -795,7 +802,7 @@ a.news-item:hover {
 
   .nav-links a {
     flex: 0 0 auto;
-    font-size: 0.72rem;
+    font-size: var(--font-size-xs);
   }
 
   .section {
@@ -821,16 +828,11 @@ a.news-item:hover {
     padding-bottom: 40px;
   }
 
-  h1 {
-    font-size: 1.8rem;
-    line-height: 1.2;
-  }
-
   .lead,
   #aboutContent,
   #contactContent,
   .bubble-card-text {
-    font-size: 0.95rem;
+    font-size: var(--font-size-body);
     line-height: 1.8;
   }
 
@@ -868,7 +870,7 @@ a.news-item:hover {
     min-height: 36px;
     padding: 6px 10px;
     gap: 7px;
-    font-size: 0.84rem;
+    font-size: var(--font-size-xs);
     color: var(--muted);
   }
 
@@ -896,15 +898,10 @@ a.news-item:hover {
 
 @media (max-width: 520px) {
   body {
+    --font-size-body: 0.9375rem;
+    --font-size-subheading: 1rem;
+    --font-size-heading: 1.5rem;
     line-height: 1.7;
-  }
-
-  h1 {
-    font-size: 2rem;
-  }
-
-  .lead {
-    font-size: 0.96rem;
   }
 
   .work-tile {

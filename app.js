@@ -344,7 +344,7 @@
     textEl.setAttribute("font-weight", fontWeight);
     textEl.setAttribute("fill", fill);
     textEl.setAttribute("text-anchor", anchor);
-    textEl.setAttribute("font-family", "sans-serif");
+    textEl.setAttribute("font-family", "inherit");
 
     if (Array.isArray(lines)) {
       lines.forEach((line, i) => {

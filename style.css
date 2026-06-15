@@ -149,6 +149,14 @@ main {
     #e8faf4;
 }
 
+#works {
+  background: #f4fffb;
+}
+
+#contact {
+  background: #f3f4fc;
+}
+
 .section-heading {
   display: grid;
   grid-template-columns: 48px 1fr;

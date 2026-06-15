@@ -484,13 +484,13 @@ a.news-item:focus-visible {
   padding: 20px 22px;
   background: linear-gradient(
     135deg,
-    rgba(245, 241, 253, 0.66) 0%,
-    rgba(239, 255, 249, 0.62) 100%
+    rgba(235, 229, 250, 0.2) 0%,
+    rgba(224, 250, 240, 0.16) 100%
   );
   border: 0;
   border-radius: 18px;
-  backdrop-filter: blur(20px) saturate(1.08);
-  -webkit-backdrop-filter: blur(20px) saturate(1.08);
+  backdrop-filter: blur(3px) saturate(1.02);
+  -webkit-backdrop-filter: blur(3px) saturate(1.02);
   font-size: var(--font-size-sm);
   line-height: 1.7;
   opacity: 0;

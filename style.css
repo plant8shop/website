@@ -158,6 +158,7 @@ main {
 }
 
 #contact {
+  min-height: calc(100vh - var(--anchor-offset));
   background: linear-gradient(135deg, #f8fbff 0%, #edf0fb 52%, #e4e1f4 100%);
 }
 
@@ -264,6 +265,13 @@ p {
 #memberPage p,
 #workPage p {
   max-width: none;
+}
+
+@media (min-width: 641px) {
+  #aboutContent p {
+    text-align: justify;
+    text-justify: inter-character;
+  }
 }
 
 #aboutContent,
@@ -926,7 +934,7 @@ a.news-item:hover {
   background: var(--mint-soft);
 }
 
-.section-heading[id] {
+.section[id] {
   scroll-margin-top: var(--anchor-offset);
 }
 

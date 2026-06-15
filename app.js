@@ -585,14 +585,13 @@
 
     container.innerHTML = `
       <div class="works-mobile-list">
-        ${data.works.map((work, index) => `
-          <article class="works-mobile-card">
-            <a href="work.html?id=${work.id}" class="works-mobile-thumb">
-              ${work.thumbnail
-                ? `<img src="${work.thumbnail}" alt="${escapeHtml(work.title)}" loading="lazy" decoding="async">`
-                : `<div class="works-mobile-thumb-placeholder"><span>${String(index + 1).padStart(2, "0")}</span></div>`
-              }
-            </a>
+        ${data.works.map(work => `
+          <article class="works-mobile-card${work.thumbnail ? "" : " is-without-image"}">
+            ${work.thumbnail ? `
+              <a href="work.html?id=${work.id}" class="works-mobile-thumb">
+                <img src="${work.thumbnail}" alt="${escapeHtml(work.title)}" loading="lazy" decoding="async">
+              </a>
+            ` : ""}
             <div class="works-mobile-body">
               <div class="works-mobile-period">${escapeHtml(work.period)}</div>
               <h3 class="works-mobile-title">

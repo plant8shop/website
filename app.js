@@ -866,7 +866,33 @@
     });
   }
 
+  function setupHeaderOffset() {
+    const header = $(".site-header");
+    if (!header) return;
+
+    const update = () => {
+      const height = header.getBoundingClientRect().height;
+      document.documentElement.style.setProperty("--anchor-offset", `${height}px`);
+    };
+
+    update();
+
+    if ("ResizeObserver" in window) {
+      new ResizeObserver(update).observe(header);
+    } else {
+      addEventListener("resize", update, { passive: true });
+    }
+
+    if (location.hash) {
+      requestAnimationFrame(() => {
+        update();
+        document.querySelector(location.hash)?.scrollIntoView({ block: "start" });
+      });
+    }
+  }
+
   setupBubbleSystem();
+  setupHeaderOffset();
   setupResponsiveRerender();
 
   if (page === "home") initHome();

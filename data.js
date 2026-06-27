@@ -86,6 +86,16 @@ const SITE_DATA = {
       <section>
         <img src="assets/detail-seisan-display.webp" alt="展覧会「生産」の詳細ビジュアル" loading="lazy" decoding="async">
       </section>
+      <section class="work-photo-grid" aria-label="展示風景">
+        <figure>
+          <img src="assets/production-gallery-01-display.webp" alt="展覧会「生産」の展示風景。会場奥に映像作品と椅子があり、壁面に作品と展示文が配置されている" loading="lazy" decoding="async">
+          <figcaption>展示風景</figcaption>
+        </figure>
+        <figure>
+          <img src="assets/production-gallery-02-display.webp" alt="展覧会「生産」の展示風景。テーブル上の作品と奥の展示台、天井のダクトが見える" loading="lazy" decoding="async">
+          <figcaption>展示風景</figcaption>
+        </figure>
+      </section>
       <section>
         <h4>トークについて</h4>
         <p>

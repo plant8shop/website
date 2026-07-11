@@ -745,6 +745,12 @@ a.news-item:focus-visible {
   border: 1px solid var(--line);
 }
 
+.work-photo-grid--documentary img {
+  aspect-ratio: auto;
+  height: auto;
+  object-fit: contain;
+}
+
 .work-photo-grid figcaption {
   margin-top: 8px;
   color: var(--muted);

@@ -121,6 +121,28 @@ const SITE_DATA = {
           本展では、「生産」という言葉を、効率や成果、価値の創出だけに結びつけるのではなく、生活の中にある発見、判断、変化、保存、感覚の働きとして捉え直しています。それぞれの作品は、異なる素材や方法を用いながら、私たちが日々の中で何を見て、何を見過ごし、どのように世界との関係を作っているのかを問いかけています。
         </p>
       </section>
+      <section class="work-photo-grid work-photo-grid--documentary" aria-label="展示写真">
+        <figure>
+          <img src="assets/ダクト.jpg" alt="展覧会「生産」の作品写真。透明な円形の容器の中に、エスカレーターと植物のコラージュが収められている" loading="lazy" decoding="async">
+          <figcaption>ダクト</figcaption>
+        </figure>
+        <figure>
+          <img src="assets/遠心力.jpg" alt="展覧会「生産」の作品写真。会場内に吊られた細い構造物とフロッタージュ作品が展示されている" loading="lazy" decoding="async">
+          <figcaption>遠心力</figcaption>
+        </figure>
+        <figure>
+          <img src="assets/あの雲 ing.jpg" alt="展覧会「生産」の作品写真。雲の映像が壁面に投影され、右側に作品キャプションが掲示されている" loading="lazy" decoding="async">
+          <figcaption>あの雲 ing</figcaption>
+        </figure>
+        <figure>
+          <img src="assets/生産-加工.jpg" alt="展覧会「生産」の作品写真。ペットボトルを加工した透明な造形がテーブル上に並んでいる" loading="lazy" decoding="async">
+          <figcaption>生産-加工</figcaption>
+        </figure>
+        <figure>
+          <img src="assets/大葉 薬の袋 充電コード ハンカチ.jpg" alt="展覧会「生産」の作品写真。大葉、薬の袋、充電コード、ハンカチを描いた額装作品が壁面に並んでいる" loading="lazy" decoding="async">
+          <figcaption>大葉 薬の袋 充電コード ハンカチ</figcaption>
+        </figure>
+      </section>
       `,
       participantIds: ["aoki", "umeda", "akiyama", "minami"],
       contributions: {

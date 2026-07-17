@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>地図脚本 管理画面</title>
+  <link rel="stylesheet" href="../assets/vendor/leaflet/leaflet.css">
+  <link rel="stylesheet" href="place-fiction-admin.css">
+</head>
+<body>
+  <header class="admin-header">
+    <div><p class="eyebrow">LOCAL EDITOR</p><h1>地図脚本 管理画面</h1></div>
+    <div class="header-actions">
+      <span id="saveState" class="save-state" role="status">読み込み中…</span>
+      <button id="previewButton" class="button button-secondary" type="button">公開ページをプレビュー</button>
+      <button id="saveButton" class="button button-primary" type="button">保存</button>
+      <button id="shutdownButton" class="button button-quiet" type="button">終了</button>
+    </div>
+  </header>
+  <main class="admin-layout">
+    <aside class="spot-sidebar" aria-label="脚本スポット一覧">
+      <div class="sidebar-heading">
+        <div><p class="eyebrow">SPOTS</p><h2>脚本一覧</h2></div>
+        <button id="newButton" class="icon-button" type="button" title="新規作成" aria-label="新しい脚本を作る">＋</button>
+      </div>
+      <div id="spotList" class="spot-list"></div>
+      <div class="list-actions">
+        <button id="duplicateButton" type="button">複製</button>
+        <button id="moveUpButton" type="button">↑ 上へ</button>
+        <button id="moveDownButton" type="button">↓ 下へ</button>
+        <button id="deleteButton" class="danger" type="button">削除</button>
+      </div>
+    </aside>
+    <section class="editor-column">
+      <div class="map-card">
+        <div class="map-card-heading">
+          <div><p class="eyebrow">LOCATION</p><h2>地図を押して位置を決める</h2></div>
+          <p id="mapStatus" class="map-status">地図を読み込み中…</p>
+        </div>
+        <div id="adminMap" class="admin-map" aria-label="スポット位置の編集地図"></div>
+        <p class="map-help">地図をクリックすると選択中の脚本を配置できます。選択中の朱色ピンはドラッグできます。地図が表示できない場合も、緯度・経度の直接入力で編集できます。</p>
+      </div>
+      <form id="spotForm" class="editor-form" novalidate>
+        <div class="form-section-heading">
+          <div><p class="eyebrow">STORY</p><h2 id="formTitle">脚本を編集</h2></div>
+          <label class="status-control"><span>公開状態</span><select id="spotStatus"><option value="draft">下書き</option><option value="published">公開</option></select></label>
+        </div>
+        <div class="form-grid two-columns">
+          <label><span>ID</span><input id="spotId" type="text" readonly><small>画像保存先にも使うため、作成後は変更できません。</small></label>
+          <label><span>日付</span><input id="spotDate" type="text" placeholder="2026.07.12"></label>
+        </div>
+        <label><span>題名</span><input id="spotTitle" type="text" placeholder="脚本の題名"></label>
+        <label><span>概要</span><textarea id="spotSummary" rows="3" placeholder="地図の詳細パネルに表示する短い紹介"></textarea></label>
+        <fieldset class="coordinate-fieldset">
+          <legend>位置</legend>
+          <div class="form-grid coordinate-grid">
+            <label><span>緯度</span><input id="spotLatitude" type="number" min="-90" max="90" step="0.000001" placeholder="位置未設定"></label>
+            <label><span>経度</span><input id="spotLongitude" type="number" min="-180" max="180" step="0.000001" placeholder="位置未設定"></label>
+            <button id="clearCoordinatesButton" class="button button-secondary coordinate-clear" type="button">位置を解除</button>
+          </div>
+          <p id="coordinateState" class="coordinate-state">位置未設定</p>
+        </fieldset>
+        <div class="form-grid two-columns">
+          <label><span>登場人物</span><textarea id="spotCharacters" rows="8" placeholder="人物名 | 説明&#10;人物名 | 説明"></textarea><small>1行に1人。「人物名 | 説明」の形式です。</small></label>
+          <label><span>小道具</span><textarea id="spotProps" rows="8" placeholder="1行に1つ"></textarea><small>1行に1つ入力します。</small></label>
+        </div>
+        <label><span>脚本全文</span><textarea id="spotScript" class="script-textarea" rows="28" placeholder="脚本をプレーンテキストで入力"></textarea><small>改行を保ったまま保存し、公開ページではHTMLとして解釈せず安全に表示します。</small></label>
+        <section class="photo-editor" aria-labelledby="photoHeading">
+          <div class="photo-heading">
+            <div><p class="eyebrow">PHOTOS</p><h2 id="photoHeading">写真</h2></div>
+            <label class="button button-secondary file-button">写真を選ぶ<input id="photoInput" type="file" accept="image/*" multiple></label>
+          </div>
+          <div id="photoDropZone" class="photo-drop-zone" tabindex="0">ここへ画像をドロップ<br><small>最大辺2000pxのWebPに変換して保存します</small></div>
+          <div id="photoUploadState" class="photo-upload-state" role="status"></div>
+          <div id="photoList" class="photo-list"></div>
+        </section>
+      </form>
+    </section>
+  </main>
+  <div id="fatalError" class="fatal-error" hidden>
+    <h2>管理画面を開始できませんでした</h2><p id="fatalErrorMessage"></p><p><code>start-place-fiction-admin.ps1</code> から起動してください。</p>
+  </div>
+  <script src="../assets/vendor/leaflet/leaflet.js"></script>
+  <script src="place-fiction-admin.js"></script>
+</body>
+</html>

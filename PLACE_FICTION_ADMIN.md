@@ -2,10 +2,12 @@
 
 ## 管理画面を開く
 
-Windows PowerShellで `start-place-fiction-admin.ps1` を実行します。
+通常は `管理画面を開く.cmd` をダブルクリックしてください。PowerShellの実行制限を一時的に回避し、ローカル管理サーバーと管理画面を起動します。
+
+コマンドから起動する場合は、Windows PowerShellで `start-place-fiction-admin.ps1` を実行します。
 
 ```powershell
-.\start-place-fiction-admin.ps1
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File ".\start-place-fiction-admin.ps1"
 ```
 
 ローカル専用サーバーが `127.0.0.1:8765` で起動し、管理画面がブラウザで開きます。外部の端末からは接続できません。作業後は管理画面右上の「終了」を押してください。

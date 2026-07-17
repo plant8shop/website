@@ -65,7 +65,24 @@
           <label><span>登場人物</span><textarea id="spotCharacters" rows="8" placeholder="人物名 | 説明&#10;人物名 | 説明"></textarea><small>1行に1人。「人物名 | 説明」の形式です。</small></label>
           <label><span>小道具</span><textarea id="spotProps" rows="8" placeholder="1行に1つ"></textarea><small>1行に1つ入力します。</small></label>
         </div>
-        <label><span>脚本全文</span><textarea id="spotScript" class="script-textarea" rows="28" placeholder="脚本をプレーンテキストで入力"></textarea><small>改行を保ったまま保存し、公開ページではHTMLとして解釈せず安全に表示します。</small></label>
+        <section class="layout-editor" aria-labelledby="layoutHeading">
+          <div class="layout-heading">
+            <div><p class="eyebrow">SCRIPT LAYOUT</p><h2 id="layoutHeading">脚本レイアウト</h2></div>
+            <div class="layout-add-actions">
+              <button id="addSceneBlockButton" type="button">＋ 場面見出し</button>
+              <button id="addTextBlockButton" type="button">＋ 本文</button>
+              <button id="addDialogueBlockButton" type="button">＋ 台詞</button>
+              <button id="addImageBlockButton" type="button">＋ 写真</button>
+              <button id="addEndBlockButton" type="button">＋ 終わり</button>
+            </div>
+          </div>
+          <p class="layout-help">PDFのページ区切りを除いた順番です。本文・台詞・写真を追加し、矢印で並べ替えます。写真は先に下の写真欄へ登録してください。</p>
+          <div id="scriptBlockList" class="script-block-list"></div>
+        </section>
+        <details class="source-script-editor">
+          <summary>検索・予備表示用の脚本全文</summary>
+          <label><span>脚本全文</span><textarea id="spotScript" class="script-textarea" rows="28" placeholder="脚本をプレーンテキストで入力"></textarea><small>公開ページでは上の「脚本レイアウト」が優先されます。レイアウト未設定時のみ、この全文をそのまま表示します。</small></label>
+        </details>
         <section class="photo-editor" aria-labelledby="photoHeading">
           <div class="photo-heading">
             <div><p class="eyebrow">PHOTOS</p><h2 id="photoHeading">写真</h2></div>

@@ -109,6 +109,47 @@
     parent.appendChild(heading);
   }
 
+  function findPhoto(spot, src) {
+    return (spot.photos || []).find(function (photo) { return photo.src === src; }) || null;
+  }
+
+  function appendScriptImage(parent, spot, block) {
+    var photo = findPhoto(spot, block.src);
+    if (!photo) return;
+    var figure = createElement("figure", "script-image");
+    var image = createElement("img");
+    image.src = photo.src;
+    image.alt = photo.alt || "";
+    image.loading = "lazy";
+    image.decoding = "async";
+    figure.appendChild(image);
+    var caption = Object.prototype.hasOwnProperty.call(block, "caption") ? block.caption : photo.caption;
+    if (caption) figure.appendChild(createElement("figcaption", "", caption));
+    parent.appendChild(figure);
+  }
+
+  function renderScriptBlocks(spot) {
+    var documentNode = createElement("div", "script-document");
+    spot.scriptBlocks.forEach(function (block) {
+      if (!block || !block.type) return;
+      if (block.type === "scene") {
+        documentNode.appendChild(createElement("p", "script-scene", block.text || ""));
+      } else if (block.type === "text") {
+        documentNode.appendChild(createElement("div", "script-prose", block.text || ""));
+      } else if (block.type === "dialogue") {
+        var dialogue = createElement("div", "script-dialogue");
+        dialogue.appendChild(createElement("span", "script-speaker", block.speaker || ""));
+        dialogue.appendChild(createElement("p", "script-line", block.text || ""));
+        documentNode.appendChild(dialogue);
+      } else if (block.type === "image") {
+        appendScriptImage(documentNode, spot, block);
+      } else if (block.type === "end") {
+        documentNode.appendChild(createElement("p", "script-end", block.text || "終わり"));
+      }
+    });
+    return documentNode;
+  }
+
   function renderStory(spot) {
     contentNode.replaceChildren();
 
@@ -144,7 +185,9 @@
       contentNode.appendChild(propSection);
     }
 
-    if (Array.isArray(spot.photos) && spot.photos.length) {
+    var hasStructuredScript = Array.isArray(spot.scriptBlocks) && spot.scriptBlocks.length;
+
+    if (!hasStructuredScript && Array.isArray(spot.photos) && spot.photos.length) {
       var photoSection = createElement("section", "story-section");
       appendSectionHeading(photoSection, "場所の写真");
       var grid = createElement("div", "photo-grid");
@@ -165,7 +208,11 @@
 
     var scriptSection = createElement("section", "story-section");
     appendSectionHeading(scriptSection, "脚本");
-    scriptSection.appendChild(createElement("div", "script-text", spot.script || ""));
+    if (hasStructuredScript) {
+      scriptSection.appendChild(renderScriptBlocks(spot));
+    } else {
+      scriptSection.appendChild(createElement("div", "script-text", spot.script || ""));
+    }
     contentNode.appendChild(scriptSection);
   }
 

@@ -123,6 +123,7 @@
     nodes.spotProps.value = (spot.props || []).join("\n");
     nodes.spotScript.value = spot.script || "";
     updateCoordinateState();
+    renderScriptBlocks();
     renderPhotos();
   }
 
@@ -156,14 +157,133 @@
       actions.appendChild(photoAction("↓", "後ろへ移動", function () { movePhoto(index, 1); }, index === spot.photos.length - 1));
       actions.appendChild(photoAction("削除", "写真を一覧から削除", function () {
         if (window.confirm("この写真を脚本のギャラリーから外しますか？\n画像ファイル自体は安全のため残ります。")) {
+          spot.scriptBlocks = (spot.scriptBlocks || []).filter(function (block) { return block.type !== "image" || block.src !== photo.src; });
           spot.photos.splice(index, 1);
           markDirty();
+          renderScriptBlocks();
           renderPhotos();
         }
       }, false, "remove"));
       card.append(image, fields, actions);
       nodes.photoList.appendChild(card);
     });
+  }
+
+  function scriptBlockKind(type) {
+    return { scene: "場面見出し", text: "本文", dialogue: "台詞", image: "写真", end: "終わり" }[type] || type;
+  }
+
+  function scriptBlockLabel(text, control) {
+    var label = document.createElement("label");
+    var span = document.createElement("span");
+    span.textContent = text;
+    label.append(span, control);
+    return label;
+  }
+
+  function scriptTextControl(value, className, onInput, multiline) {
+    var control = multiline ? document.createElement("textarea") : document.createElement("input");
+    if (!multiline) control.type = "text";
+    control.value = value || "";
+    if (className) control.className = className;
+    control.addEventListener("input", function () { onInput(control.value); markDirty(); });
+    return control;
+  }
+
+  function renderScriptBlocks() {
+    var spot = selectedSpot();
+    if (!spot) return;
+    if (!Array.isArray(spot.scriptBlocks)) spot.scriptBlocks = [];
+    nodes.scriptBlockList.replaceChildren();
+    if (!spot.scriptBlocks.length) {
+      var empty = document.createElement("div");
+      empty.className = "script-block-empty";
+      empty.textContent = "レイアウトは未設定です。上のボタンから本文・台詞・写真を追加してください。";
+      nodes.scriptBlockList.appendChild(empty);
+      return;
+    }
+
+    spot.scriptBlocks.forEach(function (block, index) {
+      var card = document.createElement("article");
+      card.className = "script-block-card";
+      var kind = document.createElement("span");
+      kind.className = "script-block-kind";
+      kind.textContent = scriptBlockKind(block.type);
+      var fields = document.createElement("div");
+      fields.className = "script-block-fields";
+
+      if (block.type === "scene") {
+        fields.appendChild(scriptBlockLabel("場面見出し", scriptTextControl(block.text, "scene-input", function (value) { block.text = value; }, false)));
+      } else if (block.type === "text") {
+        fields.appendChild(scriptBlockLabel("ト書き・本文", scriptTextControl(block.text, "", function (value) { block.text = value; }, true)));
+      } else if (block.type === "dialogue") {
+        var dialogueGrid = document.createElement("div");
+        dialogueGrid.className = "dialogue-grid";
+        dialogueGrid.appendChild(scriptBlockLabel("話者", scriptTextControl(block.speaker, "", function (value) { block.speaker = value; }, false)));
+        dialogueGrid.appendChild(scriptBlockLabel("台詞", scriptTextControl(block.text, "", function (value) { block.text = value; }, true)));
+        fields.appendChild(dialogueGrid);
+      } else if (block.type === "image") {
+        var imageLayout = document.createElement("div");
+        imageLayout.className = "script-block-image-preview";
+        var image = document.createElement("img");
+        var currentPhoto = (spot.photos || []).find(function (photo) { return photo.src === block.src; });
+        image.src = currentPhoto ? "../" + currentPhoto.src : "";
+        image.alt = currentPhoto ? currentPhoto.alt || "" : "写真未設定";
+        var imageFields = document.createElement("div");
+        imageFields.className = "script-block-fields";
+        var select = document.createElement("select");
+        (spot.photos || []).forEach(function (photo) {
+          var option = document.createElement("option");
+          option.value = photo.src;
+          option.textContent = photo.caption || photo.alt || photo.src.split("/").pop();
+          option.selected = photo.src === block.src;
+          select.appendChild(option);
+        });
+        select.addEventListener("change", function () { block.src = select.value; markDirty(); renderScriptBlocks(); });
+        imageFields.appendChild(scriptBlockLabel("使用する写真", select));
+        imageFields.appendChild(scriptBlockLabel("この位置でのキャプション（空欄なら表示しない）", scriptTextControl(block.caption, "", function (value) { block.caption = value; }, false)));
+        imageLayout.append(image, imageFields);
+        fields.appendChild(imageLayout);
+      } else if (block.type === "end") {
+        fields.appendChild(scriptBlockLabel("末尾の文字", scriptTextControl(block.text || "終わり", "scene-input", function (value) { block.text = value; }, false)));
+      }
+
+      var actions = document.createElement("div");
+      actions.className = "script-block-actions";
+      actions.appendChild(photoAction("↑", "前へ移動", function () { moveScriptBlock(index, -1); }, index === 0));
+      actions.appendChild(photoAction("↓", "後ろへ移動", function () { moveScriptBlock(index, 1); }, index === spot.scriptBlocks.length - 1));
+      actions.appendChild(photoAction("削除", "ブロックを削除", function () { spot.scriptBlocks.splice(index, 1); markDirty(); renderScriptBlocks(); }, false, "remove"));
+      card.append(kind, fields, actions);
+      nodes.scriptBlockList.appendChild(card);
+    });
+  }
+
+  function addScriptBlock(type) {
+    var spot = selectedSpot();
+    if (!spot) return;
+    if (!Array.isArray(spot.scriptBlocks)) spot.scriptBlocks = [];
+    var block;
+    if (type === "dialogue") block = { type: "dialogue", speaker: "", text: "" };
+    else if (type === "image") {
+      if (!spot.photos || !spot.photos.length) { window.alert("先に写真を追加してください。"); return; }
+      block = { type: "image", src: spot.photos[0].src, caption: "" };
+    } else if (type === "end") block = { type: "end", text: "終わり" };
+    else block = { type: type, text: "" };
+    spot.scriptBlocks.push(block);
+    markDirty();
+    renderScriptBlocks();
+    var cards = nodes.scriptBlockList.querySelectorAll(".script-block-card");
+    if (cards.length) cards[cards.length - 1].scrollIntoView({ behavior: "smooth", block: "center" });
+  }
+
+  function moveScriptBlock(index, offset) {
+    var blocks = selectedSpot().scriptBlocks;
+    var target = index + offset;
+    if (target < 0 || target >= blocks.length) return;
+    var moved = blocks.splice(index, 1)[0];
+    blocks.splice(target, 0, moved);
+    markDirty();
+    renderScriptBlocks();
   }
 
   function photoField(labelText, value, onInput) {
@@ -292,7 +412,7 @@
   function createSpot() {
     syncFormToSpot();
     var id = newId("new-spot");
-    var spot = { id: id, status: "draft", title: "新しい脚本", summary: "", date: "", coordinates: null, characters: [], props: [], script: "", photos: [], order: state.data.spots.length + 1 };
+    var spot = { id: id, status: "draft", title: "新しい脚本", summary: "", date: "", coordinates: null, characters: [], props: [], script: "", scriptBlocks: [], photos: [], order: state.data.spots.length + 1 };
     state.data.spots.push(spot);
     state.selectedId = id;
     markDirty();
@@ -309,6 +429,7 @@
     copy.status = "draft";
     copy.title = original.title + "（複製）";
     copy.photos = [];
+    copy.scriptBlocks = (copy.scriptBlocks || []).filter(function (block) { return block.type !== "image"; });
     copy.order = state.data.spots.length + 1;
     state.data.spots.push(copy);
     state.selectedId = copy.id;
@@ -348,11 +469,18 @@
       if (ids.has(spot.id)) throw new Error("ID「" + spot.id + "」が重複しています。");
       ids.add(spot.id);
       if (spot.coordinates && (!Number.isFinite(spot.coordinates[0]) || !Number.isFinite(spot.coordinates[1]) || spot.coordinates[0] < -90 || spot.coordinates[0] > 90 || spot.coordinates[1] < -180 || spot.coordinates[1] > 180)) throw new Error("「" + spot.title + "」の位置が不正です。");
+      if (!Array.isArray(spot.scriptBlocks)) throw new Error("「" + spot.title + "」の脚本レイアウトが不正です。");
+      var photoPaths = new Set((spot.photos || []).map(function (photo) { return photo.src; }));
+      spot.scriptBlocks.forEach(function (block) {
+        if (!["scene", "text", "dialogue", "image", "end"].includes(block.type)) throw new Error("「" + spot.title + "」に不明な脚本ブロックがあります。");
+        if (block.type === "dialogue" && !String(block.speaker || "").trim()) throw new Error("「" + spot.title + "」の台詞に話者を入力してください。");
+        if (block.type === "image" && !photoPaths.has(block.src)) throw new Error("「" + spot.title + "」の脚本内写真が見つかりません。");
+      });
       if (spot.status === "published") {
         var missing = [];
         if (!spot.title.trim()) missing.push("題名");
         if (!spot.coordinates) missing.push("位置");
-        if (!spot.script.trim()) missing.push("脚本本文");
+        if (!spot.script.trim() && !spot.scriptBlocks.length) missing.push("脚本本文");
         if (missing.length) throw new Error("「" + (spot.title || spot.id) + "」を公開するには" + missing.join("・") + "が必要です。");
       }
     }
@@ -424,7 +552,7 @@
         var result = await response.json();
         if (!response.ok || !result.ok) throw new Error(result.error || "画像を保存できませんでした。");
         spot.photos.push({ src: result.src, alt: "", caption: "" });
-        markDirty(); renderPhotos();
+        markDirty(); renderPhotos(); renderScriptBlocks();
       }
       nodes.photoUploadState.textContent = "写真を追加しました。代替テキストを入力して「保存」を押してください。";
     } catch (error) {
@@ -475,6 +603,11 @@
     nodes.clearCoordinatesButton.addEventListener("click", function () {
       selectedSpot().coordinates = null; nodes.spotLatitude.value = ""; nodes.spotLongitude.value = ""; updateCoordinateState(); renderMarkers(); renderSpotList(); markDirty();
     });
+    nodes.addSceneBlockButton.addEventListener("click", function () { addScriptBlock("scene"); });
+    nodes.addTextBlockButton.addEventListener("click", function () { addScriptBlock("text"); });
+    nodes.addDialogueBlockButton.addEventListener("click", function () { addScriptBlock("dialogue"); });
+    nodes.addImageBlockButton.addEventListener("click", function () { addScriptBlock("image"); });
+    nodes.addEndBlockButton.addEventListener("click", function () { addScriptBlock("end"); });
     fieldIds.forEach(function (id) {
       if (id === "spotLatitude" || id === "spotLongitude") return;
       nodes[id].addEventListener("input", function () {
@@ -494,7 +627,7 @@
   }
 
   async function init() {
-    ["saveState", "previewButton", "saveButton", "shutdownButton", "newButton", "duplicateButton", "moveUpButton", "moveDownButton", "deleteButton", "spotList", "spotForm", "formTitle", "spotId", "spotStatus", "spotDate", "spotTitle", "spotSummary", "spotLatitude", "spotLongitude", "coordinateState", "clearCoordinatesButton", "spotCharacters", "spotProps", "spotScript", "photoInput", "photoDropZone", "photoUploadState", "photoList", "mapStatus", "fatalError", "fatalErrorMessage"].forEach(function (id) { nodes[id] = byId(id); });
+    ["saveState", "previewButton", "saveButton", "shutdownButton", "newButton", "duplicateButton", "moveUpButton", "moveDownButton", "deleteButton", "spotList", "spotForm", "formTitle", "spotId", "spotStatus", "spotDate", "spotTitle", "spotSummary", "spotLatitude", "spotLongitude", "coordinateState", "clearCoordinatesButton", "spotCharacters", "spotProps", "spotScript", "addSceneBlockButton", "addTextBlockButton", "addDialogueBlockButton", "addImageBlockButton", "addEndBlockButton", "scriptBlockList", "photoInput", "photoDropZone", "photoUploadState", "photoList", "mapStatus", "fatalError", "fatalErrorMessage"].forEach(function (id) { nodes[id] = byId(id); });
     try {
       var response = await fetch("/api/place-fiction", { cache: "no-store" });
       var result = await response.json();

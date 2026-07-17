@@ -120,6 +120,7 @@ def validate_document(document: Any) -> dict[str, Any]:
         photos = spot.get("photos")
         if not isinstance(photos, list):
             raise ValidationError(f"{spot_id} の写真は配列にしてください。")
+        photo_paths: set[str] = set()
         for photo in photos:
             if not isinstance(photo, dict):
                 raise ValidationError(f"{spot_id} の写真情報が不正です。")
@@ -127,11 +128,32 @@ def validate_document(document: Any) -> dict[str, Any]:
             require_string(photo.get("alt"), f"{spot_id}の写真代替テキスト")
             require_string(photo.get("caption"), f"{spot_id}の写真キャプション")
             validate_photo_path(src, spot_id)
+            photo_paths.add(src)
+        script_blocks = spot.get("scriptBlocks", [])
+        if not isinstance(script_blocks, list):
+            raise ValidationError(f"{spot_id} の脚本レイアウトは配列にしてください。")
+        for block_index, block in enumerate(script_blocks):
+            block_label = f"{spot_id}の脚本レイアウト{block_index + 1}"
+            if not isinstance(block, dict):
+                raise ValidationError(f"{block_label} の形式が不正です。")
+            block_type = block.get("type")
+            if block_type not in {"scene", "text", "dialogue", "image", "end"}:
+                raise ValidationError(f"{block_label} の種類が不正です。")
+            if block_type in {"scene", "text", "end"}:
+                require_string(block.get("text"), f"{block_label}の本文")
+            elif block_type == "dialogue":
+                require_string(block.get("speaker"), f"{block_label}の話者", False)
+                require_string(block.get("text"), f"{block_label}の台詞")
+            elif block_type == "image":
+                block_src = require_string(block.get("src"), f"{block_label}の写真", False)
+                require_string(block.get("caption", ""), f"{block_label}のキャプション")
+                if block_src not in photo_paths:
+                    raise ValidationError(f"{block_label} が未登録の写真を参照しています。")
         if status == "published":
             missing = []
             if not title.strip(): missing.append("題名")
             if spot.get("coordinates") is None: missing.append("位置")
-            if not script.strip(): missing.append("脚本本文")
+            if not script.strip() and not script_blocks: missing.append("脚本本文")
             if missing:
                 raise ValidationError(f"{spot_id} を公開するには {'、'.join(missing)} が必要です。")
     return document

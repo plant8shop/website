@@ -384,6 +384,70 @@ select {
   overflow-wrap: anywhere;
 }
 
+.script-document {
+  display: grid;
+  gap: 0;
+  font-family: var(--font-sans);
+  font-size: 0.92rem;
+  line-height: 1.95;
+}
+
+.script-scene {
+  margin: 0 0 22px;
+  font-weight: 700;
+  letter-spacing: 0.035em;
+}
+
+.script-prose {
+  margin: 0 0 26px;
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}
+
+.script-dialogue {
+  display: grid;
+  grid-template-columns: 7.6em minmax(0, 1fr);
+  gap: 15px;
+  width: min(88%, 500px);
+  margin: 0 auto 15px;
+  align-items: baseline;
+}
+
+.script-speaker {
+  font-size: 0.84rem;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.script-line {
+  margin: 0;
+}
+
+.script-image {
+  width: min(100%, 620px);
+  margin: 6px auto 28px;
+}
+
+.script-image img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 0;
+  background: #fff;
+  box-shadow: none;
+}
+
+.script-image figcaption {
+  margin-top: 7px;
+  color: var(--ink-soft);
+  font-size: 0.7rem;
+  line-height: 1.55;
+}
+
+.script-end {
+  margin: 12px 0 0;
+}
+
 .panel-scrim {
   position: absolute;
   z-index: 700;
@@ -453,6 +517,12 @@ select {
   .character-list div {
     grid-template-columns: 1fr;
     gap: 4px;
+  }
+
+  .script-dialogue {
+    grid-template-columns: 6.3em minmax(0, 1fr);
+    gap: 10px;
+    width: 100%;
   }
 }
 

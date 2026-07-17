@@ -184,10 +184,48 @@
   function scriptTextControl(value, className, onInput, multiline) {
     var control = multiline ? document.createElement("textarea") : document.createElement("input");
     if (!multiline) control.type = "text";
+    if (multiline) control.rows = 2;
     control.value = value || "";
     if (className) control.className = className;
     control.addEventListener("input", function () { onInput(control.value); markDirty(); });
     return control;
+  }
+
+  function renderActorPicker(spot, block) {
+    if (!Array.isArray(block.actors)) block.actors = [];
+    var fieldset = document.createElement("fieldset");
+    fieldset.className = "script-block-actors";
+    var legend = document.createElement("legend");
+    legend.textContent = "この段落で動く／話す人";
+    fieldset.appendChild(legend);
+    var choices = document.createElement("div");
+    choices.className = "script-actor-choices";
+    if (!(spot.characters || []).length) {
+      var empty = document.createElement("span");
+      empty.className = "script-actor-empty";
+      empty.textContent = "先に上の「登場人物」を登録してください。";
+      choices.appendChild(empty);
+    }
+    (spot.characters || []).forEach(function (character) {
+      var label = document.createElement("label");
+      var checkbox = document.createElement("input");
+      checkbox.type = "checkbox";
+      checkbox.checked = block.actors.includes(character.name);
+      checkbox.addEventListener("change", function () {
+        if (checkbox.checked) {
+          if (!block.actors.includes(character.name)) block.actors.push(character.name);
+        } else {
+          block.actors = block.actors.filter(function (name) { return name !== character.name; });
+        }
+        markDirty();
+      });
+      var text = document.createElement("span");
+      text.textContent = character.name;
+      label.append(checkbox, text);
+      choices.appendChild(label);
+    });
+    fieldset.appendChild(choices);
+    return fieldset;
   }
 
   function renderScriptBlocks() {
@@ -211,6 +249,7 @@
       kind.textContent = scriptBlockKind(block.type);
       var fields = document.createElement("div");
       fields.className = "script-block-fields";
+      fields.appendChild(renderActorPicker(spot, block));
 
       if (block.type === "scene") {
         fields.appendChild(scriptBlockLabel("場面見出し", scriptTextControl(block.text, "scene-input", function (value) { block.text = value; }, false)));
@@ -263,12 +302,12 @@
     if (!spot) return;
     if (!Array.isArray(spot.scriptBlocks)) spot.scriptBlocks = [];
     var block;
-    if (type === "dialogue") block = { type: "dialogue", speaker: "", text: "" };
+    if (type === "dialogue") block = { type: "dialogue", speaker: "", text: "", actors: [] };
     else if (type === "image") {
       if (!spot.photos || !spot.photos.length) { window.alert("先に写真を追加してください。"); return; }
-      block = { type: "image", src: spot.photos[0].src, caption: "" };
-    } else if (type === "end") block = { type: "end", text: "終わり" };
-    else block = { type: type, text: "" };
+      block = { type: "image", src: spot.photos[0].src, caption: "", actors: [] };
+    } else if (type === "end") block = { type: "end", text: "終わり", actors: [] };
+    else block = { type: type, text: "", actors: [] };
     spot.scriptBlocks.push(block);
     markDirty();
     renderScriptBlocks();
@@ -614,7 +653,10 @@
         syncFormToSpot(); markDirty();
         if (id === "spotTitle" || id === "spotStatus") { renderSpotList(); nodes.formTitle.textContent = (selectedSpot().title || "名称未設定") + "を編集"; }
       });
-      nodes[id].addEventListener("change", function () { syncFormToSpot(); markDirty(); renderSpotList(); });
+      nodes[id].addEventListener("change", function () {
+        syncFormToSpot(); markDirty(); renderSpotList();
+        if (id === "spotCharacters") renderScriptBlocks();
+      });
     });
     nodes.spotLatitude.addEventListener("change", handleCoordinateInput);
     nodes.spotLongitude.addEventListener("change", handleCoordinateInput);

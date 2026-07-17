@@ -13,6 +13,7 @@
   var markerById = {};
   var activeSpotId = null;
   var lastTrigger = null;
+  var ROLE_COLORS = ["#b84632", "#2f6f8f", "#477a51", "#8a5a9e", "#a66a20", "#5f5a93"];
 
   function createElement(tag, className, text) {
     var node = document.createElement(tag);
@@ -128,24 +129,71 @@
     parent.appendChild(figure);
   }
 
+  function roleColor(spot, actor) {
+    var index = (spot.characters || []).findIndex(function (character) {
+      return character.name === actor;
+    });
+    return ROLE_COLORS[(index < 0 ? 0 : index) % ROLE_COLORS.length];
+  }
+
+  function createRoleBadge(spot, actor) {
+    var badge = createElement("span", "script-role-badge", actor);
+    badge.style.setProperty("--role-color", roleColor(spot, actor));
+    return badge;
+  }
+
+  function blockActors(spot, block) {
+    var knownNames = (spot.characters || []).map(function (character) { return character.name; });
+    var actors = Array.isArray(block.actors) ? block.actors : [];
+    if (!actors.length && block.type === "dialogue" && knownNames.includes(block.speaker)) {
+      actors = [block.speaker];
+    }
+    return actors.filter(function (actor, index) {
+      return knownNames.includes(actor) && actors.indexOf(actor) === index;
+    });
+  }
+
+  function appendRoleLegend(parent, spot) {
+    if (!Array.isArray(spot.characters) || !spot.characters.length) return;
+    var legend = createElement("div", "script-role-legend");
+    legend.appendChild(createElement("p", "script-role-legend-title", "役の色（段落で動く／話す人）"));
+    var badges = createElement("div", "script-role-badges");
+    spot.characters.forEach(function (character) {
+      badges.appendChild(createRoleBadge(spot, character.name));
+    });
+    legend.appendChild(badges);
+    parent.appendChild(legend);
+  }
+
   function renderScriptBlocks(spot) {
     var documentNode = createElement("div", "script-document");
     spot.scriptBlocks.forEach(function (block) {
       if (!block || !block.type) return;
+      var beat = createElement("article", "script-beat script-beat-" + block.type);
+      var actors = blockActors(spot, block);
+      if (actors.length) {
+        beat.classList.add("has-actors");
+        beat.style.setProperty("--role-color", roleColor(spot, actors[0]));
+        var actorRow = createElement("div", "script-beat-actors");
+        actorRow.setAttribute("aria-label", "この段落で動く、または話す人");
+        actors.forEach(function (actor) { actorRow.appendChild(createRoleBadge(spot, actor)); });
+        beat.appendChild(actorRow);
+      }
       if (block.type === "scene") {
-        documentNode.appendChild(createElement("p", "script-scene", block.text || ""));
+        beat.appendChild(createElement("p", "script-scene", block.text || ""));
       } else if (block.type === "text") {
-        documentNode.appendChild(createElement("div", "script-prose", block.text || ""));
+        beat.appendChild(createElement("div", "script-prose", block.text || ""));
       } else if (block.type === "dialogue") {
         var dialogue = createElement("div", "script-dialogue");
         dialogue.appendChild(createElement("span", "script-speaker", block.speaker || ""));
         dialogue.appendChild(createElement("p", "script-line", block.text || ""));
-        documentNode.appendChild(dialogue);
+        beat.appendChild(dialogue);
       } else if (block.type === "image") {
-        appendScriptImage(documentNode, spot, block);
+        appendScriptImage(beat, spot, block);
       } else if (block.type === "end") {
-        documentNode.appendChild(createElement("p", "script-end", block.text || "終わり"));
+        beat.appendChild(createElement("p", "script-end", block.text || "終わり"));
       }
+      documentNode.appendChild(beat);
     });
     return documentNode;
   }
@@ -209,6 +257,7 @@
     var scriptSection = createElement("section", "story-section");
     appendSectionHeading(scriptSection, "脚本");
     if (hasStructuredScript) {
+      appendRoleLegend(scriptSection, spot);
       scriptSection.appendChild(renderScriptBlocks(spot));
     } else {
       scriptSection.appendChild(createElement("div", "script-text", spot.script || ""));

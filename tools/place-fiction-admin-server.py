@@ -109,10 +109,14 @@ def validate_document(document: Any) -> dict[str, Any]:
         characters = spot.get("characters")
         if not isinstance(characters, list):
             raise ValidationError(f"{spot_id} の登場人物は配列にしてください。")
+        character_names: set[str] = set()
         for character in characters:
             if not isinstance(character, dict):
                 raise ValidationError(f"{spot_id} の登場人物の形式が不正です。")
-            require_string(character.get("name"), f"{spot_id}の人物名", False)
+            character_name = require_string(character.get("name"), f"{spot_id}の人物名", False)
+            if character_name in character_names:
+                raise ValidationError(f"{spot_id} の人物名 {character_name} が重複しています。")
+            character_names.add(character_name)
             require_string(character.get("description"), f"{spot_id}の人物説明")
         props = spot.get("props")
         if not isinstance(props, list) or any(not isinstance(item, str) for item in props):
@@ -139,6 +143,14 @@ def validate_document(document: Any) -> dict[str, Any]:
             block_type = block.get("type")
             if block_type not in {"scene", "text", "dialogue", "image", "end"}:
                 raise ValidationError(f"{block_label} の種類が不正です。")
+            actors = block.get("actors", [])
+            if not isinstance(actors, list) or any(not isinstance(actor, str) for actor in actors):
+                raise ValidationError(f"{block_label} の担当役は文字列の配列にしてください。")
+            if len(actors) != len(set(actors)):
+                raise ValidationError(f"{block_label} の担当役が重複しています。")
+            unknown_actors = [actor for actor in actors if actor not in character_names]
+            if unknown_actors:
+                raise ValidationError(f"{block_label} に未登録の担当役（{unknown_actors[0]}）があります。")
             if block_type in {"scene", "text", "end"}:
                 require_string(block.get("text"), f"{block_label}の本文")
             elif block_type == "dialogue":

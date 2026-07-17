@@ -386,10 +386,69 @@ select {
 
 .script-document {
   display: grid;
-  gap: 0;
+  gap: 8px;
   font-family: var(--font-sans);
   font-size: 0.92rem;
   line-height: 1.95;
+}
+
+.script-role-legend {
+  margin: 0 0 26px;
+  padding: 13px 15px 14px;
+  border: 1px dashed var(--line);
+  background: rgba(255, 252, 243, 0.6);
+}
+
+.script-role-legend-title {
+  margin: 0 0 9px;
+  color: var(--ink-soft);
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.script-role-badges,
+.script-beat-actors {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.script-role-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 8px 3px 6px;
+  border: 1px solid color-mix(in srgb, var(--role-color) 65%, transparent);
+  border-radius: 999px;
+  color: var(--ink);
+  background: color-mix(in srgb, var(--role-color) 13%, #fffdf7);
+  font-size: 0.69rem;
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+.script-role-badge::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: var(--role-color);
+}
+
+.script-beat {
+  min-width: 0;
+}
+
+.script-beat.has-actors {
+  margin-bottom: 8px;
+  padding: 9px 12px 11px 14px;
+  border-left: 4px solid var(--role-color);
+  background: linear-gradient(90deg, color-mix(in srgb, var(--role-color) 9%, transparent), transparent 75%);
+}
+
+.script-beat-actors {
+  margin-bottom: 7px;
 }
 
 .script-scene {
@@ -399,7 +458,7 @@ select {
 }
 
 .script-prose {
-  margin: 0 0 26px;
+  margin: 0;
   white-space: pre-line;
   overflow-wrap: anywhere;
 }
@@ -409,7 +468,7 @@ select {
   grid-template-columns: 7.6em minmax(0, 1fr);
   gap: 15px;
   width: min(88%, 500px);
-  margin: 0 auto 15px;
+  margin: 0 auto;
   align-items: baseline;
 }
 
@@ -426,6 +485,10 @@ select {
 .script-image {
   width: min(100%, 620px);
   margin: 6px auto 28px;
+}
+
+.script-beat-image {
+  margin-block: 0 12px;
 }
 
 .script-image img {

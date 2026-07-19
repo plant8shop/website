@@ -981,11 +981,14 @@
     },
     {
       "id": "wind-passage",
-      "status": "draft",
+      "status": "published",
       "title": "風の通る道",
       "summary": "街区の内側の路地で眠る二人と、段ボールを捨てに来たスーパーの人が、行き止まりの向こうをめぐって話す。",
       "date": "2026.07.19 更新",
-      "coordinates": null,
+      "coordinates": [
+        35.041478,
+        135.747859
+      ],
       "characters": [
         {
           "name": "スーパーの人",
@@ -1459,11 +1462,14 @@
     },
     {
       "id": "descending-things",
-      "status": "draft",
+      "status": "published",
       "title": "降りてくるもの",
       "summary": "船岡山の麓の三角形の公園で、白い足跡の上に立つ二人が、石を持って山から降りてくる無言の人々を見送る。",
       "date": "2026.07.19 更新",
-      "coordinates": null,
+      "coordinates": [
+        35.039642,
+        135.743428
+      ],
       "characters": [
         {
           "name": "通行人",

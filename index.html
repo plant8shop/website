@@ -38,7 +38,7 @@
       </a>
       <div class="nav-links">
         <a href="#about">概要</a>
-        <a href="#news">最新情報</a>
+        <a href="#announcements">告知</a>
         <a href="#works">活動・参加者</a>
         <a href="#contact">連絡先</a>
       </div>
@@ -74,11 +74,11 @@
       </div>
     </section>
 
-    <section id="news" class="section news-section">
+    <section id="announcements" class="section news-section">
       <div class="section-inner">
         <div class="section-heading">
           <span class="section-index">02</span>
-          <h2>最新情報</h2>
+          <h2>告知</h2>
         </div>
         <div class="news-column">
           <div class="news-actions">
@@ -95,7 +95,25 @@
               rel="noopener noreferrer"
             >Instagram</a>
           </div>
-          <div id="newsList" class="news-list"></div>
+          <div class="announcement-tabs" role="tablist" aria-label="告知の表示切り替え">
+            <button
+              class="announcement-tab is-active"
+              type="button"
+              role="tab"
+              aria-selected="true"
+              aria-controls="newsList"
+              data-announcement-status="latest"
+            >最新</button>
+            <button
+              class="announcement-tab"
+              type="button"
+              role="tab"
+              aria-selected="false"
+              aria-controls="newsList"
+              data-announcement-status="done"
+            >済み</button>
+          </div>
+          <div id="newsList" class="news-list" role="tabpanel" aria-live="polite"></div>
         </div>
       </div>
     </section>
@@ -121,7 +139,12 @@
     </section>
   </main>
 
-  <div id="tooltip" class="tooltip" hidden></div>
+  <div id="tooltip" class="dialog-backdrop" hidden>
+    <div class="tooltip" role="dialog" aria-modal="true" aria-labelledby="dialogTitle" tabindex="-1">
+      <button class="dialog-close" type="button" aria-label="説明を閉じる">×</button>
+      <div id="dialogContent" class="dialog-content"></div>
+    </div>
+  </div>
 
   <script src="data.js"></script>
   <script src="app.js"></script>

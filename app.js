@@ -23,8 +23,13 @@
 
   const membersById = Object.fromEntries(data.members.map(m => [m.id, m]));
   const worksById = Object.fromEntries(data.works.map(w => [w.id, w]));
+  const announcementsById = Object.fromEntries(
+    (data.site.announcements || []).map(item => [item.id, item])
+  );
 
   let activeBubbleTrigger = null;
+  let closeDialogTimer = null;
+  let announcementStatus = "latest";
   let lastIsMobile = window.innerWidth <= MOBILE_BREAKPOINT;
 
   function el(tag, className = "", html = "") {
@@ -84,11 +89,10 @@
       <div class="bubble-card">
         <div class="bubble-card-head">
           <div>
-            <div class="bubble-card-name">${escapeHtml(memberName)}</div>
+            <div class="bubble-card-name" id="dialogTitle">${escapeHtml(memberName)}</div>
           </div>
         </div>
         <div class="bubble-card-text">${escapeHtml(contribution || "記述なし")}</div>
-        <div class="bubble-card-action">もう一度押すと参加者ページへ移動します</div>
       </div>
     `;
   }
@@ -98,18 +102,36 @@
       <div class="bubble-card">
         <div class="bubble-card-head">
           <div>
-            <div class="bubble-card-name">${escapeHtml(work.title)}</div>
+            <div class="bubble-card-name" id="dialogTitle">${escapeHtml(work.title)}</div>
             <div class="bubble-card-meta">${escapeHtml(work.period)}</div>
           </div>
         </div>
         <div class="bubble-card-text">${escapeHtml(work.summary)}</div>
-        <div class="bubble-card-action">もう一度押すと活動ページへ移動します</div>
       </div>
     `;
   }
 
-  function getTooltip() {
+  function announcementBubbleHtml(item) {
+    return `
+      <div class="bubble-card">
+        <div class="bubble-card-head">
+          <span class="status-indicator status-indicator--${escapeHtml(item.status)}" aria-hidden="true"></span>
+          <div>
+            <div class="bubble-card-name" id="dialogTitle">${escapeHtml(item.title)}</div>
+            <div class="bubble-card-meta">${escapeHtml(item.date)} · ${item.status === "done" ? "済み" : "最新"}</div>
+          </div>
+        </div>
+        <div class="bubble-card-text">${escapeHtml(item.summary)}</div>
+      </div>
+    `;
+  }
+
+  function getDialogBackdrop() {
     return $("#tooltip");
+  }
+
+  function getDialog() {
+    return $(".tooltip", getDialogBackdrop());
   }
 
   function clearActiveBubbleTrigger() {
@@ -120,29 +142,40 @@
   }
 
   function hideBubble() {
-    const tip = getTooltip();
-    if (!tip) return;
+    const backdrop = getDialogBackdrop();
+    if (!backdrop || backdrop.hidden) return;
+    const returnFocus = activeBubbleTrigger;
 
-    tip.classList.remove("is-visible", "is-left", "is-right");
-    tip.hidden = true;
-    tip.innerHTML = "";
-    tip.style.left = "";
-    tip.style.top = "";
-    tip.style.right = "";
-    tip.style.bottom = "";
+    backdrop.classList.remove("is-visible");
+    document.body.classList.remove("dialog-open");
+
+    clearTimeout(closeDialogTimer);
+    closeDialogTimer = setTimeout(() => {
+      backdrop.hidden = true;
+      const content = $("#dialogContent", backdrop);
+      if (content) content.innerHTML = "";
+    }, 180);
 
     clearActiveBubbleTrigger();
+
+    if (returnFocus?.isConnected) returnFocus.focus();
   }
 
-  function showBubbleAtRect(html, rect, trigger = null) {
-    const tip = getTooltip();
-    if (!tip || !html) return;
+  function showBubble(html, trigger = null, href = "") {
+    const backdrop = getDialogBackdrop();
+    const dialog = getDialog();
+    const content = $("#dialogContent", backdrop);
+    if (!backdrop || !dialog || !content || !html) return;
 
+    clearTimeout(closeDialogTimer);
     clearActiveBubbleTrigger();
 
-    tip.innerHTML = html;
-    tip.hidden = false;
-    tip.classList.add("is-bubble");
+    content.innerHTML = `
+      ${html}
+      ${href ? `<a class="dialog-detail-link" href="${escapeHtml(href)}">詳細を見る</a>` : ""}
+    `;
+    backdrop.hidden = false;
+    document.body.classList.add("dialog-open");
 
     if (trigger) {
       activeBubbleTrigger = trigger;
@@ -150,92 +183,64 @@
       trigger.setAttribute("data-bubble-open", "1");
     }
 
-    tip.style.left = "";
-    tip.style.top = "";
-    tip.style.right = "";
-    tip.style.bottom = "";
-    tip.classList.remove("is-left", "is-right");
-
     requestAnimationFrame(() => {
-      tip.classList.add("is-visible");
+      backdrop.classList.add("is-visible");
+      $(".dialog-close", backdrop)?.focus();
     });
   }
 
-  function showBubbleAtEvent(html, event, trigger = null) {
-    const x = event.clientX;
-    const y = event.clientY;
-    showBubbleAtRect(html, {
-      left: x,
-      right: x,
-      top: y,
-      bottom: y,
-      width: 0,
-      height: 0
-    }, trigger);
-  }
-
-  function attachInfoBubble(node, html, isLink = false) {
+  function attachDialogNavigation(node, html, href = "", options = {}) {
+    const { ignoreNestedLinks = false } = options;
     node.classList.add("bubble-trigger");
     node.setAttribute("tabindex", node.getAttribute("tabindex") || "0");
 
-    node.addEventListener("click", event => {
-      const isOpen = node.getAttribute("data-bubble-open") === "1";
+    const activate = event => {
+      const nestedLink = event.target.closest?.("a");
+      if (ignoreNestedLinks && nestedLink && nestedLink !== node) return;
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      showBubble(html, node, href);
+    };
 
-      if (isLink && !isOpen) event.preventDefault();
-      event.stopPropagation();
-
-      if (isLink && isOpen) {
-        hideBubble();
-        return;
-      }
-
-      if (isLink) {
-        showBubbleAtEvent(html, event, node);
-        return;
-      }
-
-      showBubbleAtRect(html, node.getBoundingClientRect(), node);
-    });
-
+    node.addEventListener("click", activate);
     node.addEventListener("keydown", event => {
       if (event.key !== "Enter" && event.key !== " ") return;
-
-      const isOpen = node.getAttribute("data-bubble-open") === "1";
-      event.preventDefault();
-      event.stopPropagation();
-
-      if (isLink && isOpen && node.href) {
-        location.href = node.href;
-        return;
-      }
-
-      showBubbleAtRect(html, node.getBoundingClientRect(), node);
+      activate(event);
     });
   }
 
   function setupBubbleSystem() {
-    const tip = getTooltip();
-    if (!tip) return;
+    const backdrop = getDialogBackdrop();
+    const dialog = getDialog();
+    if (!backdrop || !dialog) return;
 
-    tip.addEventListener("click", event => event.stopPropagation());
-
-    document.addEventListener("click", event => {
-      const target = event.target;
-      if (!target.closest(".bubble-trigger") && !target.closest("#tooltip")) {
-        hideBubble();
-      }
+    $(".dialog-close", backdrop)?.addEventListener("click", hideBubble);
+    backdrop.addEventListener("click", event => {
+      if (event.target === backdrop) hideBubble();
     });
 
     document.addEventListener("keydown", event => {
-      if (event.key === "Escape") hideBubble();
-    });
+      if (backdrop.hidden) return;
+      if (event.key === "Escape") {
+        hideBubble();
+        return;
+      }
+      if (event.key !== "Tab") return;
 
-    addEventListener("scroll", () => {
-      if (!tip.hidden) hideBubble();
-    }, { passive: true });
+      const focusable = [...dialog.querySelectorAll(
+        'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])'
+      )];
+      if (!focusable.length) return;
 
-    addEventListener("resize", () => {
-      if (!tip.hidden) hideBubble();
+      const first = focusable[0];
+      const last = focusable.at(-1);
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
     });
   }
 
@@ -246,60 +251,58 @@
     about.innerHTML = data.site.about;
   }
 
-  function attachTwoStepNavigation(node, html, href, options = {}) {
-    const { ignoreNestedLinks = false } = options;
-    node.classList.add("bubble-trigger");
-    node.setAttribute("tabindex", node.getAttribute("tabindex") || "0");
-
-    const activate = event => {
-      const nestedLink = event.target.closest?.("a");
-      if (ignoreNestedLinks && nestedLink && nestedLink !== node) return;
-
-      const isOpen = node.getAttribute("data-bubble-open") === "1";
-      event.preventDefault();
-      event.stopImmediatePropagation();
-
-      if (isOpen) {
-        location.href = href;
-        return;
-      }
-
-      showBubbleAtRect(html, node.getBoundingClientRect(), node);
-    };
-
-    node.addEventListener("click", activate);
-    node.addEventListener("keydown", event => {
-      if (event.key !== "Enter" && event.key !== " ") return;
-      activate(event);
-    });
-  }
-
-  function renderNews() {
+  function renderAnnouncements() {
     const wrap = $("#newsList");
     if (!wrap) return;
 
-    const news = [...(data.site.news || [])]
+    const announcements = [...(data.site.announcements || [])]
+      .filter(item => item.status === announcementStatus)
       .sort((a, b) => String(b.date).localeCompare(String(a.date)));
 
-    if (!news.length) {
-      wrap.innerHTML = `<p class="news-empty">現在、お知らせはありません。</p>`;
+    if (!announcements.length) {
+      wrap.innerHTML = `<p class="news-empty">${announcementStatus === "latest" ? "現在、新しい告知はありません。" : "済みの告知はありません。"}</p>`;
       return;
     }
 
-    wrap.innerHTML = news.map(item => {
-      const content = `
+    wrap.innerHTML = announcements.map(item => `
+      <article
+        class="news-item announcement-item"
+        tabindex="0"
+        role="button"
+        data-announcement-id="${escapeHtml(item.id)}"
+        aria-label="${escapeHtml(item.title)}の概要を見る"
+      >
         <time class="news-date" datetime="${escapeHtml(item.date.replaceAll(".", "-"))}">
           ${escapeHtml(item.date)}
         </time>
         <h3 class="news-title">${escapeHtml(item.title)}</h3>
-        <p class="news-body">${escapeHtml(item.body)}</p>
-        ${item.url ? `<span class="news-more">詳しく見る</span>` : ""}
-      `;
+        <p class="news-body">${escapeHtml(item.summary)}</p>
+        <span class="news-more">概要を見る</span>
+      </article>
+    `).join("");
 
-      return item.url
-        ? `<a class="news-item" href="${escapeHtml(item.url)}">${content}</a>`
-        : `<article class="news-item">${content}</article>`;
-    }).join("");
+    wrap.querySelectorAll(".announcement-item").forEach(itemNode => {
+      const item = announcementsById[itemNode.dataset.announcementId];
+      attachDialogNavigation(
+        itemNode,
+        announcementBubbleHtml(item),
+        `announcement.html?id=${item.id}`
+      );
+    });
+  }
+
+  function setupAnnouncementTabs() {
+    document.querySelectorAll("[data-announcement-status]").forEach(button => {
+      button.addEventListener("click", () => {
+        announcementStatus = button.dataset.announcementStatus;
+        document.querySelectorAll("[data-announcement-status]").forEach(tab => {
+          const isActive = tab === button;
+          tab.classList.toggle("is-active", isActive);
+          tab.setAttribute("aria-selected", String(isActive));
+        });
+        renderAnnouncements();
+      });
+    });
   }
 
   function renderContact() {
@@ -454,7 +457,7 @@
         class: "graph-work-overlay"
       }));
 
-      attachTwoStepNavigation(link, workBubbleHtml(work), `work.html?id=${work.id}`);
+      attachDialogNavigation(link, workBubbleHtml(work), `work.html?id=${work.id}`);
 
       svg.appendChild(link);
 
@@ -548,7 +551,7 @@
           class: "graph-node-button bubble-trigger",
           tabindex: "0",
           role: "link",
-          "aria-label": `${member.name}が${work.title}でやった内容を表示。もう一度押すと参加者ページへ移動`
+          "aria-label": `${member.name}が${work.title}で担当した内容を見る`
         });
 
         group.appendChild(svgEl("circle", {
@@ -567,7 +570,7 @@
           "stroke-width": "1.2"
         }));
 
-        attachTwoStepNavigation(group, html, `member.html?id=${member.id}`);
+        attachDialogNavigation(group, html, `member.html?id=${member.id}`);
 
         svg.appendChild(group);
       });
@@ -628,7 +631,7 @@
     container.querySelectorAll(".works-mobile-card").forEach(card => {
       const workId = new URL(card.dataset.href, location.href).searchParams.get("id");
       const work = worksById[workId];
-      attachTwoStepNavigation(card, workBubbleHtml(work), card.dataset.href, {
+      attachDialogNavigation(card, workBubbleHtml(work), card.dataset.href, {
         ignoreNestedLinks: true
       });
     });
@@ -636,7 +639,7 @@
     container.querySelectorAll(".works-mobile-members .member-detail-link").forEach(link => {
       const work = worksById[link.dataset.workId];
       const member = membersById[link.dataset.memberId];
-      attachTwoStepNavigation(link, bubbleHtml({
+      attachDialogNavigation(link, bubbleHtml({
         memberName: member.name,
         contribution: work.contributions?.[member.id]
       }), link.getAttribute("href"));
@@ -655,11 +658,11 @@
     );
     link.href = `member.html?id=${member.id}`;
 
-    attachInfoBubble(link, bubbleHtml({
+    attachDialogNavigation(link, bubbleHtml({
       memberName: member.name,
       memberIcon: member.icon,
       contribution: work.contributions[member.id]
-    }), true);
+    }), link.href);
 
     return link;
   }
@@ -678,16 +681,15 @@
 
     tile.href = `work.html?id=${work.id}`;
 
-    attachTwoStepNavigation(tile, `
+    attachDialogNavigation(tile, `
       <div class="bubble-card">
         <div class="bubble-card-head">
           <div>
-            <div class="bubble-card-name">${escapeHtml(work.title)}</div>
+            <div class="bubble-card-name" id="dialogTitle">${escapeHtml(work.title)}</div>
             <div class="bubble-card-meta">${escapeHtml(work.period)}</div>
           </div>
         </div>
         <div class="bubble-card-text">${escapeHtml(work.contributions[member.id] || "記述なし")}</div>
-        <div class="bubble-card-action">もう一度押すと活動ページへ移動します</div>
       </div>
     `, tile.href);
 
@@ -801,6 +803,56 @@
     memberWorks.forEach(work => worksWrap.appendChild(workTile(work, member)));
   }
 
+  function renderAnnouncementPage() {
+    const wrap = $("#announcementPage");
+    if (!wrap) return;
+
+    const item = announcementsById[getQueryParam("id")];
+    if (!item) return renderNotFound(wrap, "告知");
+
+    const image = item.image
+      ? new URL(item.image, location.origin).href
+      : "https://plantshop.work/assets/logo-full.png";
+
+    setMeta({
+      title: `${item.title}｜告知｜プラントショップ`,
+      description: `${item.summary}`.slice(0, 120),
+      image,
+      url: location.href
+    });
+
+    wrap.innerHTML = `
+      <article class="page-hero announcement-detail">
+        <div class="announcement-detail-meta">
+          <span class="announcement-status announcement-status--${escapeHtml(item.status)}">
+            <span class="status-indicator status-indicator--${escapeHtml(item.status)}" aria-hidden="true"></span>
+            ${item.status === "done" ? "済み" : "最新"}
+          </span>
+          <time datetime="${escapeHtml(item.date.replaceAll(".", "-"))}">${escapeHtml(item.date)}</time>
+        </div>
+        <h1>${escapeHtml(item.title)}</h1>
+        ${item.image ? `<img src="${escapeHtml(item.image)}" alt="${escapeHtml(item.title)}" decoding="async">` : ""}
+        <div>
+          <h3>内容</h3>
+          <p>${escapeHtml(item.body)}</p>
+        </div>
+        ${Array.isArray(item.relatedLinks) && item.relatedLinks.length ? `
+          <div>
+            <h3>関連情報</h3>
+            <div class="announcement-related-links">
+              ${item.relatedLinks.map(link => `
+                <a class="member-external-link" href="${escapeHtml(link.url)}">
+                  ${escapeHtml(link.label)}
+                </a>
+              `).join("")}
+            </div>
+          </div>
+        ` : ""}
+        <a class="text-link announcement-back-link" href="index.html#announcements">告知一覧へ戻る</a>
+      </article>
+    `;
+  }
+
   function renderWorksAreaForViewport() {
     if (window.innerWidth <= MOBILE_BREAKPOINT) {
       renderWorksListMobile();
@@ -811,7 +863,8 @@
 
   function initHome() {
     renderAbout();
-    renderNews();
+    setupAnnouncementTabs();
+    renderAnnouncements();
     renderWorksAreaForViewport();
     renderContact();
   }
@@ -860,4 +913,5 @@
   if (page === "home") initHome();
   if (page === "work") renderWorkPage();
   if (page === "member") renderMemberPage();
+  if (page === "announcement") renderAnnouncementPage();
 })();

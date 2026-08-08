@@ -9,18 +9,28 @@ const SITE_DATA = {
         現在は、そこに存在するものから想像することと、それを共有することについて話すことが多いです。
       </p>
     `,
-    news: [
+    announcements: [
       {
+        id: "production-talk",
         date: "2026.06.27",
         title: "展覧会「生産」で、トークをします",
+        summary: "28日（日）13時より、ALC Library&Galleryで開催している「生産」展で、作品について話すトークを予定しています。",
         body: "28日（日）13時より、ALC Library&Galleryで開催している「生産」展で、作品について話すトークを予定しています。",
-        url: "work.html?id=production"
+        status: "done",
+        relatedLinks: [
+          { label: "活動「生産」を見る", url: "work.html?id=production" }
+        ]
       },
       {
+        id: "production-exhibition",
         date: "2026.06.15",
         title: "展覧会「生産」を開催します",
+        summary: "2026年6月26日から30日まで、京都・岡崎道のALC Library&Galleryで開催します。",
         body: "2026年6月26日から30日まで、京都・岡崎道のALC Library&Galleryで開催します。",
-        url: "work.html?id=production"
+        status: "done",
+        relatedLinks: [
+          { label: "活動「生産」を見る", url: "work.html?id=production" }
+        ]
       }
     ],
     contact: {

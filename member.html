@@ -37,7 +37,7 @@
       </a>
       <div class="nav-links">
         <a href="index.html#about">概要</a>
-        <a href="index.html#news">最新情報</a>
+        <a href="index.html#announcements">告知</a>
         <a href="index.html#works">活動・参加者</a>
         <a href="index.html#contact">連絡先</a>
       </div>
@@ -50,7 +50,12 @@
     </div>
   </main>
 
-  <div id="tooltip" class="tooltip" hidden></div>
+  <div id="tooltip" class="dialog-backdrop" hidden>
+    <div class="tooltip" role="dialog" aria-modal="true" aria-labelledby="dialogTitle" tabindex="-1">
+      <button class="dialog-close" type="button" aria-label="説明を閉じる">×</button>
+      <div id="dialogContent" class="dialog-content"></div>
+    </div>
+  </div>
 
   <script src="data.js"></script>
   <script src="app.js"></script>

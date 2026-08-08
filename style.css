@@ -53,18 +53,6 @@ body {
   text-rendering: optimizeLegibility;
 }
 
-body::before {
-  position: fixed;
-  inset: 0;
-  z-index: 99999;
-  background-image:
-    linear-gradient(rgba(77, 71, 127, 0.025) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(77, 71, 127, 0.025) 1px, transparent 1px);
-  background-size: 4px 4px;
-  content: "";
-  pointer-events: none;
-}
-
 body.dialog-open {
   overflow: hidden;
 }
@@ -597,19 +585,6 @@ p {
   transform: translateY(12px) scale(0.985);
   transition: opacity 0.24s ease, transform 0.24s cubic-bezier(0.22, 1, 0.36, 1);
   isolation: isolate;
-}
-
-.tooltip::before {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  border-radius: inherit;
-  background-image:
-    linear-gradient(rgba(77, 71, 127, 0.035) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(77, 71, 127, 0.035) 1px, transparent 1px);
-  background-size: 4px 4px;
-  content: "";
-  pointer-events: none;
 }
 
 .dialog-backdrop.is-visible .tooltip {

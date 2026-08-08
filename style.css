@@ -1,8 +1,8 @@
-@import url("https://fonts.googleapis.com/css2?family=DotGothic16&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=M+PLUS+1:wght@400;500;600&family=M+PLUS+1+Code:wght@400;500;600&display=swap");
 
 :root {
-  --font-sans: "Noto Sans JP", "Hiragino Sans", "Yu Gothic UI", "Yu Gothic", sans-serif;
-  --font-ui: "DotGothic16", "MS Gothic", monospace;
+  --font-sans: "M PLUS 1", "Noto Sans JP", "Hiragino Sans", "Yu Gothic UI", "Yu Gothic", sans-serif;
+  --font-ui: "M PLUS 1 Code", "M PLUS 1", "Noto Sans JP", sans-serif;
   --font-size-xs: 0.75rem;
   --font-size-sm: 0.875rem;
   --font-size-body: 1rem;
@@ -444,16 +444,25 @@ p {
   min-height: 40px;
   padding: 8px 12px;
   border: 1px solid var(--line);
+  border-radius: 2px;
   background: var(--surface);
+  box-shadow:
+    inset 1px 1px 0 rgba(255, 255, 255, 0.95),
+    inset -1px -1px 0 rgba(77, 71, 127, 0.16),
+    0 1px 0 rgba(77, 71, 127, 0.1);
+  font-family: var(--font-ui);
   transition:
     border-color 0.18s ease,
     background 0.18s ease,
     color 0.18s ease;
 }
 
-.member-detail-link:hover {
+.member-detail-link:hover,
+.member-detail-link:focus-visible {
   border-color: var(--line-strong);
   background: var(--mint-soft);
+  outline: 1px solid var(--line-strong);
+  outline-offset: 2px;
 }
 
 #worksGraph {
@@ -772,7 +781,7 @@ p {
   gap: 0 4px;
   overflow: hidden;
   padding: 10px 10px 12px;
-  border: 0;
+  border: 1px solid var(--line);
   background: linear-gradient(
     135deg,
     rgba(235, 231, 249, 0.92) 0%,
@@ -831,10 +840,20 @@ p {
 }
 
 .works-mobile-more {
-  display: inline-block;
-  padding-bottom: 1px;
-  border-bottom: 1px solid currentColor;
+  display: inline-flex;
+  min-height: 40px;
+  align-items: center;
+  width: fit-content;
+  padding: 8px 12px;
+  border: 1px solid var(--line);
+  border-radius: 2px;
   color: var(--violet-dark);
+  background: var(--surface);
+  box-shadow:
+    inset 1px 1px 0 rgba(255, 255, 255, 0.95),
+    inset -1px -1px 0 rgba(77, 71, 127, 0.16),
+    0 1px 0 rgba(77, 71, 127, 0.1);
+  font-family: var(--font-ui);
   font-size: var(--font-size-xs);
 }
 
@@ -1056,11 +1075,11 @@ p {
   }
 
   .works-mobile-members .member-detail-link {
-    min-height: 36px;
-    padding: 6px 10px;
+    min-height: 40px;
+    padding: 8px 12px;
     border: 1px solid var(--line);
-    background: rgba(255, 255, 255, 0.8);
-    gap: 7px;
+    background: var(--surface);
+    gap: 8px;
     font-size: var(--font-size-xs);
     color: var(--violet-dark);
     transition:
@@ -1072,8 +1091,9 @@ p {
   .works-mobile-members .member-detail-link:hover,
   .works-mobile-members .member-detail-link:focus-visible {
     border-color: var(--line-strong);
-    background: rgba(239, 251, 247, 0.96);
-    outline: none;
+    background: var(--mint-soft);
+    outline: 1px solid var(--line-strong);
+    outline-offset: 2px;
   }
 
   .works-mobile-members .member-detail-link:active,

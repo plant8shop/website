@@ -3,13 +3,24 @@ const SITE_DATA = {
     name: "プラントショップ",
     about: `
       <p>
-        プラントショップは、建築・美術・映像・デザインなどを横断しながら、共同で持続的に制作を行うためのコレクティブです。
+        プラントショップは、京都を拠点に、建築・美術・映像・デザインなどの領域を横断しながら、共同で持続的に制作を行うコレクティブです。
       </p>
       <p>
-        現在は、そこに存在するものから想像することと、それを共有することについて話すことが多いです。
+        制作・展示・販売・対話を重ねながら、一人では生まれにくい問いや表現を育て、制作を続けられる環境をつくっています。
       </p>
     `,
     announcements: [
+      {
+        id: "walking-pot-podcast",
+        date: "2026.09.04",
+        title: "ポッドキャスト「歩く植木鉢」を始めました",
+        summary: "プラントショップの人類メンバーによるポッドキャスト「歩く植木鉢」の配信を始めました。",
+        body: "制作の途中で考えていること、最近見た作品、日々の出来事などを、散歩するように話します。Spotify、YouTube、Apple Podcastsでお聴きいただけます。",
+        status: "latest",
+        relatedLinks: [
+          { label: "「歩く植木鉢」を見る", url: "index.html#walking-pot" }
+        ]
+      },
       {
         id: "production-talk",
         date: "2026.06.27",
@@ -44,6 +55,28 @@ const SITE_DATA = {
         { name: " X ", url: "https://x.com/plant8shop" },
         { name: "Instagram", url: "https://www.instagram.com/plant8shop/" },
         { name: "note", url: "https://note.com/plant8shop" },
+      ],
+      memberShare: {
+        label: "メンバー共有サイト",
+        url: "https://plantshop-member-share.umedakouki.chatgpt.site/",
+        note: "アクセス権のあるメンバーのみ閲覧できます。"
+      }
+    },
+
+    operatingMembers: [
+      { memberId: "aoki", roles: ["進行", "渉外", "広報", "ビジュアル"] },
+      { memberId: "umeda", roles: ["会計", "ウェブサイト"] },
+      { memberId: "akiyama", roles: ["広報"] },
+      { memberId: "yoshimura", roles: ["分析"] }
+    ],
+
+    podcast: {
+      name: "歩く植木鉢",
+      description: "「歩く植木鉢」は、プラントショップの人類メンバーが、制作の途中で考えていること、最近見た作品、日々の出来事などを、散歩するように話すポッドキャストです。まとまりきらない会話も含め、その時々の思考を音声として残していきます。",
+      platforms: [
+        { name: "Spotify", url: "https://open.spotify.com/show/6fRvms2YDICubHjnrbha1V" },
+        { name: "YouTube", url: "https://youtube.com/playlist?list=PLPhupFXT_kck&si=ZepatBfoxZ88OlJZ" },
+        { name: "Apple Podcasts", url: "https://podcasts.apple.com/us/podcast/歩く植木鉢/id6808640269" }
       ]
     },
 

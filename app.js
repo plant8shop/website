@@ -247,7 +247,6 @@
   function renderAbout() {
     const about = $("#aboutContent");
     if (!about) return;
-    if (about.innerHTML.trim()) return;
     about.innerHTML = data.site.about;
   }
 
@@ -310,6 +309,7 @@
     if (!wrap) return;
 
     const sns = data.site.contact.sns || [];
+    const memberShare = data.site.contact.memberShare;
 
     wrap.innerHTML = `
       ${data.site.contact.text || ""}
@@ -332,6 +332,62 @@
           `
           : ""
       }
+      ${memberShare ? `
+        <div class="member-share-link">
+          <h3>${escapeHtml(memberShare.label)}</h3>
+          <p>${escapeHtml(memberShare.note)}</p>
+          <a
+            class="contact-sns-link"
+            href="${escapeHtml(memberShare.url)}"
+            target="_blank"
+            rel="noopener noreferrer"
+          >共有サイトを開く</a>
+        </div>
+      ` : ""}
+    `;
+  }
+
+  function renderOperatingMembers() {
+    const wrap = $("#operatingMembersContent");
+    if (!wrap) return;
+
+    const operatingMembers = data.site.operatingMembers || [];
+    wrap.innerHTML = `
+      <p class="section-lead">活動全体を継続するための役割を、メンバーで分担しています。</p>
+      <ul class="operating-member-list">
+        ${operatingMembers.map(item => {
+          const member = membersById[item.memberId];
+          if (!member) return "";
+          return `
+            <li>
+              <a href="member.html?id=${escapeHtml(member.id)}">${escapeHtml(member.name)}</a>
+              <span>${(item.roles || []).map(escapeHtml).join("・")}</span>
+            </li>
+          `;
+        }).join("")}
+      </ul>
+    `;
+  }
+
+  function renderPodcast() {
+    const wrap = $("#podcastContent");
+    if (!wrap) return;
+
+    const podcast = data.site.podcast;
+    if (!podcast) return;
+
+    wrap.innerHTML = `
+      <p>${escapeHtml(podcast.description)}</p>
+      <div class="podcast-links" aria-label="${escapeHtml(podcast.name)}の配信先">
+        ${(podcast.platforms || []).map(platform => `
+          <a
+            class="contact-sns-link"
+            href="${escapeHtml(platform.url)}"
+            target="_blank"
+            rel="noopener noreferrer"
+          >${escapeHtml(platform.name)}</a>
+        `).join("")}
+      </div>
     `;
   }
 
@@ -866,6 +922,8 @@
     setupAnnouncementTabs();
     renderAnnouncements();
     renderWorksAreaForViewport();
+    renderOperatingMembers();
+    renderPodcast();
     renderContact();
   }
 

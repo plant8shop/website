@@ -55,12 +55,13 @@ const SITE_DATA = {
         { name: " X ", url: "https://x.com/plant8shop" },
         { name: "Instagram", url: "https://www.instagram.com/plant8shop/" },
         { name: "note", url: "https://note.com/plant8shop" },
-      ],
-      memberShare: {
-        label: "メンバー共有サイト",
-        url: "https://plantshop-member-share.umedakouki.chatgpt.site/",
-        note: "アクセス権のあるメンバーのみ閲覧できます。"
-      }
+      ]
+    },
+
+    memberShare: {
+      label: "メンバー共有サイト",
+      url: "https://plantshop-member-share.umedakouki.chatgpt.site/",
+      description: "プラントショップの運営や活動状況を確認するための、メンバー向け共有サイトです。アクセス権のあるメンバーのみ閲覧できます。"
     },
 
     operatingMembers: [
@@ -73,6 +74,7 @@ const SITE_DATA = {
     podcast: {
       name: "歩く植木鉢",
       description: "「歩く植木鉢」は、プラントショップの人類メンバーが、制作の途中で考えていること、最近見た作品、日々の出来事などを、散歩するように話すポッドキャストです。まとまりきらない会話も含め、その時々の思考を音声として残していきます。",
+      feedUrl: "https://anchor.fm/s/116db43d8/podcast/rss",
       platforms: [
         { name: "Spotify", url: "https://open.spotify.com/show/6fRvms2YDICubHjnrbha1V" },
         { name: "YouTube", url: "https://youtube.com/playlist?list=PLPhupFXT_kck&si=ZepatBfoxZ88OlJZ" },

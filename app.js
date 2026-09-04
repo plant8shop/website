@@ -309,7 +309,6 @@
     if (!wrap) return;
 
     const sns = data.site.contact.sns || [];
-    const memberShare = data.site.contact.memberShare;
 
     wrap.innerHTML = `
       ${data.site.contact.text || ""}
@@ -332,18 +331,24 @@
           `
           : ""
       }
-      ${memberShare ? `
-        <div class="member-share-link">
-          <h3>${escapeHtml(memberShare.label)}</h3>
-          <p>${escapeHtml(memberShare.note)}</p>
-          <a
-            class="contact-sns-link"
-            href="${escapeHtml(memberShare.url)}"
-            target="_blank"
-            rel="noopener noreferrer"
-          >共有サイトを開く</a>
-        </div>
-      ` : ""}
+    `;
+  }
+
+  function renderMemberShare() {
+    const wrap = $("#memberShareContent");
+    if (!wrap) return;
+
+    const memberShare = data.site.memberShare;
+    if (!memberShare) return;
+
+    wrap.innerHTML = `
+      <p>${escapeHtml(memberShare.description)}</p>
+      <a
+        class="contact-sns-link"
+        href="${escapeHtml(memberShare.url)}"
+        target="_blank"
+        rel="noopener noreferrer"
+      >共有サイトを開く</a>
     `;
   }
 
@@ -369,7 +374,7 @@
     `;
   }
 
-  function renderPodcast() {
+  async function renderPodcast() {
     const wrap = $("#podcastContent");
     if (!wrap) return;
 
@@ -378,6 +383,10 @@
 
     wrap.innerHTML = `
       <p>${escapeHtml(podcast.description)}</p>
+      <div class="podcast-player" aria-live="polite">
+        <h3>エピソードを選んで聴く</h3>
+        <p class="podcast-player-note">エピソードを読み込んでいます。</p>
+      </div>
       <div class="podcast-links" aria-label="${escapeHtml(podcast.name)}の配信先">
         ${(podcast.platforms || []).map(platform => `
           <a
@@ -389,6 +398,75 @@
         `).join("")}
       </div>
     `;
+
+    const player = $(".podcast-player", wrap);
+    if (!player || !podcast.feedUrl) return;
+
+    try {
+      const response = await fetch(podcast.feedUrl);
+      if (!response.ok) throw new Error("Podcast feed request failed");
+
+      const documentXml = new DOMParser().parseFromString(await response.text(), "application/xml");
+      if (documentXml.querySelector("parsererror")) throw new Error("Podcast feed parse failed");
+
+      const episodes = [...documentXml.querySelectorAll("item")].map((item, index) => {
+        const enclosureUrl = item.querySelector("enclosure")?.getAttribute("url") || "";
+        const publishedAt = item.querySelector("pubDate")?.textContent?.trim() || "";
+        const duration = item.getElementsByTagName("itunes:duration")[0]?.textContent?.trim() || "";
+        return {
+          id: item.querySelector("guid")?.textContent?.trim() || String(index),
+          title: item.querySelector("title")?.textContent?.trim() || `エピソード ${index + 1}`,
+          enclosureUrl,
+          publishedAt,
+          duration
+        };
+      }).filter(episode => episode.enclosureUrl.startsWith("https://"));
+
+      if (!episodes.length) throw new Error("Podcast feed has no playable episodes");
+
+      player.innerHTML = `
+        <h3>エピソードを選んで聴く</h3>
+        <label class="podcast-episode-label" for="podcastEpisodeSelect">エピソード</label>
+        <select id="podcastEpisodeSelect" class="podcast-episode-select">
+          ${episodes.map((episode, index) => `
+            <option value="${index}">${escapeHtml(episode.title)}</option>
+          `).join("")}
+        </select>
+        <div class="podcast-episode-current">
+          <div class="podcast-episode-title"></div>
+          <div class="podcast-episode-meta"></div>
+        </div>
+        <audio controls preload="metadata">
+          お使いのブラウザは音声再生に対応していません。
+        </audio>
+      `;
+
+      const select = $("#podcastEpisodeSelect", player);
+      const audio = $("audio", player);
+      const title = $(".podcast-episode-title", player);
+      const meta = $(".podcast-episode-meta", player);
+
+      const selectEpisode = () => {
+        const episode = episodes[Number(select.value)] || episodes[0];
+        title.textContent = episode.title;
+        meta.textContent = [
+          episode.publishedAt
+            ? new Intl.DateTimeFormat("ja-JP", { dateStyle: "long" }).format(new Date(episode.publishedAt))
+            : "",
+          episode.duration ? `再生時間 ${episode.duration}` : ""
+        ].filter(Boolean).join(" ／ ");
+        audio.src = episode.enclosureUrl;
+        audio.load();
+      };
+
+      select.addEventListener("change", selectEpisode);
+      selectEpisode();
+    } catch {
+      player.innerHTML = `
+        <h3>エピソードを選んで聴く</h3>
+        <p class="podcast-player-note">エピソード一覧を読み込めませんでした。下の配信サービスからお聴きください。</p>
+      `;
+    }
   }
 
   function addSvgText(svg, x, y, options = {}) {
@@ -925,6 +1003,7 @@
     renderOperatingMembers();
     renderPodcast();
     renderContact();
+    renderMemberShare();
   }
 
   function setupResponsiveRerender() {

@@ -161,7 +161,7 @@ const SITE_DATA = {
     {
       id: "matsugasaki-festival",
       title: "プラントショ⌇ップ",
-      period: "2026.08–2026.11",
+      period: "2026.08-",
       status: "進行中",
       thumbnail: "",
       summary: "松ヶ崎祭で、コンクリートのひび割れから植物が生えたような植木鉢を制作・販売し、プラントショップの活動を伝えるプロジェクトです。",
@@ -200,7 +200,7 @@ const SITE_DATA = {
     {
       id: "production",
       title: "生産",
-      period: "2026.03–",
+      period: "2026.03-2026.06",
       thumbnail: "assets/thumb-seisan-display.webp",
       summary: "私たちは、建築・映像・美術といった分野を横断し、持続的に制作を行うための「プラントショップ」で活動を始めました。本展は、その最初の活動です。そこで私たちはまず、自分たちにとってもっとも基本的な行為である「作る」ということを、あらためて見つめ直すことにしました。2026年6月26日～30日に、京都・岡崎道のALC Library&Galleryにて展示します。",
       detailHtml: `

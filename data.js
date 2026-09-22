@@ -3,10 +3,10 @@ const SITE_DATA = {
     name: "プラントショップ",
     about: `
       <p>
-        プラントショップは、京都を拠点に、建築・美術・映像・デザインなどの領域を横断しながら、共同で持続的に制作を行うコレクティブです。
+        プラントショップは、空間や場所をモチーフとした、体験の創造や映像表現を主軸とし、共同で持続的に制作するコレクティブです。
       </p>
       <p>
-        制作・展示・販売・対話を重ねながら、一人では生まれにくい問いや表現を育て、制作を続けられる環境をつくっています。
+        個人では得にくい人員、技術、道具、場所、人脈などをつなぎ、制作、発表、販売へ進める環境をつくっています。
       </p>
     `,
     announcements: [
@@ -65,15 +65,16 @@ const SITE_DATA = {
     },
 
     operatingMembers: [
-      { memberId: "aoki", roles: ["進行", "渉外", "広報", "ビジュアル"] },
-      { memberId: "umeda", roles: ["会計", "ウェブサイト"] },
-      { memberId: "akiyama", roles: ["広報"] },
-      { memberId: "yoshimura", roles: ["分析"] }
+      { memberId: "aoki", roles: ["全体進行", "渉外", "広報・Instagram", "広報・note", "記録"] },
+      { memberId: "umeda", roles: ["会計", "Webサイト運営", "機材備品管理"] },
+      { memberId: "akiyama", roles: ["広報・X", "広報・note"] },
+      { memberId: "yoshimura", roles: ["分析"] },
+      { memberId: "okubo", roles: [] }
     ],
 
     podcast: {
       name: "歩く植木鉢",
-      description: "「歩く植木鉢」は、プラントショップの人類メンバーが、制作の途中で考えていること、最近見た作品、日々の出来事などを、散歩するように話すポッドキャストです。まとまりきらない会話も含め、その時々の思考を音声として残していきます。",
+      description: "プラントショップのメンバーが、活動の過程で考えていることや日々のことなどをゆるく話しているポッドキャストです。",
       feedUrl: "https://anchor.fm/s/116db43d8/podcast/rss",
       platforms: [
         { name: "Spotify", url: "https://open.spotify.com/show/6fRvms2YDICubHjnrbha1V" },
@@ -114,6 +115,21 @@ const SITE_DATA = {
       bio: ""
     },
     {
+      id: "okubo",
+      name: "大久保",
+      bio: ""
+    },
+    {
+      id: "asada",
+      name: "浅田",
+      bio: ""
+    },
+    {
+      id: "yukibatan",
+      name: "ユキバタン",
+      bio: ""
+    },
+    {
       id: "minami",
       name: "南 佳步",
       bio: "2004年生まれ京都府出身。現在は龍谷大学文学部哲学科教育学専攻に所属。近畿大学理工学部にも在籍していました。幅広く芸術や哲学などを好んでいます。"
@@ -121,6 +137,64 @@ const SITE_DATA = {
   ],
 
   works: [
+    {
+      id: "saved-space",
+      title: "Saved Space",
+      period: "2026.08–",
+      status: "進行中",
+      thumbnail: "",
+      summary: "ロボット掃除機が動く無人のリビングを徐々に変容させ、空間に別の意味や生態系が立ち上がる様子を映像にするプロジェクトです。音入れを進め、再撮影と微調整を予定しています。",
+      detailHtml: `
+      <section>
+        <h4>進行状況</h4>
+        <p>音入れを進め、2026年10月に再撮影と微調整を行う予定です。卒業制作展や海外映画祭での発表を検討しています。</p>
+      </section>
+      `,
+      participantIds: ["aoki", "umeda"],
+      additionalParticipants: "木畑ほか撮影参加者",
+      contributions: {
+        aoki: "企画と制作を進めています。",
+        umeda: "撮影と制作に参加しています。"
+      }
+    },
+    {
+      id: "plantshop-document",
+      title: "プラントショ⌇ップ",
+      period: "2026–",
+      status: "進行中",
+      thumbnail: "",
+      summary: "プラントショップとは何かを、活動を見る人と参加を考える人に伝えるための資料をつくるプロジェクトです。目的や参加の仕組みを、Web・PDF・冊子などで説明することを検討しています。",
+      detailHtml: `
+      <section>
+        <h4>進行状況</h4>
+        <p>見る人向けの資料と参加者向けの資料を分けて検討し、参加者向け資料の制作を進める予定です。</p>
+      </section>
+      `,
+      participantIds: ["umeda"],
+      contributions: {
+        umeda: "企画と資料制作を進めています。"
+      }
+    },
+    {
+      id: "coin-laundry",
+      title: "コインランドリー（仮）",
+      period: "2026.09–",
+      status: "進行中",
+      thumbnail: "",
+      summary: "コインランドリーの待ち時間に、街の記憶や他者の存在を想像する小さな演劇的状況をつくるプロジェクトです。写真・地図・短い戯曲・音声を公開し、ワークショップを通じて戯曲を制作する計画です。",
+      detailHtml: `
+      <section>
+        <h4>進行状況</h4>
+        <p>実施場所の確保、参加者募集、広報などを分担し、2026年10月後半から11月末の実施に向けて準備しています。</p>
+      </section>
+      `,
+      participantIds: ["umeda", "aoki", "yoshimura"],
+      contributions: {
+        umeda: "統括と企画書作成を担当しています。",
+        aoki: "企画進行、場所確保、参加者募集、戯曲制作を担当する予定です。",
+        yoshimura: "広報を担当する候補です。"
+      }
+    },
     {
       id: "production",
       title: "生産",

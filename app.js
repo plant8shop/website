@@ -103,7 +103,7 @@
         <div class="bubble-card-head">
           <div>
             <div class="bubble-card-name" id="dialogTitle">${escapeHtml(work.title)}</div>
-            <div class="bubble-card-meta">${escapeHtml(work.period)}</div>
+            <div class="bubble-card-meta">${[work.status, work.period].filter(Boolean).map(escapeHtml).join(" ／ ")}</div>
           </div>
         </div>
         <div class="bubble-card-text">${escapeHtml(work.summary)}</div>
@@ -365,8 +365,8 @@
           if (!member) return "";
           return `
             <li>
-              <a href="member.html?id=${escapeHtml(member.id)}">${escapeHtml(member.name)}</a>
-              <span>${(item.roles || []).map(escapeHtml).join("・")}</span>
+              <a class="member-detail-link" href="member.html?id=${escapeHtml(member.id)}"><span>${escapeHtml(member.name)}</span></a>
+              <span>${(item.roles || []).length ? item.roles.map(escapeHtml).join("・") : "担当なし"}</span>
             </li>
           `;
         }).join("")}
@@ -384,7 +384,6 @@
     wrap.innerHTML = `
       <p>${escapeHtml(podcast.description)}</p>
       <div class="podcast-player" aria-live="polite">
-        <h3>エピソードを選んで聴く</h3>
         <p class="podcast-player-note">エピソードを読み込んでいます。</p>
       </div>
       <div class="podcast-links" aria-label="${escapeHtml(podcast.name)}の配信先">
@@ -425,7 +424,6 @@
       if (!episodes.length) throw new Error("Podcast feed has no playable episodes");
 
       player.innerHTML = `
-        <h3>エピソードを選んで聴く</h3>
         <label class="podcast-episode-label" for="podcastEpisodeSelect">エピソード</label>
         <select id="podcastEpisodeSelect" class="podcast-episode-select">
           ${episodes.map((episode, index) => `
@@ -433,7 +431,6 @@
           `).join("")}
         </select>
         <div class="podcast-episode-current">
-          <div class="podcast-episode-title"></div>
           <div class="podcast-episode-meta"></div>
         </div>
         <audio controls preload="metadata">
@@ -443,12 +440,10 @@
 
       const select = $("#podcastEpisodeSelect", player);
       const audio = $("audio", player);
-      const title = $(".podcast-episode-title", player);
       const meta = $(".podcast-episode-meta", player);
 
       const selectEpisode = () => {
         const episode = episodes[Number(select.value)] || episodes[0];
-        title.textContent = episode.title;
         meta.textContent = [
           episode.publishedAt
             ? new Intl.DateTimeFormat("ja-JP", { dateStyle: "long" }).format(new Date(episode.publishedAt))
@@ -463,7 +458,6 @@
       selectEpisode();
     } catch {
       player.innerHTML = `
-        <h3>エピソードを選んで聴く</h3>
         <p class="podcast-player-note">エピソード一覧を読み込めませんでした。下の配信サービスからお聴きください。</p>
       `;
     }
@@ -734,8 +728,9 @@
               </div>
             ` : ""}
             <div class="works-mobile-body">
-              <div class="works-mobile-period">${escapeHtml(work.period)}</div>
+              <div class="works-mobile-period">${[work.status, work.period].filter(Boolean).map(escapeHtml).join(" ／ ")}</div>
               <h3 class="works-mobile-title">${escapeHtml(work.title)}</h3>
+              ${work.status ? `<p class="works-mobile-summary">${escapeHtml(work.summary)}</p>` : ""}
               <span class="works-mobile-more">概要を見る</span>
             </div>
             <div class="works-mobile-participants">
@@ -755,10 +750,21 @@
                     </a>
                   `;
                 }).join("")}
+                ${work.additionalParticipants ? `<span class="works-mobile-additional">${escapeHtml(work.additionalParticipants)}</span>` : ""}
               </div>
             </div>
           </article>
         `).join("")}
+        <div class="participant-directory">
+          <h3>参加メンバー</h3>
+          <div class="member-detail-list">
+            ${data.members.map(member => `
+              <a class="member-detail-link" href="member.html?id=${escapeHtml(member.id)}">
+                <span>${escapeHtml(member.name)}</span>
+              </a>
+            `).join("")}
+          </div>
+        </div>
       </div>
     `;
 
@@ -850,7 +856,7 @@
       <div class="page-hero">
         <h1>${escapeHtml(work.title)}</h1>
         ${work.thumbnail ? `<img src="${work.thumbnail}" alt="${escapeHtml(work.title)}" decoding="async">` : ""}
-        <div class="meta">期間: ${escapeHtml(work.period)}</div>
+        <div class="meta">${work.status ? `状況: ${escapeHtml(work.status)} ／ ` : ""}期間: ${escapeHtml(work.period)}</div>
         <div>
           <h3>参加者</h3>
           <div class="member-detail-list" id="workMemberList"></div>
@@ -879,6 +885,9 @@
       .map(id => membersById[id])
       .filter(Boolean)
       .forEach(member => memberList.appendChild(memberLink(member, work)));
+    if (work.additionalParticipants) {
+      memberList.appendChild(el("span", "work-additional-participants", escapeHtml(work.additionalParticipants)));
+    }
   }
 
   function renderMemberPage() {
@@ -988,11 +997,7 @@
   }
 
   function renderWorksAreaForViewport() {
-    if (window.innerWidth <= MOBILE_BREAKPOINT) {
-      renderWorksListMobile();
-    } else {
-      renderWorksGraph();
-    }
+    renderWorksListMobile();
   }
 
   function initHome() {
@@ -1023,7 +1028,9 @@
     if (!header) return;
 
     const update = () => {
-      const height = header.getBoundingClientRect().height;
+      const height = window.innerWidth <= MOBILE_BREAKPOINT
+        ? header.getBoundingClientRect().height
+        : 0;
       document.documentElement.style.setProperty("--anchor-offset", `${height}px`);
     };
 
@@ -1031,9 +1038,8 @@
 
     if ("ResizeObserver" in window) {
       new ResizeObserver(update).observe(header);
-    } else {
-      addEventListener("resize", update, { passive: true });
     }
+    addEventListener("resize", update, { passive: true });
 
     if (location.hash) {
       requestAnimationFrame(() => {

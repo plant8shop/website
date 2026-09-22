@@ -7,7 +7,7 @@
     cardW: 244,
     cardH: 92,
     railX: 340,
-    memberGap: 82,
+    memberGap: 102,
     memberTopY: 36,
     memberLabelY: 12,
     rowTop: 92,
@@ -499,7 +499,7 @@
     return textEl;
   }
 
-  function splitTitle(title, max = 7) {
+  function splitTitle(title, max = 12) {
     if (title.length <= max) return [title];
 
     const lines = [];
@@ -619,40 +619,41 @@
         .map(work => yByWork[work.id])
         .sort((a, b) => a - b);
 
-      if (!ys.length) return;
-
-      svg.appendChild(svgEl("line", {
-        x1: x,
-        y1: Math.max(GRAPH.memberTopY + 18, ys[0]),
-        x2: x,
-        y2: ys.at(-1),
-        stroke: "#b9b2d6",
-        "stroke-width": "2.2",
-        "stroke-linecap": "round",
-        class: "graph-member-shaft"
-      }));
+      if (ys.length) {
+        svg.appendChild(svgEl("line", {
+          x1: x,
+          y1: Math.max(GRAPH.memberTopY + 22, ys[0]),
+          x2: x,
+          y2: ys.at(-1),
+          stroke: "#b9b2d6",
+          "stroke-width": "2.2",
+          "stroke-linecap": "round",
+          class: "graph-member-shaft"
+        }));
+      }
 
       const nameLink = svgEl("a", {
         href: `member.html?id=${member.id}`,
         class: "graph-member-link"
       });
 
-      const labelW = 64;
-      const labelH = 28;
+      const labelW = Math.max(76, Math.min(96, member.name.length * 13 + 24));
+      const labelH = 40;
 
       nameLink.appendChild(svgEl("rect", {
         x: x - labelW / 2,
         y: GRAPH.memberTopY - labelH / 2,
         width: labelW,
         height: labelH,
-        fill: "#f7fffc",
-        stroke: "#aaa3cf",
+        rx: "2",
+        fill: "#fafffd",
+        stroke: "rgba(91, 83, 147, 0.24)",
         class: "graph-member-name-box"
       }));
 
-      addSvgText(nameLink, x, GRAPH.memberTopY + 4, {
+      addSvgText(nameLink, x, GRAPH.memberTopY + 5, {
         text: member.name,
-        fontSize: 11,
+        fontSize: 12,
         fill: "#4d477f",
         anchor: "middle"
       });
@@ -731,7 +732,6 @@
               <div class="works-mobile-period">${[work.status, work.period].filter(Boolean).map(escapeHtml).join(" ／ ")}</div>
               <h3 class="works-mobile-title">${escapeHtml(work.title)}</h3>
               ${work.status ? `<p class="works-mobile-summary">${escapeHtml(work.summary)}</p>` : ""}
-              <span class="works-mobile-more">概要を見る</span>
             </div>
             <div class="works-mobile-participants">
               <span class="works-mobile-members-label">参加者</span>
@@ -750,7 +750,6 @@
                     </a>
                   `;
                 }).join("")}
-                ${work.additionalParticipants ? `<span class="works-mobile-additional">${escapeHtml(work.additionalParticipants)}</span>` : ""}
               </div>
             </div>
           </article>
@@ -885,9 +884,6 @@
       .map(id => membersById[id])
       .filter(Boolean)
       .forEach(member => memberList.appendChild(memberLink(member, work)));
-    if (work.additionalParticipants) {
-      memberList.appendChild(el("span", "work-additional-participants", escapeHtml(work.additionalParticipants)));
-    }
   }
 
   function renderMemberPage() {
@@ -913,7 +909,7 @@
         <h1>${escapeHtml(member.name)}</h1>
         <div>
           <h3>情報</h3>
-          <p>${escapeHtml(member.bio)}</p>
+          <p class="member-profile-text">${escapeHtml(member.bio)}</p>
         </div>
         ${
           Array.isArray(member.links) && member.links.length
@@ -997,7 +993,11 @@
   }
 
   function renderWorksAreaForViewport() {
-    renderWorksListMobile();
+    if (window.innerWidth <= MOBILE_BREAKPOINT) {
+      renderWorksListMobile();
+    } else {
+      renderWorksGraph();
+    }
   }
 
   function initHome() {

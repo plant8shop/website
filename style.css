@@ -531,6 +531,7 @@ p {
 }
 
 .graph-member-name-box {
+  filter: drop-shadow(0 1px 0 rgba(77, 71, 127, 0.1));
   transition:
     fill 0.18s ease,
     stroke 0.18s ease,
@@ -858,24 +859,6 @@ p {
   line-height: 1.75;
 }
 
-.works-mobile-more {
-  display: inline-flex;
-  min-height: 40px;
-  align-items: center;
-  width: fit-content;
-  padding: 8px 12px;
-  border: 1px solid var(--line);
-  border-radius: 2px;
-  color: var(--violet-dark);
-  background: var(--surface);
-  box-shadow:
-    inset 1px 1px 0 rgba(255, 255, 255, 0.95),
-    inset -1px -1px 0 rgba(77, 71, 127, 0.16),
-    0 1px 0 rgba(77, 71, 127, 0.1);
-  font-family: var(--font-ui);
-  font-size: var(--font-size-xs);
-}
-
 .works-mobile-participants {
   display: grid;
   grid-column: 1 / -1;
@@ -900,15 +883,6 @@ p {
   flex-wrap: wrap;
   gap: 6px;
   min-width: 0;
-}
-
-.works-mobile-additional,
-.work-additional-participants {
-  display: inline-flex;
-  align-items: center;
-  min-height: 40px;
-  color: var(--muted);
-  font-size: var(--font-size-xs);
 }
 
 .participant-directory {
@@ -1209,6 +1183,10 @@ p {
 .contact-sns-link:hover {
   border-color: var(--line-strong);
   background: var(--mint-soft);
+}
+
+.member-profile-text {
+  white-space: pre-line;
 }
 
 .section[id] {

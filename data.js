@@ -99,7 +99,8 @@ const SITE_DATA = {
     {
       id: "umeda",
       name: "梅田航輝",
-      bio: "2001年新潟市生まれ。現在は京都工芸繊維大学建築学専攻修士課程に在籍。建築、映像、美術に関心があり、関連した活動や作品制作を行っています。",
+      bio: `2001年新潟市生まれ。京都工芸繊維大学建築学専攻修士課程に在籍。
+建築や都市、空間や場所という現象について、主にカメラやビジュアル表現を通して考え制作を行っています。`,
       links: [
         { label: "ウェブサイト", url: "https://umedakouki.github.io" },
       ]
@@ -138,44 +139,6 @@ const SITE_DATA = {
 
   works: [
     {
-      id: "saved-space",
-      title: "Saved Space",
-      period: "2026.08–",
-      status: "進行中",
-      thumbnail: "",
-      summary: "ロボット掃除機が動く無人のリビングを徐々に変容させ、空間に別の意味や生態系が立ち上がる様子を映像にするプロジェクトです。音入れを進め、再撮影と微調整を予定しています。",
-      detailHtml: `
-      <section>
-        <h4>進行状況</h4>
-        <p>音入れを進め、2026年10月に再撮影と微調整を行う予定です。卒業制作展や海外映画祭での発表を検討しています。</p>
-      </section>
-      `,
-      participantIds: ["aoki", "umeda"],
-      additionalParticipants: "木畑ほか撮影参加者",
-      contributions: {
-        aoki: "企画と制作を進めています。",
-        umeda: "撮影と制作に参加しています。"
-      }
-    },
-    {
-      id: "plantshop-document",
-      title: "プラントショ⌇ップ",
-      period: "2026–",
-      status: "進行中",
-      thumbnail: "",
-      summary: "プラントショップとは何かを、活動を見る人と参加を考える人に伝えるための資料をつくるプロジェクトです。目的や参加の仕組みを、Web・PDF・冊子などで説明することを検討しています。",
-      detailHtml: `
-      <section>
-        <h4>進行状況</h4>
-        <p>見る人向けの資料と参加者向けの資料を分けて検討し、参加者向け資料の制作を進める予定です。</p>
-      </section>
-      `,
-      participantIds: ["umeda"],
-      contributions: {
-        umeda: "企画と資料制作を進めています。"
-      }
-    },
-    {
       id: "coin-laundry",
       title: "コインランドリー（仮）",
       period: "2026.09–",
@@ -193,6 +156,45 @@ const SITE_DATA = {
         umeda: "統括と企画書作成を担当しています。",
         aoki: "企画進行、場所確保、参加者募集、戯曲制作を担当する予定です。",
         yoshimura: "広報を担当する候補です。"
+      }
+    },
+    {
+      id: "matsugasaki-festival",
+      title: "プラントショ⌇ップ",
+      period: "2026.08–2026.11",
+      status: "進行中",
+      thumbnail: "",
+      summary: "松ヶ崎祭で、コンクリートのひび割れから植物が生えたような植木鉢を制作・販売し、プラントショップの活動を伝えるプロジェクトです。",
+      detailHtml: `
+      <section>
+        <h4>進行状況</h4>
+        <p>ひび割れを探し、生草を植える蓋式プランターを制作しています。2026年10月に量産し、11月の松ヶ崎祭で展示・販売する予定です。</p>
+      </section>
+      `,
+      participantIds: ["aoki", "umeda", "asada"],
+      contributions: {
+        aoki: "企画と制作を進めています。",
+        umeda: "制作に参加しています。",
+        asada: "制作に参加しています。"
+      }
+    },
+    {
+      id: "saved-space",
+      title: "Saved Space",
+      period: "2026.08–",
+      status: "進行中",
+      thumbnail: "",
+      summary: "ロボット掃除機が動く無人のリビングを徐々に変容させ、空間に別の意味や生態系が立ち上がる様子を映像にするプロジェクトです。音入れを進め、再撮影と微調整を予定しています。",
+      detailHtml: `
+      <section>
+        <h4>進行状況</h4>
+        <p>音入れを進め、2026年10月に再撮影と微調整を行う予定です。卒業制作展や海外映画祭での発表を検討しています。</p>
+      </section>
+      `,
+      participantIds: ["aoki", "umeda"],
+      contributions: {
+        aoki: "企画と制作を進めています。",
+        umeda: "撮影と制作に参加しています。"
       }
     },
     {

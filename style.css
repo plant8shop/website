@@ -1352,41 +1352,6 @@ p {
 }
 
 @media (min-width: 641px) {
-  .section::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    right: 100%;
-    bottom: 0;
-    width: 200px;
-    pointer-events: none;
-  }
-
-  .intro-section::before {
-    background: #ffffff;
-  }
-
-  .news-section::before {
-    background: #e8e4f6;
-  }
-
-  #works::before {
-    background: #e2f8f0;
-  }
-
-  #operating-members::before,
-  #member-share::before {
-    background: #ffffff;
-  }
-
-  #walking-pot::before {
-    background: #f5f3fb;
-  }
-
-  #contact::before {
-    background: #e5f8f1;
-  }
-
   .site-header {
     position: fixed;
     inset: 0 auto 0 max(20px, calc(50vw - 532px));
@@ -1436,8 +1401,12 @@ p {
   }
 
   main {
-    width: calc(100% - 200px);
-    margin-left: 200px;
+    width: 100%;
+    margin-left: 0;
+  }
+
+  .section {
+    padding-left: calc(200px + var(--section-pad-x));
   }
 
   #works .section-inner,

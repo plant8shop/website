@@ -34,6 +34,7 @@
   let closeDialogTimer = null;
   let announcementStatus = "latest";
   let lastIsMobile = window.innerWidth <= MOBILE_BREAKPOINT;
+  let graphResizeObserver = null;
 
   function el(tag, className = "", html = "") {
     const node = document.createElement(tag);
@@ -540,6 +541,64 @@
     return lines.slice(0, 3);
   }
 
+  function clearGraphScrollControls() {
+    graphResizeObserver?.disconnect();
+    graphResizeObserver = null;
+
+    const controls = $("#worksGraphControls");
+    if (!controls) return;
+    controls.hidden = true;
+    controls.innerHTML = "";
+  }
+
+  function setupGraphScrollControls(container) {
+    const controls = $("#worksGraphControls");
+    if (!controls) return;
+
+    clearGraphScrollControls();
+    controls.innerHTML = `
+      <div class="graph-scroll-controls" aria-label="参加メンバーの横位置を調整">
+        <button class="graph-scroll-button" type="button" data-scroll-direction="-1" aria-label="左へ移動">←</button>
+        <label class="graph-scroll-range-wrap">
+          <span>横位置</span>
+          <input class="graph-scroll-range" type="range" min="0" max="0" value="0" step="1" aria-label="参加メンバーの横位置">
+        </label>
+        <button class="graph-scroll-button" type="button" data-scroll-direction="1" aria-label="右へ移動">→</button>
+      </div>
+    `;
+
+    const range = $(".graph-scroll-range", controls);
+    const updateRange = () => {
+      const max = Math.max(0, container.scrollWidth - container.clientWidth);
+      range.max = String(max);
+      range.value = String(Math.min(container.scrollLeft, max));
+      controls.hidden = max <= 0;
+    };
+
+    range.addEventListener("input", () => {
+      container.scrollLeft = Number(range.value);
+    });
+
+    container.addEventListener("scroll", () => {
+      range.value = String(container.scrollLeft);
+    }, { passive: true });
+
+    controls.querySelectorAll("[data-scroll-direction]").forEach(button => {
+      button.addEventListener("click", () => {
+        const direction = Number(button.dataset.scrollDirection);
+        const distance = Math.max(180, container.clientWidth * 0.55);
+        container.scrollBy({
+          left: direction * distance,
+          behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth"
+        });
+      });
+    });
+
+    graphResizeObserver = new ResizeObserver(updateRange);
+    graphResizeObserver.observe(container);
+    requestAnimationFrame(updateRange);
+  }
+
   function svgEl(tag, attrs = {}) {
     const node = document.createElementNS(svgNS, tag);
     Object.entries(attrs).forEach(([key, value]) => node.setAttribute(key, value));
@@ -730,11 +789,13 @@
 
     container.innerHTML = "";
     container.appendChild(svg);
+    setupGraphScrollControls(container);
   }
 
   function renderWorksListMobile() {
     const container = $("#worksGraph");
     if (!container) return;
+    clearGraphScrollControls();
 
     container.innerHTML = `
       <div class="works-mobile-list">

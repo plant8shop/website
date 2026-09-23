@@ -26,6 +26,9 @@
   const announcementsById = Object.fromEntries(
     (data.site.announcements || []).map(item => [item.id, item])
   );
+  const memberRegistrationIndex = Object.fromEntries(
+    data.members.map((member, index) => [member.id, index])
+  );
 
   let activeBubbleTrigger = null;
   let closeDialogTimer = null;
@@ -95,6 +98,26 @@
         <div class="bubble-card-text">${escapeHtml(contribution || "記述なし")}</div>
       </div>
     `;
+  }
+
+  function membersByActivityOrder() {
+    const activityIndexesByMember = Object.fromEntries(
+      data.members.map(member => [
+        member.id,
+        data.works
+          .map((work, index) => work.participantIds.includes(member.id) ? index : -1)
+          .filter(index => index >= 0)
+      ])
+    );
+
+    return [...data.members].sort((a, b) => {
+      const aIndexes = activityIndexesByMember[a.id];
+      const bIndexes = activityIndexesByMember[b.id];
+
+      return bIndexes.length - aIndexes.length
+        || (aIndexes[0] ?? Number.POSITIVE_INFINITY) - (bIndexes[0] ?? Number.POSITIVE_INFINITY)
+        || memberRegistrationIndex[a.id] - memberRegistrationIndex[b.id];
+    });
   }
 
   function workBubbleHtml(work) {
@@ -528,7 +551,7 @@
     if (!container) return;
 
     const works = data.works;
-    const members = data.members;
+    const members = membersByActivityOrder();
     const width = GRAPH.railX + GRAPH.memberGap * members.length + GRAPH.endPad;
     const height = GRAPH.rowTop + GRAPH.rowGap * works.length + 20;
 
@@ -757,7 +780,7 @@
         <div class="participant-directory">
           <h3>参加メンバー</h3>
           <div class="member-detail-list">
-            ${data.members.map(member => `
+            ${membersByActivityOrder().map(member => `
               <a class="member-detail-link" href="member.html?id=${escapeHtml(member.id)}">
                 <span>${escapeHtml(member.name)}</span>
               </a>

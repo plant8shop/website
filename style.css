@@ -1353,9 +1353,11 @@ p {
 @media (min-width: 641px) {
   .site-header {
     position: fixed;
-    inset: 0 auto 0 0;
-    width: 200px;
-    border-right: 1px solid var(--line);
+    inset: 0 auto 0 max(20px, calc(50vw - 532px));
+    width: 168px;
+    background: transparent;
+    backdrop-filter: none;
+    border-right: 0;
     border-bottom: 0;
   }
 
@@ -1363,7 +1365,7 @@ p {
     width: 100%;
     height: 100%;
     margin: 0;
-    padding: 28px 22px;
+    padding: 28px 0;
     flex-direction: column;
     align-items: stretch;
     gap: 42px;

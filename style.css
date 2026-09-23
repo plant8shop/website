@@ -480,6 +480,8 @@ p {
 
 #worksGraph {
   overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
   padding: 30px;
   background:
     linear-gradient(rgba(116, 109, 184, 0.045) 1px, transparent 1px),
@@ -489,7 +491,11 @@ p {
   border: 1px solid var(--line);
 }
 
-#worksGraphControls[hidden] {
+#worksGraph::-webkit-scrollbar {
+  display: none;
+}
+
+.works-graph-controls[hidden] {
   display: none;
 }
 
@@ -499,6 +505,10 @@ p {
   gap: 10px;
   align-items: stretch;
   margin-bottom: 12px;
+}
+
+.works-graph-controls-bottom .graph-scroll-controls {
+  margin: 12px 0 0;
 }
 
 .graph-scroll-button,
@@ -533,17 +543,9 @@ p {
 }
 
 .graph-scroll-range-wrap {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  gap: 14px;
+  display: flex;
   align-items: center;
   padding: 7px 12px;
-}
-
-.graph-scroll-range-wrap span {
-  color: var(--muted);
-  font-size: var(--font-size-xs);
-  letter-spacing: 0.06em;
 }
 
 .graph-scroll-range {

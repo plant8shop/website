@@ -15,6 +15,7 @@
   var remote = { works: {}, submissions: [] };
   var likedOnly = false;
   var selectedPoint = null;
+  var editPoint = null;
   var activeWork = null;
   var activeSubmission = null;
   var speech = null;
@@ -26,7 +27,9 @@
   var commentDialog = document.getElementById("commentDialog");
   var editDialog = document.getElementById("editDialog");
   var submitMap = document.getElementById("submissionMap");
+  var editMap = document.getElementById("editSubmissionMap");
   var unknown = document.getElementById("locationUnknown");
+  var editUnknown = document.getElementById("editLocationUnknown");
   var form = document.getElementById("submissionForm");
   var editForm = document.getElementById("editForm");
   var formStatus = document.getElementById("formStatus");
@@ -292,16 +295,38 @@
     });
   }
 
-  function positionFromEvent(event) {
-    var rect = submitMap.getBoundingClientRect();
+  function positionFromEvent(event, mapElement) {
+    var rect = mapElement.getBoundingClientRect();
     var x = Math.max(0, Math.min(1, (event.clientX - rect.left) / rect.width));
     var y = Math.max(0, Math.min(1, (event.clientY - rect.top) / rect.height));
     return { x: x, y: y, latitude: store.center.lat + (0.5 - y) * 0.02, longitude: store.center.lng + (x - 0.5) * 0.03 };
   }
 
+  function pointFromCoordinates(latitude, longitude) {
+    if (latitude == null || longitude == null || String(latitude).trim() === "" || String(longitude).trim() === "") return null;
+    var lat = Number(latitude);
+    var lng = Number(longitude);
+    if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
+    return {
+      x: Math.max(0, Math.min(1, 0.5 + (lng - store.center.lng) / 0.03)),
+      y: Math.max(0, Math.min(1, 0.5 - (lat - store.center.lat) / 0.02)),
+      latitude: lat,
+      longitude: lng
+    };
+  }
+
+  function locationIsUnknown(value) {
+    return value === true || String(value).toLowerCase() === "true";
+  }
+
   function renderSubmissionMap() {
     submitMap.innerHTML = mapScenery() + (selectedPoint && !unknown.checked ? '<span class="submission-pin" style="--x:' + (selectedPoint.x * 100) + '%;--y:' + (selectedPoint.y * 100) + '%">＋</span>' : '<span class="map-help">地図上の場所を押してください</span>');
     document.getElementById("selectedLocation").textContent = unknown.checked ? "場所の名前を入力してください。" : (selectedPoint ? "地図上の場所を選びました。" : "場所はまだ選ばれていません。");
+  }
+
+  function renderEditMap() {
+    editMap.innerHTML = mapScenery() + (editPoint && !editUnknown.checked ? '<span class="submission-pin" style="--x:' + (editPoint.x * 100) + '%;--y:' + (editPoint.y * 100) + '%">＋</span>' : '<span class="map-help">地図上の場所を押してください</span>');
+    document.getElementById("editSelectedLocation").textContent = editUnknown.checked ? "場所の名前で記録されています。" : (editPoint ? "現在の投稿場所です。地図を押すと変更できます。" : "場所はまだ選ばれていません。");
   }
 
   function setMode(mode) {
@@ -328,8 +353,13 @@
     editForm.elements.placeLabel.value = activeSubmission.placeLabel || "";
     editForm.elements.body.value = activeSubmission.body || "";
     editForm.elements.consent.checked = false;
-    document.getElementById("editPlaceField").hidden = activeSubmission.type === "comment";
-    document.getElementById("editTypeLabel").textContent = activeSubmission.type === "comment" ? "「" + (activeSubmission.workTitle || "作品") + "」へのコメント" : "場所の投稿";
+    var isComment = activeSubmission.type === "comment";
+    document.getElementById("editPlaceField").hidden = isComment;
+    document.getElementById("editLocationFields").hidden = isComment;
+    document.getElementById("editTypeLabel").textContent = isComment ? "「" + (activeSubmission.workTitle || "作品") + "」へのコメント" : "場所の投稿";
+    editUnknown.checked = locationIsUnknown(activeSubmission.locationUnknown);
+    editPoint = isComment || editUnknown.checked ? null : pointFromCoordinates(activeSubmission.latitude, activeSubmission.longitude);
+    if (!isComment) renderEditMap();
     document.getElementById("currentPhoto").innerHTML = activeSubmission.photoId ? '<p>写真を読み込んでいます…</p>' : "";
     document.getElementById("editStatus").textContent = "";
     editDialog.showModal();
@@ -384,10 +414,16 @@
 
   submitMap.addEventListener("click", function (event) {
     if (unknown.checked) return;
-    selectedPoint = positionFromEvent(event);
+    selectedPoint = positionFromEvent(event, submitMap);
     renderSubmissionMap();
   });
   unknown.addEventListener("change", renderSubmissionMap);
+  editMap.addEventListener("click", function (event) {
+    if (editUnknown.checked) return;
+    editPoint = positionFromEvent(event, editMap);
+    renderEditMap();
+  });
+  editUnknown.addEventListener("change", renderEditMap);
 
   form.addEventListener("submit", function (event) {
     event.preventDefault();
@@ -431,12 +467,18 @@
     if (!event.currentTarget.reportValidity() || !activeSubmission) return;
     var values = new FormData(event.currentTarget);
     var status = document.getElementById("editStatus");
+    if (activeSubmission.type !== "comment" && !editUnknown.checked && !editPoint) {
+      status.textContent = "地図上の場所を選ぶか、「地図では場所がわからない」を選んでください。";
+      return;
+    }
     status.textContent = "修正を保存しています…";
     submitRecord({
       action: "updateSubmission", id: activeSubmission.id, type: activeSubmission.type,
       workId: activeSubmission.workId, workTitle: activeSubmission.workTitle,
       placeLabel: activeSubmission.type === "comment" ? "" : values.get("placeLabel"), body: values.get("body"),
-      locationUnknown: activeSubmission.locationUnknown, latitude: activeSubmission.latitude, longitude: activeSubmission.longitude,
+      locationUnknown: activeSubmission.type === "comment" ? activeSubmission.locationUnknown : editUnknown.checked,
+      latitude: activeSubmission.type === "comment" ? activeSubmission.latitude : (editPoint ? editPoint.latitude : ""),
+      longitude: activeSubmission.type === "comment" ? activeSubmission.longitude : (editPoint ? editPoint.longitude : ""),
       file: values.get("photo"), keepPhotoId: activeSubmission.photoId, existing: activeSubmission
     }).then(function (record) {
       activeSubmission = record;

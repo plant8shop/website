@@ -415,6 +415,9 @@ h1 span {
 .dialog-form textarea { min-height: 170px; resize: vertical; }
 .dialog-form small { display: block; margin-top: 7px; color: var(--muted); font-size: .72rem; }
 .dialog-form .button { justify-self: start; }
+.edit-location-fields { display: grid; gap: 10px; }
+.edit-location-fields[hidden] { display: none; }
+.edit-location-fields .map-canvas { min-height: 240px; }
 .current-photo img { max-width: 100%; max-height: 280px; object-fit: contain; border: 1px solid var(--line); }
 .current-photo p { margin: 0; color: var(--muted); font-size: .78rem; }
 .photo-preview {

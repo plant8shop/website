@@ -3,37 +3,108 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="ランドリーシアターの店舗ページです。作品の視聴と、場所の記憶の投稿ができます。">
+  <meta name="description" content="ランドリーシアターの店舗ページです。作品を見たり聴いたり、場所の記憶を投稿できます。">
   <title>店舗｜ランドリーシアター</title>
-  <link rel="stylesheet" href="laundry.css?v=20261009-2">
+  <link rel="stylesheet" href="laundry.css?v=20261009-3">
 </head>
 <body class="store-page">
   <header class="site-header">
-    <nav class="nav" aria-label="ランドリーシアター">
+    <nav class="nav store-header" aria-label="ランドリーシアター">
       <a href="laundry.html" class="theater-wordmark">ランドリーシアター</a>
-      <a class="nav-back" href="laundry.html">店舗を選び直す</a>
+      <span id="headerStoreName" class="header-store-name"></span>
     </nav>
   </header>
+
   <main>
-    <section class="store-hero"><div class="section-inner section-inner-wide">
-      <p id="storeKicker" class="eyebrow"></p><h1 id="storeTitle"></h1><p id="storeDescription" class="hero-copy"></p>
-      <nav class="mode-nav" aria-label="店舗ページの機能"><a href="#works">作品を見る・聴く</a><a href="#submit">投稿する</a></nav>
-    </div></section>
-    <section id="works" class="section works-section"><div class="section-inner section-inner-wide">
-      <div class="section-heading"><span class="section-index">01</span><div><h2>作品を見る・聴く</h2><p>地図の印または作品名を選んでください。</p></div></div>
-      <div class="works-toolbar"><button id="likedFilter" class="button" type="button" aria-pressed="false">「いいね」した作品を表示</button><p>以前の反応は、このブラウザに匿名で記録されます。</p></div>
-      <div class="experience-grid"><div class="map-card map-card-flat"><div class="map-label-row"><span>AREA MAP</span><span class="map-provisional">仮地図</span></div><div id="mapCanvas" class="map-canvas" role="group" aria-label="店舗周辺の仮地図"></div></div><div><p id="workCount" class="section-note"></p><div id="workList" class="work-list"></div></div></div>
-    </div></section>
-    <section id="submit" class="section submit-section"><div class="section-inner section-inner-wide">
-      <div class="section-heading"><span class="section-index">02</span><div><h2>投稿する</h2><p>地図を押して場所を選ぶか、場所の手がかりを文章で教えてください。</p></div></div>
-      <form id="submissionForm" class="submission-form"><input class="honeypot" type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
-        <div class="submission-layout"><div><div class="map-card map-card-flat"><div class="map-label-row"><span>場所を選ぶ</span><span class="map-provisional">仮地図</span></div><button id="submissionMap" class="map-canvas submission-map" type="button" aria-label="仮地図上で投稿する場所を選ぶ"><span class="map-help">地図上の場所を押してください</span></button></div><p id="selectedLocation" class="selected-location">場所はまだ選ばれていません。</p><label class="unknown-row"><input id="locationUnknown" type="checkbox" name="locationUnknown"><span>地図では場所がわからない</span></label></div>
-          <div class="form-fields"><p class="store-fixed">投稿先 <strong id="submissionStoreName"></strong></p><label><span>場所の名前・目印（任意）</span><input name="placeLabel" type="text" maxlength="120" placeholder="例：角の自動販売機の前"></label><label><span>その場所について教えてください</span><textarea name="body" required maxlength="1200" rows="8" placeholder="そこで見たこと、聞こえた音、思い出したことなど"></textarea></label><label><span>表示する名前（任意）</span><input name="displayName" type="text" maxlength="60" placeholder="空欄なら匿名"></label><label class="consent-row"><input name="consent" type="checkbox" required><span>投稿内容を、作品制作や本サイトへの掲載素材として確認することに同意します。</span></label><button class="button button-primary" type="submit">投稿する</button><p id="formStatus" class="form-status" role="status" aria-live="polite"></p></div>
+    <section class="store-hero">
+      <div class="section-inner section-inner-wide">
+        <p id="storeKicker" class="eyebrow"></p>
+        <h1 id="storeTitle"></h1>
+        <p id="storeDescription" class="hero-copy"></p>
+        <nav class="mode-nav" aria-label="店舗ページの機能">
+          <button class="mode-button is-active" type="button" data-mode="works" aria-pressed="true"><span>01</span>作品を見る・聴く</button>
+          <button class="mode-button" type="button" data-mode="submit" aria-pressed="false"><span>02</span>投稿する</button>
+          <button class="mode-button" type="button" data-mode="mine" aria-pressed="false"><span>03</span>あなたが投稿したもの</button>
+        </nav>
+      </div>
+    </section>
+
+    <section id="works" class="section mode-panel works-section is-active" data-panel="works">
+      <div class="section-inner section-inner-wide">
+        <div class="section-heading"><span class="section-index">01</span><div><h2>作品を見る・聴く</h2><p>地図の印または作品名を選んでください。</p></div></div>
+        <div class="works-toolbar"><button id="likedFilter" class="button" type="button" aria-pressed="false">「いいね」した作品を表示</button></div>
+        <div class="experience-grid">
+          <div class="map-card map-card-flat"><div class="map-label-row"><span>AREA MAP</span><span class="map-provisional">仮地図</span></div><div id="mapCanvas" class="map-canvas" role="group" aria-label="店舗周辺の仮地図"></div></div>
+          <div><p id="workCount" class="section-note"></p><div id="workList" class="work-list"></div></div>
         </div>
-      </form>
-    </div></section>
+      </div>
+    </section>
+
+    <section id="submit" class="section mode-panel submit-section" data-panel="submit" hidden>
+      <div class="section-inner section-inner-wide">
+        <div class="section-heading"><span class="section-index">02</span><div><h2>投稿する</h2><p>場所を選び、そこで見たことや感じたことを送ってください。</p></div></div>
+        <form id="submissionForm" class="submission-form"><input class="honeypot" type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
+          <div class="submission-layout">
+            <div>
+              <div class="map-card map-card-flat"><div class="map-label-row"><span>場所を選ぶ</span><span class="map-provisional">仮地図</span></div><button id="submissionMap" class="map-canvas submission-map" type="button" aria-label="仮地図上で投稿する場所を選ぶ"><span class="map-help">地図上の場所を押してください</span></button></div>
+              <p id="selectedLocation" class="selected-location">場所はまだ選ばれていません。</p>
+              <label class="unknown-row"><input id="locationUnknown" type="checkbox" name="locationUnknown"><span>地図では場所がわからない</span></label>
+            </div>
+            <div class="form-fields">
+              <label><span>場所の名前</span><input name="placeLabel" type="text" maxlength="120" placeholder="例：角の自動販売機の前"></label>
+              <label><span>テキスト</span><textarea name="body" required maxlength="1200" rows="8" placeholder="そこで見たこと、聞こえた音、思い出したことなど"></textarea></label>
+              <label><span>写真（任意）</span><input name="photo" type="file" accept="image/*"><small>JPEG・PNGなど。大きな写真は送信時に縮小されます。</small></label>
+              <label class="consent-row"><input name="consent" type="checkbox" required><span>投稿内容を、作品制作や本サイトへの掲載素材として確認することに同意します。</span></label>
+              <button class="button button-primary" type="submit">投稿する</button>
+              <p id="formStatus" class="form-status" role="status" aria-live="polite"></p>
+            </div>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <section id="mine" class="section mode-panel mine-section" data-panel="mine" hidden>
+      <div class="section-inner section-inner-wide">
+        <div class="section-heading"><span class="section-index">03</span><div><h2>あなたが投稿したもの</h2><p>このブラウザから送った投稿を確認・修正できます。</p></div></div>
+        <div id="mySubmissionList" class="my-submission-list"></div>
+      </div>
+    </section>
   </main>
+
+  <footer class="theater-footer">
+    <div class="section-inner section-inner-wide footer-links">
+      <a href="laundry.html">店舗を選びなおす</a>
+      <a href="index.html">プラントショップ（企画・運営）</a>
+    </div>
+  </footer>
+
   <dialog id="workDialog" class="work-dialog" aria-labelledby="dialogTitle"><button id="dialogClose" class="dialog-close" type="button" aria-label="作品を閉じる">×</button><div id="dialogContent"></div></dialog>
-  <script src="data/laundry-waiting-room.js?v=20261009-2"></script><script src="laundry-store.js?v=20261009-2"></script>
+
+  <dialog id="commentDialog" class="form-dialog" aria-labelledby="commentDialogTitle">
+    <button class="dialog-close" type="button" data-close-dialog="commentDialog" aria-label="コメント画面を閉じる">×</button>
+    <form id="commentForm" class="dialog-form">
+      <p class="dialog-index">作品への投稿</p><h2 id="commentDialogTitle">コメントする</h2><p id="commentWorkTitle" class="dialog-context"></p>
+      <label><span>テキスト</span><textarea name="body" required maxlength="1200" rows="7"></textarea></label>
+      <label><span>写真（任意）</span><input name="photo" type="file" accept="image/*"><small>大きな写真は送信時に縮小されます。</small></label>
+      <label class="consent-row"><input name="consent" type="checkbox" required><span>投稿内容を、作品制作や本サイトへの掲載素材として確認することに同意します。</span></label>
+      <button class="button button-primary" type="submit">投稿する</button><p id="commentStatus" class="form-status" role="status" aria-live="polite"></p>
+    </form>
+  </dialog>
+
+  <dialog id="editDialog" class="form-dialog" aria-labelledby="editDialogTitle">
+    <button class="dialog-close" type="button" data-close-dialog="editDialog" aria-label="投稿を閉じる">×</button>
+    <form id="editForm" class="dialog-form">
+      <p class="dialog-index">あなたの投稿</p><h2 id="editDialogTitle">投稿を見る</h2><p id="editTypeLabel" class="dialog-context"></p>
+      <label id="editPlaceField"><span>場所の名前</span><input name="placeLabel" type="text" maxlength="120"></label>
+      <label><span>テキスト</span><textarea name="body" required maxlength="1200" rows="7"></textarea></label>
+      <div id="currentPhoto" class="current-photo"></div>
+      <label><span>写真を変更（任意）</span><input name="photo" type="file" accept="image/*"></label>
+      <label class="consent-row"><input name="consent" type="checkbox" required><span>修正内容を、作品制作や本サイトへの掲載素材として確認することに同意します。</span></label>
+      <button class="button button-primary" type="submit">修正を保存する</button><p id="editStatus" class="form-status" role="status" aria-live="polite"></p>
+    </form>
+  </dialog>
+
+  <script src="data/laundry-waiting-room.js?v=20261009-3"></script>
+  <script src="laundry-store.js?v=20261009-3"></script>
 </body>
 </html>

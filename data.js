@@ -149,6 +149,7 @@ const SITE_DATA = {
       <section>
         <h4>進行状況</h4>
         <p>実施場所の確保、参加者募集、広報などを分担し、2026年10月後半から11月末の実施に向けて準備しています。</p>
+        <p><a class="member-detail-link" href="laundry.html">「ランドリー待合室」視聴・投稿サイトを開く</a></p>
       </section>
       `,
       participantIds: ["umeda", "aoki", "yoshimura"],

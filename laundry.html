@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="コインランドリーの待ち時間に、地域の場所から生まれた写真・戯曲・朗読を鑑賞し、記憶や感覚を投稿するPlantshopのサイトです。">
+  <title>ランドリー待合室｜プラントショップ</title>
+  <link rel="canonical" href="https://plantshop.work/laundry.html">
+  <link rel="stylesheet" href="laundry.css?v=20261009-1">
+</head>
+<body>
+  <header class="site-header">
+    <nav class="nav" aria-label="サイト内ナビゲーション">
+      <a href="index.html" class="nav-logo-link" aria-label="プラントショップのトップへ">
+        <img src="assets/logo-text-display.webp" alt="プラントショップ" class="nav-logo" width="480" height="157">
+      </a>
+      <div class="nav-links">
+        <a href="#stores">店舗</a>
+        <a href="#works">視聴</a>
+        <a href="#submit">投稿</a>
+        <a href="index.html">公式サイト</a>
+      </div>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero" aria-labelledby="pageTitle">
+      <div class="hero-inner">
+        <p class="eyebrow">PLANTSHOP / LAUNDRY WAITING ROOM</p>
+        <h1 id="pageTitle">ランドリー待合室<br><span>居合わせる都市を想像する</span></h1>
+        <p class="hero-copy">洗濯や乾燥を待つあいだ、近くの場所から生まれた写真、短い戯曲、朗読をひらく。あなたが覚えている場所の断片も、ここから残せます。</p>
+        <div class="hero-actions">
+          <a class="button button-primary" href="#works">作品を視聴する</a>
+          <a class="button" href="#submit">場所について投稿する</a>
+        </div>
+      </div>
+      <div class="hero-orbit" aria-hidden="true">
+        <span class="orbit orbit-a"></span>
+        <span class="orbit orbit-b"></span>
+        <span class="orbit orbit-c"></span>
+        <span class="hero-dot"></span>
+      </div>
+    </section>
+
+    <section id="stores" class="section stores-section">
+      <div class="section-inner section-inner-wide">
+        <div class="section-heading">
+          <span class="section-index">01</span>
+          <div>
+            <h2>店舗を選ぶ</h2>
+            <p>店舗ごとに、その周辺で集まった場所と作品を分けています。</p>
+          </div>
+        </div>
+        <div id="storeTabs" class="store-tabs" role="tablist" aria-label="店舗の切り替え"></div>
+        <article id="storeSummary" class="store-summary" aria-live="polite"></article>
+      </div>
+    </section>
+
+    <section id="works" class="section works-section">
+      <div class="section-inner section-inner-wide">
+        <div class="section-heading">
+          <span class="section-index">02</span>
+          <div>
+            <h2>地図から作品を視聴する</h2>
+            <p>仮地図上の印、または作品一覧を選んでください。</p>
+          </div>
+        </div>
+        <div class="experience-grid">
+          <div class="map-card">
+            <div class="map-label-row">
+              <span>AREA MAP</span>
+              <span class="map-provisional">仮地図</span>
+            </div>
+            <div id="mapCanvas" class="map-canvas" role="group" aria-label="周辺の仮地図"></div>
+            <p class="map-note">本番では各店舗周辺の地図と、投稿・作品の位置を表示します。</p>
+          </div>
+          <div>
+            <p id="workCount" class="section-note"></p>
+            <div id="workList" class="work-list"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="submit" class="section submit-section">
+      <div class="section-inner">
+        <div class="section-heading">
+          <span class="section-index">03</span>
+          <div>
+            <h2>場所の断片を投稿する</h2>
+            <p>写真、記憶、感覚、想像上の出来事など、短い断片から送れます。</p>
+          </div>
+        </div>
+        <form id="submissionForm" class="submission-form">
+          <div class="form-grid">
+            <label>
+              <span>店舗</span>
+              <select id="submissionStore" name="store" required></select>
+            </label>
+            <label>
+              <span>場所の名前・目印</span>
+              <input name="place" type="text" required maxlength="80" placeholder="例：角の自動販売機の前">
+            </label>
+          </div>
+          <fieldset>
+            <legend>投稿するもの</legend>
+            <div class="choice-row">
+              <label><input type="radio" name="kind" value="記憶" checked>記憶</label>
+              <label><input type="radio" name="kind" value="感覚">感覚</label>
+              <label><input type="radio" name="kind" value="写真">写真</label>
+              <label><input type="radio" name="kind" value="想像上の物語">想像上の物語</label>
+            </div>
+          </fieldset>
+          <label>
+            <span>場所について教えてください</span>
+            <textarea name="story" required maxlength="1200" rows="7" placeholder="そこで見たこと、聞こえた音、思い出したこと、起こりそうなことなど"></textarea>
+          </label>
+          <label>
+            <span>写真（任意）</span>
+            <input id="submissionPhoto" name="photo" type="file" accept="image/*">
+            <small>メールが開いたあと、選んだ写真をご自身で添付してください。</small>
+          </label>
+          <div class="form-grid">
+            <label>
+              <span>お名前（任意）</span>
+              <input name="name" type="text" maxlength="60" placeholder="匿名でも投稿できます">
+            </label>
+            <label>
+              <span>返信先メール（任意）</span>
+              <input name="replyTo" type="email" maxlength="120" placeholder="確認が必要な場合のみ使用します">
+            </label>
+          </div>
+          <label class="consent-row">
+            <input name="consent" type="checkbox" required>
+            <span>投稿内容を、戯曲制作や本サイトへの掲載素材としてPlantshopが確認することに同意します。掲載時は個人情報を公開しません。</span>
+          </label>
+          <div class="submit-row">
+            <button class="button button-primary" type="submit">メールで投稿する</button>
+            <p>入力内容からPlantshop宛てのメール下書きを作ります。このページだけでは送信されません。</p>
+          </div>
+          <p id="formStatus" class="form-status" role="status" aria-live="polite"></p>
+        </form>
+      </div>
+    </section>
+
+    <section class="section about-project-section">
+      <div class="section-inner">
+        <div class="section-heading">
+          <span class="section-index">04</span>
+          <div><h2>この企画について</h2></div>
+        </div>
+        <p>京都市内のコインランドリーを基点に、周辺の場所にまつわる写真、感覚、記憶、想像上の物語を集め、短い戯曲や朗読音声へ変えて地域へ戻す試みです。</p>
+        <p class="muted">現在は画面構成を確認するための試作版です。店舗名、地図、作品、投稿後の運用は協力店舗との調整後に更新します。</p>
+      </div>
+    </section>
+  </main>
+
+  <dialog id="workDialog" class="work-dialog" aria-labelledby="dialogTitle">
+    <button id="dialogClose" class="dialog-close" type="button" aria-label="作品を閉じる">×</button>
+    <div id="dialogContent"></div>
+  </dialog>
+
+  <script src="data/laundry-waiting-room.js?v=20261009-1"></script>
+  <script src="laundry.js?v=20261009-1"></script>
+</body>
+</html>

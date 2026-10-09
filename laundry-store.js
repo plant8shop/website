@@ -12,7 +12,12 @@
 
   var api = data.apiUrl || "";
   var localKey = "plantshop_laundry_theater_submissions_" + visitorId;
+  var likeOverrideKey = "plantshop_laundry_theater_likes_" + visitorId;
   var remote = { works: {}, submissions: [] };
+  var remoteLoaded = false;
+  var likeOverrides = readLikeOverrides();
+  var photoPreviewCache = {};
+  var photoDbPromise = null;
   var likedOnly = false;
   var selectedPoint = null;
   var editPoint = null;
@@ -45,7 +50,33 @@
   }
 
   function stateFor(workId) {
-    return remote.works[workId] || { likeCount: 0, liked: false };
+    var base = remote.works[workId] || { likeCount: 0, liked: false };
+    var override = likeOverrides[workId];
+    if (!override) return base;
+    var count = Number(base.likeCount) || 0;
+    if (Boolean(base.liked) !== override.liked) count += override.liked ? 1 : -1;
+    return { likeCount: Math.max(0, count), liked: override.liked, syncing: true };
+  }
+
+  function readLikeOverrides() {
+    try { return JSON.parse(localStorage.getItem(likeOverrideKey) || "{}"); } catch (error) { return {}; }
+  }
+
+  function saveLikeOverrides() {
+    try { localStorage.setItem(likeOverrideKey, JSON.stringify(likeOverrides)); } catch (error) {}
+  }
+
+  function reconcileLikeOverrides() {
+    if (!remoteLoaded) return;
+    var changed = false;
+    Object.keys(likeOverrides).forEach(function (workId) {
+      var serverState = remote.works[workId];
+      if (serverState && Boolean(serverState.liked) === likeOverrides[workId].liked) {
+        delete likeOverrides[workId];
+        changed = true;
+      }
+    });
+    if (changed) saveLikeOverrides();
   }
 
   function mapScenery() {
@@ -81,7 +112,7 @@
   function renderDialog() {
     if (!activeWork) return;
     var state = stateFor(activeWork.id);
-    dialogContent.innerHTML = '<p class="dialog-index">STORE ' + escapeHtml(store.index) + ' / WORK ' + escapeHtml(activeWork.number) + '</p><h2 id="dialogTitle">' + escapeHtml(activeWork.title) + '</h2><p class="dialog-place">' + escapeHtml(activeWork.place) + '</p><div class="dialog-photo" role="img" aria-label="' + escapeHtml(activeWork.imageLabel) + '"><span>' + escapeHtml(activeWork.imageLabel) + '</span></div><p class="dialog-summary">' + escapeHtml(activeWork.summary) + '</p><div class="listen-row"><button id="listenButton" class="button button-primary" type="button">仮朗読を再生</button><span>ブラウザの音声で試聴します</span></div><div class="script"><h3>短い戯曲</h3>' + activeWork.script.map(function (paragraph) { return '<p>' + escapeHtml(paragraph) + '</p>'; }).join("") + '</div><section class="reactions"><button id="likeButton" class="like-button' + (state.liked ? ' is-liked' : '') + '" type="button" aria-pressed="' + state.liked + '">♡ <strong>' + (state.liked ? 'いいね済み' : 'いいね') + '</strong><span>' + state.likeCount + '</span></button><button id="commentButton" class="button" type="button">コメントする</button></section>';
+    dialogContent.innerHTML = '<p class="dialog-index">STORE ' + escapeHtml(store.index) + ' / WORK ' + escapeHtml(activeWork.number) + '</p><h2 id="dialogTitle">' + escapeHtml(activeWork.title) + '</h2><p class="dialog-place">' + escapeHtml(activeWork.place) + '</p><div class="dialog-photo" role="img" aria-label="' + escapeHtml(activeWork.imageLabel) + '"><span>' + escapeHtml(activeWork.imageLabel) + '</span></div><p class="dialog-summary">' + escapeHtml(activeWork.summary) + '</p><div class="listen-row"><button id="listenButton" class="button button-primary" type="button">仮朗読を再生</button><span>ブラウザの音声で試聴します</span></div><div class="script"><h3>短い戯曲</h3>' + activeWork.script.map(function (paragraph) { return '<p>' + escapeHtml(paragraph) + '</p>'; }).join("") + '</div><section class="reactions"><button id="likeButton" class="like-button' + (state.liked ? ' is-liked' : '') + '" type="button" aria-pressed="' + state.liked + '">♡ <strong>' + (state.liked ? 'いいね済み' : 'いいね') + '</strong><span>' + state.likeCount + '</span>' + (state.syncing ? '<small>保存中</small>' : '') + '</button><button id="commentButton" class="button" type="button">コメントする</button></section>';
     document.getElementById("listenButton").addEventListener("click", toggleSpeech);
     document.getElementById("likeButton").addEventListener("click", toggleLike);
     document.getElementById("commentButton").addEventListener("click", openCommentForm);
@@ -127,16 +158,20 @@
   }
 
   function toggleLike() {
+    var workId = activeWork.id;
     var state = stateFor(activeWork.id);
-    state.liked = !state.liked;
-    state.likeCount += state.liked ? 1 : -1;
+    var previousOverride = likeOverrides[workId];
+    likeOverrides[workId] = { liked: !state.liked, changedAt: Date.now() };
+    saveLikeOverrides();
     renderDialog();
     renderWorks();
-    post({ action: "toggleLike", workId: activeWork.id }).then(function () {
-      setTimeout(loadRemote, 700);
+    post({ action: "toggleLike", workId: workId }).then(function () {
+      setTimeout(loadRemote, 1200);
+      setTimeout(loadRemote, 3500);
     }).catch(function () {
-      state.liked = !state.liked;
-      state.likeCount += state.liked ? 1 : -1;
+      if (previousOverride) likeOverrides[workId] = previousOverride;
+      else delete likeOverrides[workId];
+      saveLikeOverrides();
       renderDialog();
       renderWorks();
     });
@@ -186,8 +221,71 @@
     node.innerHTML = submissions.map(function (item) {
       var isComment = item.type === "comment";
       var title = isComment ? (item.workTitle || "作品へのコメント") : (item.placeLabel || "場所の投稿");
-      return '<button class="my-submission-card" type="button" data-submission-id="' + escapeHtml(item.id) + '"><span class="submission-type">' + (isComment ? "作品へのコメント" : "場所の投稿") + '</span><strong>' + escapeHtml(title) + '</strong><p>' + escapeHtml(item.body) + '</p><small>' + escapeHtml(formatDate(item.updatedAt || item.createdAt)) + '</small><span class="work-arrow" aria-hidden="true">↗</span></button>';
+      var photoSlot = item.photoId || item.photoName ? '<span class="my-submission-thumb" data-photo-slot="' + escapeHtml(item.id) + '" hidden></span>' : '';
+      return '<button class="my-submission-card" type="button" data-submission-id="' + escapeHtml(item.id) + '">' + photoSlot + '<span class="submission-type">' + (isComment ? "作品へのコメント" : "場所の投稿") + '</span><strong>' + escapeHtml(title) + '</strong><p>' + escapeHtml(item.body) + '</p><small>' + escapeHtml(formatDate(item.updatedAt || item.createdAt)) + '</small><span class="work-arrow" aria-hidden="true">↗</span></button>';
     }).join("");
+    hydrateSubmissionThumbnails(submissions);
+  }
+
+  function openPhotoDb() {
+    if (photoDbPromise) return photoDbPromise;
+    if (!("indexedDB" in window)) return Promise.resolve(null);
+    photoDbPromise = new Promise(function (resolve) {
+      var request = indexedDB.open("plantshop_laundry_theater", 1);
+      request.onupgradeneeded = function () {
+        if (!request.result.objectStoreNames.contains("photoPreviews")) request.result.createObjectStore("photoPreviews", { keyPath: "id" });
+      };
+      request.onsuccess = function () { resolve(request.result); };
+      request.onerror = function () { resolve(null); };
+    });
+    return photoDbPromise;
+  }
+
+  function cachePhotoPreview(id, dataUrl) {
+    if (!id || !dataUrl) return Promise.resolve();
+    photoPreviewCache[id] = dataUrl;
+    return openPhotoDb().then(function (db) {
+      if (!db) return;
+      return new Promise(function (resolve) {
+        var transaction = db.transaction("photoPreviews", "readwrite");
+        transaction.objectStore("photoPreviews").put({ id: id, dataUrl: dataUrl, updatedAt: Date.now() });
+        transaction.oncomplete = function () { resolve(); };
+        transaction.onerror = function () { resolve(); };
+      });
+    });
+  }
+
+  function getCachedPhotoPreview(id) {
+    if (photoPreviewCache[id]) return Promise.resolve(photoPreviewCache[id]);
+    return openPhotoDb().then(function (db) {
+      if (!db) return "";
+      return new Promise(function (resolve) {
+        var request = db.transaction("photoPreviews", "readonly").objectStore("photoPreviews").get(id);
+        request.onsuccess = function () {
+          var value = request.result && request.result.dataUrl || "";
+          if (value) photoPreviewCache[id] = value;
+          resolve(value);
+        };
+        request.onerror = function () { resolve(""); };
+      });
+    });
+  }
+
+  function setPhotoNode(node, dataUrl, altText) {
+    if (!node || !dataUrl) return;
+    node.hidden = false;
+    node.innerHTML = '<img src="' + dataUrl + '" alt="' + escapeHtml(altText) + '">';
+  }
+
+  function hydrateSubmissionThumbnails(submissions) {
+    submissions.forEach(function (item) {
+      if (!item.photoId && !item.photoName) return;
+      getCachedPhotoPreview(item.id).then(function (dataUrl) {
+        if (!dataUrl) return;
+        var slot = Array.from(document.querySelectorAll("[data-photo-slot]")).find(function (node) { return node.dataset.photoSlot === item.id; });
+        setPhotoNode(slot, dataUrl, "投稿写真");
+      });
+    });
   }
 
   function formatDate(value) {
@@ -198,7 +296,7 @@
   }
 
   function filePayload(file) {
-    if (!file) return Promise.resolve({ photoData: "", photoName: "", photoType: "" });
+    if (!file || !file.name || !file.size) return Promise.resolve({ photoData: "", photoName: "", photoType: "", photoPreview: "" });
     if (!file.type.match(/^image\//)) return Promise.reject(new Error("写真ファイルを選んでください。"));
     return new Promise(function (resolve, reject) {
       var reader = new FileReader();
@@ -207,13 +305,18 @@
         var image = new Image();
         image.onerror = function () { reject(new Error("写真を読み込めませんでした。")); };
         image.onload = function () {
-          var scale = Math.min(1, 1600 / Math.max(image.width, image.height));
+          var scale = Math.min(1, 1280 / Math.max(image.width, image.height));
           var canvas = document.createElement("canvas");
           canvas.width = Math.max(1, Math.round(image.width * scale));
           canvas.height = Math.max(1, Math.round(image.height * scale));
           canvas.getContext("2d").drawImage(image, 0, 0, canvas.width, canvas.height);
-          var dataUrl = canvas.toDataURL("image/jpeg", 0.82);
-          resolve({ photoData: dataUrl.split(",")[1], photoName: file.name.replace(/\.[^.]+$/, "") + ".jpg", photoType: "image/jpeg" });
+          var dataUrl = canvas.toDataURL("image/jpeg", 0.76);
+          var thumbScale = Math.min(1, 420 / Math.max(image.width, image.height));
+          var thumb = document.createElement("canvas");
+          thumb.width = Math.max(1, Math.round(image.width * thumbScale));
+          thumb.height = Math.max(1, Math.round(image.height * thumbScale));
+          thumb.getContext("2d").drawImage(image, 0, 0, thumb.width, thumb.height);
+          resolve({ photoData: dataUrl.split(",")[1], photoName: file.name.replace(/\.[^.]+$/, "") + ".jpg", photoType: "image/jpeg", photoPreview: thumb.toDataURL("image/jpeg", 0.7) });
         };
         image.src = String(reader.result);
       };
@@ -289,8 +392,10 @@
           createdAt: existing.createdAt || now,
           updatedAt: now
         });
-        writeLocalSubmission(record);
-        return record;
+        return cachePhotoPreview(options.id, photo.photoPreview).then(function () {
+          writeLocalSubmission(record);
+          return record;
+        });
       });
     });
   }
@@ -360,10 +465,17 @@
     editUnknown.checked = locationIsUnknown(activeSubmission.locationUnknown);
     editPoint = isComment || editUnknown.checked ? null : pointFromCoordinates(activeSubmission.latitude, activeSubmission.longitude);
     if (!isComment) renderEditMap();
-    document.getElementById("currentPhoto").innerHTML = activeSubmission.photoId ? '<p>写真を読み込んでいます…</p>' : "";
+    var currentPhotoNode = document.getElementById("currentPhoto");
+    currentPhotoNode.innerHTML = activeSubmission.photoId ? '<p>写真を読み込んでいます…</p>' : "";
     document.getElementById("editStatus").textContent = "";
     editDialog.showModal();
-    if (activeSubmission.photoId) loadSubmissionDetails(activeSubmission.id);
+    if (activeSubmission.photoId) {
+      getCachedPhotoPreview(activeSubmission.id).then(function (dataUrl) {
+        if (dataUrl) setPhotoNode(currentPhotoNode, dataUrl, "現在の写真");
+        else if (activeSubmission.photoId === "pending") currentPhotoNode.innerHTML = '<p>写真を保存しています…</p>';
+        else loadSubmissionDetails(activeSubmission.id);
+      });
+    }
   }
 
   function loadSubmissionDetails(submissionId) {
@@ -374,7 +486,9 @@
       var photoNode = document.getElementById("currentPhoto");
       if (payload && payload.ok && payload.submission && payload.submission.photoData) {
         var detail = payload.submission;
-        photoNode.innerHTML = '<img src="data:' + escapeHtml(detail.photoType || "image/jpeg") + ';base64,' + detail.photoData + '" alt="現在の写真">';
+        var dataUrl = "data:" + escapeHtml(detail.photoType || "image/jpeg") + ";base64," + detail.photoData;
+        setPhotoNode(photoNode, dataUrl, "現在の写真");
+        cachePhotoPreview(submissionId, dataUrl);
       } else if (photoNode) {
         photoNode.innerHTML = '<p>写真を読み込めませんでした。</p>';
       }
@@ -392,24 +506,29 @@
   }
 
   function loadRemote() {
-    if (!api) return;
+    if (!api) return Promise.resolve(false);
+    return new Promise(function (resolve) {
     var callback = "laundryCallback_" + Date.now();
     var script = document.createElement("script");
     window[callback] = function (payload) {
       if (payload && payload.ok) {
         remote = payload;
+        remoteLoaded = true;
         remote.works = remote.works || {};
         remote.submissions = remote.submissions || remote.mine || [];
+        reconcileLikeOverrides();
         renderWorks();
         renderMySubmissions();
         if (dialog.open) renderDialog();
       }
       delete window[callback];
       script.remove();
+      resolve(Boolean(payload && payload.ok));
     };
     script.src = api + "?action=snapshot&visitorId=" + encodeURIComponent(visitorId) + "&storeId=" + encodeURIComponent(store.id) + "&callback=" + callback;
-    script.onerror = function () { delete window[callback]; script.remove(); };
+    script.onerror = function () { delete window[callback]; script.remove(); resolve(false); };
     document.head.appendChild(script);
+    });
   }
 
   submitMap.addEventListener("click", function (event) {
@@ -523,4 +642,6 @@
   renderSubmissionMap();
   renderMySubmissions();
   loadRemote();
+  setInterval(function () { if (!document.hidden) loadRemote(); }, 10000);
+  document.addEventListener("visibilitychange", function () { if (!document.hidden) loadRemote(); });
 })();

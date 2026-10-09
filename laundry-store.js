@@ -28,6 +28,7 @@
   var submitMap = document.getElementById("submissionMap");
   var unknown = document.getElementById("locationUnknown");
   var form = document.getElementById("submissionForm");
+  var editForm = document.getElementById("editForm");
   var formStatus = document.getElementById("formStatus");
 
   function escapeHtml(value) {
@@ -217,6 +218,36 @@
     });
   }
 
+  function bindPhotoPreview(input, preview, altText) {
+    var objectUrl = "";
+
+    function clearPreview() {
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
+      objectUrl = "";
+      preview.replaceChildren();
+      preview.hidden = true;
+    }
+
+    input.addEventListener("change", function () {
+      clearPreview();
+      var file = input.files && input.files[0];
+      if (!file) return;
+      if (!file.type.match(/^image\//)) {
+        preview.innerHTML = '<p>写真ファイルを選んでください。</p>';
+        preview.hidden = false;
+        return;
+      }
+      objectUrl = URL.createObjectURL(file);
+      preview.innerHTML = '<img src="' + objectUrl + '" alt="' + escapeHtml(altText) + '"><p>' + escapeHtml(file.name) + '</p>';
+      preview.hidden = false;
+    });
+
+    return clearPreview;
+  }
+
+  var clearSubmissionPhotoPreview = bindPhotoPreview(form.elements.photo, document.getElementById("submissionPhotoPreview"), "投稿する写真のプレビュー");
+  var clearEditPhotoPreview = bindPhotoPreview(editForm.elements.photo, document.getElementById("editPhotoPreview"), "変更後の写真のプレビュー");
+
   function submitRecord(options) {
     return filePayload(options.file).then(function (photo) {
       var values = Object.assign({
@@ -292,8 +323,8 @@
   function openEditForm(id) {
     activeSubmission = mySubmissions().find(function (item) { return item.id === id; });
     if (!activeSubmission) return;
-    var editForm = document.getElementById("editForm");
     editForm.reset();
+    clearEditPhotoPreview();
     editForm.elements.placeLabel.value = activeSubmission.placeLabel || "";
     editForm.elements.body.value = activeSubmission.body || "";
     editForm.elements.consent.checked = false;
@@ -373,6 +404,7 @@
       file: values.get("photo"), website: values.get("website")
     }).then(function () {
       form.reset();
+      clearSubmissionPhotoPreview();
       selectedPoint = null;
       renderSubmissionMap();
       formStatus.textContent = "投稿を受け付けました。";
@@ -394,7 +426,7 @@
     }).catch(function (error) { status.textContent = error.message; });
   });
 
-  document.getElementById("editForm").addEventListener("submit", function (event) {
+  editForm.addEventListener("submit", function (event) {
     event.preventDefault();
     if (!event.currentTarget.reportValidity() || !activeSubmission) return;
     var values = new FormData(event.currentTarget);
@@ -432,6 +464,7 @@
   [dialog, commentDialog, editDialog].forEach(function (item) {
     item.addEventListener("click", function (event) { if (event.target === item) { if (item === dialog) stopSpeech(); item.close(); } });
   });
+  editDialog.addEventListener("close", clearEditPhotoPreview);
   document.getElementById("likedFilter").addEventListener("click", function (event) {
     likedOnly = !likedOnly;
     event.currentTarget.setAttribute("aria-pressed", likedOnly);

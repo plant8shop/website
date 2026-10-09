@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="ランドリーシアターの店舗ページです。作品を見たり聴いたり、場所の記憶を投稿できます。">
   <title>店舗｜ランドリーシアター</title>
-  <link rel="stylesheet" href="laundry.css?v=20261009-3">
+  <link rel="stylesheet" href="laundry.css?v=20261009-4">
 </head>
 <body class="store-page">
   <header class="site-header">
@@ -54,6 +54,7 @@
               <label><span>場所の名前</span><input name="placeLabel" type="text" maxlength="120" placeholder="例：角の自動販売機の前"></label>
               <label><span>テキスト</span><textarea name="body" required maxlength="1200" rows="8" placeholder="そこで見たこと、聞こえた音、思い出したことなど"></textarea></label>
               <label><span>写真（任意）</span><input name="photo" type="file" accept="image/*"><small>JPEG・PNGなど。大きな写真は送信時に縮小されます。</small></label>
+              <div id="submissionPhotoPreview" class="photo-preview" aria-live="polite" hidden></div>
               <label class="consent-row"><input name="consent" type="checkbox" required><span>投稿内容を、作品制作や本サイトへの掲載素材として確認することに同意します。</span></label>
               <button class="button button-primary" type="submit">投稿する</button>
               <p id="formStatus" class="form-status" role="status" aria-live="polite"></p>
@@ -99,12 +100,13 @@
       <label><span>テキスト</span><textarea name="body" required maxlength="1200" rows="7"></textarea></label>
       <div id="currentPhoto" class="current-photo"></div>
       <label><span>写真を変更（任意）</span><input name="photo" type="file" accept="image/*"></label>
+      <div id="editPhotoPreview" class="photo-preview" aria-live="polite" hidden></div>
       <label class="consent-row"><input name="consent" type="checkbox" required><span>修正内容を、作品制作や本サイトへの掲載素材として確認することに同意します。</span></label>
       <button class="button button-primary" type="submit">修正を保存する</button><p id="editStatus" class="form-status" role="status" aria-live="polite"></p>
     </form>
   </dialog>
 
   <script src="data/laundry-waiting-room.js?v=20261009-3"></script>
-  <script src="laundry-store.js?v=20261009-3"></script>
+  <script src="laundry-store.js?v=20261009-4"></script>
 </body>
 </html>

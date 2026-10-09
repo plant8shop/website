@@ -184,10 +184,6 @@ main {
   background: linear-gradient(145deg, #e5f8f1 0%, #f3fbf8 52%, #ffffff 100%);
 }
 
-#laundry-room {
-  background: linear-gradient(135deg, #f5f3fb 0%, #ffffff 52%, #e8f8f2 100%);
-}
-
 #member-share {
   min-height: calc(100vh - var(--anchor-offset));
   background: #fff;

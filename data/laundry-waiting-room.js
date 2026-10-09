@@ -1,5 +1,5 @@
 window.LAUNDRY_WAITING_ROOM_DATA = {
-  submissionEmail: "plant8shop@gmail.com",
+  apiUrl: "https://script.google.com/macros/s/AKfycbxqvrKF72LX8TN2riDJRHFfl-VcenqqlZSQUapmuRIRDYAukbSSXAJOHdDZcZQyf5MBLw/exec",
   stores: [
     {
       id: "kitaoji-model",
@@ -8,6 +8,7 @@ window.LAUNDRY_WAITING_ROOM_DATA = {
       area: "京都・北大路周辺",
       status: "試作表示",
       description: "店舗と周辺地域の調整前に、視聴と投稿の流れを確認するためのモデルページです。",
+      center: { lat: 35.0443, lng: 135.7588 },
       works: [
         {
           id: "lost-property",
@@ -51,6 +52,7 @@ window.LAUNDRY_WAITING_ROOM_DATA = {
       area: "京都市内・調整中",
       status: "準備中",
       description: "協力店舗との調整後に、店舗名、周辺地図、初期作品を掲載します。",
+      center: { lat: 35.0116, lng: 135.7681 },
       works: []
     }
   ]

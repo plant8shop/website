@@ -301,6 +301,9 @@ h1 span {
 .detailed-map::before, .detailed-map::after { content: ""; position: absolute; background: rgba(255,255,255,.85); border: 1px solid rgba(77,71,127,.16); }
 .detailed-map::before { width: 42%; height: 24%; left: 5%; top: 9%; }
 .detailed-map::after { width: 30%; height: 30%; right: 7%; bottom: 8%; }
+.detailed-map.has-image { min-height: 0; aspect-ratio: 860 / 1167; background: #fff; }
+.detailed-map.has-image::before, .detailed-map.has-image::after { display: none; }
+.detailed-map-image { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 .map-note { position: absolute; z-index: 2; left: var(--x); top: var(--y); max-width: 150px; padding: 5px 8px; transform: translate(-50%,-50%); border: 1px solid var(--line-strong); background: rgba(255,255,255,.94); color: var(--violet-dark); font-size: .68rem; line-height: 1.4; }
 .dialog-summary { margin: 28px 0; padding: 22px 0; border-top: 1px solid var(--violet-dark); border-bottom: 1px solid var(--violet-dark); color: var(--text-soft); }
 .audio-player { display: grid; grid-template-columns: 50px 1fr; gap: 12px 14px; align-items: center; margin: 0 0 42px; padding: 15px; border: 1px solid var(--line-strong); background: #fff; }

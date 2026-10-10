@@ -26,11 +26,12 @@ window.LAUNDRY_WAITING_ROOM_DATA = {
             { label: "場所の写真 2 / 準備中" }
           ],
           areaMap: {
+            image: "assets/laundry-lost-property-area-map.png",
+            imageAlt: "落とし物の場所周辺の航空写真",
             notes: [
-              { x: 18, y: 54, text: "大通り" },
-              { x: 53, y: 38, text: "斜めに入る細い道" },
-              { x: 72, y: 24, text: "木陰" },
-              { x: 68, y: 70, text: "掃く音が聞こえた場所" }
+              { x: 66, y: 34, text: "落とし物の場所" },
+              { x: 64, y: 55, text: "細い道" },
+              { x: 78, y: 20, text: "木陰" }
             ]
           },
           script: [

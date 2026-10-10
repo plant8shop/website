@@ -12,6 +12,7 @@
 
   var api = data.apiUrl || "";
   var localKey = "plantshop_laundry_theater_submissions_" + visitorId;
+  var deletedKey = "plantshop_laundry_theater_deleted_" + visitorId;
   var likeOverrideKey = "plantshop_laundry_theater_likes_" + visitorId;
   var remote = { works: {}, submissions: [] };
   var remoteLoaded = false;
@@ -302,8 +303,28 @@
     renderMySubmissions();
   }
 
+  function readDeletedSubmissions() {
+    try { return JSON.parse(localStorage.getItem(deletedKey) || "{}"); } catch (error) { return {}; }
+  }
+
+  function removeLocalSubmission(id) {
+    var records = readLocalSubmissions().filter(function (item) { return item.id !== id; });
+    localStorage.setItem(localKey, JSON.stringify(records));
+    var deleted = readDeletedSubmissions();
+    deleted[id] = Date.now();
+    localStorage.setItem(deletedKey, JSON.stringify(deleted));
+    for (var index = 0; index < 5; index++) delete photoPreviewCache[photoCacheKey(id, index)];
+    openPhotoDb().then(function (db) {
+      if (!db) return;
+      var transaction = db.transaction("photoPreviews", "readwrite");
+      for (var index = 0; index < 5; index++) transaction.objectStore("photoPreviews").delete(photoCacheKey(id, index));
+    });
+    renderMySubmissions();
+  }
+
   function mySubmissions() {
     var combined = readLocalSubmissions();
+    var deleted = readDeletedSubmissions();
     var fromRemote = remote.submissions || remote.mine || [];
     fromRemote.filter(function (item) { return !item.storeId || item.storeId === store.id; }).forEach(function (item) {
       var normalized = Object.assign({}, item, { id: item.id || item.submissionId });
@@ -311,7 +332,7 @@
       if (index >= 0) combined[index] = Object.assign({}, combined[index], normalized);
       else combined.push(normalized);
     });
-    return combined.filter(function (item) { return item.storeId === store.id; }).sort(function (a, b) {
+    return combined.filter(function (item) { return item.storeId === store.id && !deleted[item.id]; }).sort(function (a, b) {
       return String(b.updatedAt || b.createdAt || "").localeCompare(String(a.updatedAt || a.createdAt || ""));
     });
   }
@@ -341,7 +362,7 @@
     var node = document.getElementById("mySubmissionList");
     var submissions = mySubmissions();
     if (!submissions.length) {
-      node.innerHTML = '<div class="empty-card"><strong>まだ投稿はありません</strong><p>「投稿する」または作品の「コメントする」から送った内容がここに並びます。</p></div>';
+      node.innerHTML = '<div class="empty-card"><strong>まだ投稿・コメントはありません</strong><p>「投稿する」または作品の「コメントする」から送った内容がここに並びます。</p></div>';
       return;
     }
     node.innerHTML = submissions.map(function (item) {
@@ -464,18 +485,45 @@
 
   function bindPhotoPreview(input, preview, altText) {
     var objectUrls = [];
+    var selectedFiles = [];
 
     function clearPreview() {
       objectUrls.forEach(function (url) { URL.revokeObjectURL(url); });
       objectUrls = [];
+      selectedFiles = [];
+      input.value = "";
       preview.replaceChildren();
       preview.hidden = true;
     }
 
+    function syncInputFiles() {
+      if (!("DataTransfer" in window)) return;
+      var transfer = new DataTransfer();
+      selectedFiles.forEach(function (file) { transfer.items.add(file); });
+      input.files = transfer.files;
+    }
+
+    function renderPreview() {
+      objectUrls.forEach(function (url) { URL.revokeObjectURL(url); });
+      objectUrls = [];
+      if (!selectedFiles.length) {
+        preview.replaceChildren();
+        preview.hidden = true;
+        return;
+      }
+      preview.innerHTML = selectedFiles.map(function (file, index) {
+        var url = URL.createObjectURL(file);
+        objectUrls.push(url);
+        return '<figure><img src="' + url + '" alt="' + escapeHtml(altText + " " + (index + 1)) + '"><figcaption>' + escapeHtml(file.name) + '</figcaption><button class="photo-remove" type="button" data-remove-photo="' + index + '" aria-label="' + escapeHtml(file.name + "を削除") + '">削除</button></figure>';
+      }).join("");
+      preview.hidden = false;
+    }
+
     input.addEventListener("change", function () {
-      clearPreview();
-      var files = Array.from(input.files || []);
-      if (!files.length) return;
+      var incoming = Array.from(input.files || []);
+      var files = selectedFiles.concat(incoming.filter(function (file) {
+        return !selectedFiles.some(function (selected) { return selected.name === file.name && selected.size === file.size && selected.lastModified === file.lastModified; });
+      }));
       if (files.length > 5) {
         preview.innerHTML = '<p>写真は5枚まで選択できます。</p>';
         preview.hidden = false;
@@ -487,12 +535,17 @@
         preview.hidden = false;
         return;
       }
-      preview.innerHTML = files.map(function (file, index) {
-        var url = URL.createObjectURL(file);
-        objectUrls.push(url);
-        return '<figure><img src="' + url + '" alt="' + escapeHtml(altText + " " + (index + 1)) + '"><figcaption>' + escapeHtml(file.name) + '</figcaption></figure>';
-      }).join("");
-      preview.hidden = false;
+      selectedFiles = files;
+      syncInputFiles();
+      renderPreview();
+    });
+
+    preview.addEventListener("click", function (event) {
+      var button = event.target.closest("[data-remove-photo]");
+      if (!button) return;
+      selectedFiles.splice(Number(button.dataset.removePhoto), 1);
+      syncInputFiles();
+      renderPreview();
     });
 
     return clearPreview;
@@ -768,6 +821,27 @@
       setTimeout(loadRemote, 700);
       setTimeout(function () { editDialog.close(); }, 650);
     }).catch(function (error) { status.textContent = error.message; });
+  });
+
+  document.getElementById("deleteSubmissionButton").addEventListener("click", function (event) {
+    if (!activeSubmission) return;
+    var item = activeSubmission;
+    var label = item.type === "comment" ? "コメント" : "投稿";
+    if (!window.confirm("この" + label + "を削除しますか？\n削除すると元に戻せません。")) return;
+    var button = event.currentTarget;
+    var status = document.getElementById("editStatus");
+    button.disabled = true;
+    status.textContent = "削除しています…";
+    post({ action: "deleteSubmission", submissionId: item.id }).then(function () {
+      removeLocalSubmission(item.id);
+      activeSubmission = null;
+      status.textContent = "削除しました。";
+      setTimeout(loadRemote, 700);
+      setTimeout(function () { editDialog.close(); button.disabled = false; }, 500);
+    }).catch(function (error) {
+      status.textContent = error.message;
+      button.disabled = false;
+    });
   });
 
   document.querySelectorAll("[data-mode]").forEach(function (button) {

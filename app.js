@@ -406,7 +406,7 @@
     if (!podcast) return;
 
     wrap.innerHTML = `
-      <p>${escapeHtml(podcast.description)}</p>
+      <p class="podcast-description">${escapeHtml(podcast.description)}</p>
       <div class="podcast-player" aria-live="polite">
         <p class="podcast-player-note">エピソードを読み込んでいます。</p>
       </div>
@@ -432,16 +432,43 @@
       const documentXml = new DOMParser().parseFromString(await response.text(), "application/xml");
       if (documentXml.querySelector("parsererror")) throw new Error("Podcast feed parse failed");
 
+      const toPlainText = value => {
+        if (!value) return "";
+
+        const htmlDocument = new DOMParser().parseFromString(value, "text/html");
+        htmlDocument.body.querySelectorAll("br").forEach(element => element.replaceWith("\n"));
+        htmlDocument.body.querySelectorAll("p, div, li").forEach(element => element.append("\n"));
+
+        return (htmlDocument.body.textContent || "")
+          .replace(/\u00a0/g, " ")
+          .split("\n")
+          .map(line => line.replace(/\s+/g, " ").trim())
+          .filter(Boolean)
+          .join("\n");
+      };
+
+      const feedDescription = toPlainText(
+        documentXml.querySelector("channel > description")?.textContent?.trim() || ""
+      );
+      const description = $(".podcast-description", wrap);
+      if (description && feedDescription) description.textContent = feedDescription;
+
       const episodes = [...documentXml.querySelectorAll("item")].map((item, index) => {
         const enclosureUrl = item.querySelector("enclosure")?.getAttribute("url") || "";
         const publishedAt = item.querySelector("pubDate")?.textContent?.trim() || "";
         const duration = item.getElementsByTagName("itunes:duration")[0]?.textContent?.trim() || "";
+        const description = toPlainText(
+          item.querySelector("description")?.textContent?.trim()
+            || item.getElementsByTagName("itunes:summary")[0]?.textContent?.trim()
+            || ""
+        );
         return {
           id: item.querySelector("guid")?.textContent?.trim() || String(index),
           title: item.querySelector("title")?.textContent?.trim() || `エピソード ${index + 1}`,
           enclosureUrl,
           publishedAt,
-          duration
+          duration,
+          description
         };
       }).filter(episode => episode.enclosureUrl.startsWith("https://"));
 
@@ -456,6 +483,7 @@
         </select>
         <div class="podcast-episode-current">
           <div class="podcast-episode-meta"></div>
+          <p class="podcast-episode-description"></p>
         </div>
         <audio controls preload="metadata">
           お使いのブラウザは音声再生に対応していません。
@@ -465,6 +493,7 @@
       const select = $("#podcastEpisodeSelect", player);
       const audio = $("audio", player);
       const meta = $(".podcast-episode-meta", player);
+      const episodeDescription = $(".podcast-episode-description", player);
 
       const selectEpisode = () => {
         const episode = episodes[Number(select.value)] || episodes[0];
@@ -474,6 +503,8 @@
             : "",
           episode.duration ? `再生時間 ${episode.duration}` : ""
         ].filter(Boolean).join(" ／ ");
+        episodeDescription.textContent = episode.description;
+        episodeDescription.hidden = !episode.description;
         audio.src = episode.enclosureUrl;
         audio.load();
       };

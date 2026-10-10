@@ -24,6 +24,11 @@
   var activeWork = null;
   var activeSubmission = null;
   var speech = null;
+  var speechTimer = null;
+  var speechStartedAt = 0;
+  var speechPausedAt = 0;
+  var speechPausedTotal = 0;
+  var speechDuration = 0;
   var mapNode = document.getElementById("mapCanvas");
   var listNode = document.getElementById("workList");
   var countNode = document.getElementById("workCount");
@@ -112,10 +117,56 @@
   function renderDialog() {
     if (!activeWork) return;
     var state = stateFor(activeWork.id);
-    dialogContent.innerHTML = '<p class="dialog-index">STORE ' + escapeHtml(store.index) + ' / WORK ' + escapeHtml(activeWork.number) + '</p><h2 id="dialogTitle">' + escapeHtml(activeWork.title) + '</h2><p class="dialog-place">' + escapeHtml(activeWork.place) + '</p><div class="dialog-photo" role="img" aria-label="' + escapeHtml(activeWork.imageLabel) + '"><span>' + escapeHtml(activeWork.imageLabel) + '</span></div><p class="dialog-summary">' + escapeHtml(activeWork.summary) + '</p><div class="listen-row"><button id="listenButton" class="button button-primary" type="button">仮朗読を再生</button><span>ブラウザの音声で試聴します</span></div><div class="script"><h3>短い戯曲</h3>' + activeWork.script.map(function (paragraph) { return '<p>' + escapeHtml(paragraph) + '</p>'; }).join("") + '</div><section class="reactions"><button id="likeButton" class="like-button' + (state.liked ? ' is-liked' : '') + '" type="button" aria-pressed="' + state.liked + '">♡ <strong>' + (state.liked ? 'いいね済み' : 'いいね') + '</strong><span>' + state.likeCount + '</span>' + (state.syncing ? '<small>保存中</small>' : '') + '</button><button id="commentButton" class="button" type="button">コメントする</button></section>';
+    var images = activeWork.images && activeWork.images.length ? activeWork.images : [{ label: activeWork.imageLabel || "場所の写真 / 準備中" }];
+    var gallery = images.map(function (item, index) {
+      var content = item.src ? '<img src="' + escapeHtml(item.src) + '" alt="' + escapeHtml(item.alt || item.label || activeWork.title + "の写真") + '">' : '<div class="work-gallery-placeholder" role="img" aria-label="' + escapeHtml(item.label || "場所の写真 / 準備中") + '"><span>' + escapeHtml(item.label || "場所の写真 / 準備中") + '</span></div>';
+      return '<figure data-gallery-item="' + index + '">' + content + (item.caption ? '<figcaption>' + escapeHtml(item.caption) + '</figcaption>' : '') + '</figure>';
+    }).join("");
+    var notes = activeWork.areaMap && activeWork.areaMap.notes || [];
+    var areaMap = notes.map(function (note) { return '<span class="map-note" style="--x:' + Number(note.x || 50) + '%;--y:' + Number(note.y || 50) + '%">' + escapeHtml(note.text) + '</span>'; }).join("");
+    dialogContent.innerHTML = '<h2 id="dialogTitle">' + escapeHtml(activeWork.title) + '</h2><p class="dialog-place">' + escapeHtml(activeWork.place) + '</p><div id="workGallery" class="work-gallery">' + gallery + '</div><div class="gallery-toolbar"><span id="galleryCounter" class="gallery-counter">1 / ' + images.length + '</span><div><button id="galleryPrev" type="button" aria-label="前の写真">←</button><button id="galleryNext" type="button" aria-label="次の写真">→</button></div></div><button id="areaMapToggle" class="area-map-toggle" type="button" aria-expanded="false" aria-controls="areaMapPanel">周辺図を表示する</button><div id="areaMapPanel" class="area-map-panel" hidden><div class="detailed-map" role="img" aria-label="' + escapeHtml(activeWork.title) + 'の場所周辺図">' + areaMap + '</div></div><p class="dialog-summary">' + escapeHtml(activeWork.summary) + '</p><div class="audio-player"><button id="listenButton" class="audio-play" type="button" aria-label="朗読を再生">▶</button><div class="audio-track"><progress id="audioProgress" class="audio-progress" max="100" value="0"></progress><div class="audio-time"><span id="audioCurrent">0:00</span><span id="audioDuration">' + formatTime(estimateSpeechDuration()) + '</span></div></div><p class="audio-caption">ブラウザの音声でテキストを再生します</p></div><div class="script"><h3>テキスト</h3>' + activeWork.script.map(function (paragraph) { return '<p>' + escapeHtml(paragraph) + '</p>'; }).join("") + '</div><section class="reactions"><button id="likeButton" class="like-button' + (state.liked ? ' is-liked' : '') + '" type="button" aria-pressed="' + state.liked + '">♡ <strong>' + (state.liked ? 'いいね済み' : 'いいね') + '</strong><span>' + state.likeCount + '</span>' + (state.syncing ? '<small>保存中</small>' : '') + '</button><button id="commentButton" class="button" type="button">コメントする</button></section>';
     document.getElementById("listenButton").addEventListener("click", toggleSpeech);
     document.getElementById("likeButton").addEventListener("click", toggleLike);
     document.getElementById("commentButton").addEventListener("click", openCommentForm);
+    document.getElementById("areaMapToggle").addEventListener("click", toggleAreaMap);
+    document.getElementById("galleryPrev").addEventListener("click", function () { moveGallery(-1); });
+    document.getElementById("galleryNext").addEventListener("click", function () { moveGallery(1); });
+    document.getElementById("workGallery").addEventListener("scroll", updateGalleryCounter);
+  }
+
+  function updateDialogReactionState() {
+    if (!activeWork) return;
+    var button = document.getElementById("likeButton");
+    if (!button) return;
+    var state = stateFor(activeWork.id);
+    button.classList.toggle("is-liked", state.liked);
+    button.setAttribute("aria-pressed", String(state.liked));
+    button.innerHTML = '♡ <strong>' + (state.liked ? 'いいね済み' : 'いいね') + '</strong><span>' + state.likeCount + '</span>' + (state.syncing ? '<small>保存中</small>' : '');
+  }
+
+  function moveGallery(direction) {
+    var gallery = document.getElementById("workGallery");
+    gallery.scrollBy({ left: direction * gallery.clientWidth * 0.86, behavior: "smooth" });
+  }
+
+  function updateGalleryCounter() {
+    var gallery = document.getElementById("workGallery");
+    var items = Array.from(gallery.querySelectorAll("[data-gallery-item]"));
+    if (!items.length) return;
+    var nearest = items.reduce(function (best, item, index) {
+      var distance = Math.abs(item.offsetLeft - gallery.scrollLeft);
+      return distance < best.distance ? { index: index, distance: distance } : best;
+    }, { index: 0, distance: Infinity });
+    document.getElementById("galleryCounter").textContent = (nearest.index + 1) + " / " + items.length;
+  }
+
+  function toggleAreaMap(event) {
+    var button = event.currentTarget;
+    var panel = document.getElementById("areaMapPanel");
+    var expanded = button.getAttribute("aria-expanded") === "true";
+    button.setAttribute("aria-expanded", String(!expanded));
+    button.textContent = expanded ? "周辺図を表示する" : "周辺図を閉じる";
+    panel.hidden = expanded;
   }
 
   function openWork(workId) {
@@ -128,22 +179,75 @@
 
   function toggleSpeech(event) {
     var button = event.currentTarget;
-    if (speechSynthesis.speaking) {
-      stopSpeech();
-      button.textContent = "仮朗読を再生";
+    if (speechSynthesis.speaking && !speechSynthesis.paused) {
+      speechSynthesis.pause();
+      speechPausedAt = Date.now();
+      button.textContent = "▶";
+      button.setAttribute("aria-label", "朗読を再開");
       return;
     }
+    if (speechSynthesis.paused && speech) {
+      speechSynthesis.resume();
+      speechPausedTotal += Date.now() - speechPausedAt;
+      button.textContent = "❚❚";
+      button.setAttribute("aria-label", "朗読を一時停止");
+      return;
+    }
+    stopSpeech();
     speech = new SpeechSynthesisUtterance(activeWork.script.join("。\n"));
     speech.lang = "ja-JP";
     speech.rate = 0.92;
-    speech.onend = function () { if (button.isConnected) button.textContent = "仮朗読を再生"; };
+    speechDuration = estimateSpeechDuration();
+    speechStartedAt = Date.now();
+    speechPausedTotal = 0;
+    speech.onend = function () { finishSpeechPlayer(); };
+    speech.onerror = function () { finishSpeechPlayer(); };
     speechSynthesis.speak(speech);
-    button.textContent = "朗読を停止";
+    button.textContent = "❚❚";
+    button.setAttribute("aria-label", "朗読を一時停止");
+    speechTimer = setInterval(updateSpeechPlayer, 250);
+  }
+
+  function estimateSpeechDuration() {
+    if (!activeWork) return 0;
+    return Math.max(1, Math.round(activeWork.script.join("").length / 5.5));
+  }
+
+  function formatTime(seconds) {
+    seconds = Math.max(0, Math.round(Number(seconds) || 0));
+    return Math.floor(seconds / 60) + ":" + String(seconds % 60).padStart(2, "0");
+  }
+
+  function updateSpeechPlayer() {
+    var progress = document.getElementById("audioProgress");
+    var current = document.getElementById("audioCurrent");
+    if (!progress || !current || !speechStartedAt) return;
+    var pausedNow = speechSynthesis.paused && speechPausedAt ? Date.now() - speechPausedAt : 0;
+    var elapsed = Math.min(speechDuration, (Date.now() - speechStartedAt - speechPausedTotal - pausedNow) / 1000);
+    progress.value = speechDuration ? elapsed / speechDuration * 100 : 0;
+    current.textContent = formatTime(elapsed);
+  }
+
+  function finishSpeechPlayer() {
+    if (speechTimer) clearInterval(speechTimer);
+    speechTimer = null;
+    speech = null;
+    var button = document.getElementById("listenButton");
+    var progress = document.getElementById("audioProgress");
+    var current = document.getElementById("audioCurrent");
+    if (button) { button.textContent = "▶"; button.setAttribute("aria-label", "朗読を再生"); }
+    if (progress) progress.value = 0;
+    if (current) current.textContent = "0:00";
   }
 
   function stopSpeech() {
     if ("speechSynthesis" in window) speechSynthesis.cancel();
+    if (speechTimer) clearInterval(speechTimer);
+    speechTimer = null;
     speech = null;
+    speechStartedAt = 0;
+    speechPausedAt = 0;
+    speechPausedTotal = 0;
   }
 
   function post(values) {
@@ -163,7 +267,7 @@
     var previousOverride = likeOverrides[workId];
     likeOverrides[workId] = { liked: !state.liked, changedAt: Date.now() };
     saveLikeOverrides();
-    renderDialog();
+    updateDialogReactionState();
     renderWorks();
     post({ action: "toggleLike", workId: workId }).then(function () {
       setTimeout(loadRemote, 1200);
@@ -172,7 +276,7 @@
       if (previousOverride) likeOverrides[workId] = previousOverride;
       else delete likeOverrides[workId];
       saveLikeOverrides();
-      renderDialog();
+      updateDialogReactionState();
       renderWorks();
     });
   }
@@ -180,6 +284,7 @@
   function openCommentForm() {
     document.getElementById("commentWorkTitle").textContent = activeWork.title;
     document.getElementById("commentForm").reset();
+    clearCommentPhotoPreview();
     document.getElementById("commentStatus").textContent = "";
     commentDialog.showModal();
   }
@@ -211,6 +316,27 @@
     });
   }
 
+  function parseArrayValue(value) {
+    if (Array.isArray(value)) return value.filter(Boolean);
+    if (!value) return [];
+    try {
+      var parsed = JSON.parse(value);
+      return Array.isArray(parsed) ? parsed.filter(Boolean) : [];
+    } catch (error) { return []; }
+  }
+
+  function submissionPhotoIds(item) {
+    var ids = parseArrayValue(item && (item.photoIds || item.photo_ids));
+    if (!ids.length && item && item.photoId) ids = [item.photoId];
+    return ids;
+  }
+
+  function submissionPhotoNames(item) {
+    var names = parseArrayValue(item && (item.photoNames || item.photo_names));
+    if (!names.length && item && item.photoName) names = [item.photoName];
+    return names;
+  }
+
   function renderMySubmissions() {
     var node = document.getElementById("mySubmissionList");
     var submissions = mySubmissions();
@@ -221,7 +347,7 @@
     node.innerHTML = submissions.map(function (item) {
       var isComment = item.type === "comment";
       var title = isComment ? (item.workTitle || "作品へのコメント") : (item.placeLabel || "場所の投稿");
-      var photoSlot = item.photoId || item.photoName ? '<span class="my-submission-thumb" data-photo-slot="' + escapeHtml(item.id) + '" hidden></span>' : '';
+      var photoSlot = submissionPhotoIds(item).length || submissionPhotoNames(item).length ? '<span class="my-submission-thumb" data-photo-slot="' + escapeHtml(item.id) + '" hidden></span>' : '';
       return '<button class="my-submission-card" type="button" data-submission-id="' + escapeHtml(item.id) + '">' + photoSlot + '<span class="submission-type">' + (isComment ? "作品へのコメント" : "場所の投稿") + '</span><strong>' + escapeHtml(title) + '</strong><p>' + escapeHtml(item.body) + '</p><small>' + escapeHtml(formatDate(item.updatedAt || item.createdAt)) + '</small><span class="work-arrow" aria-hidden="true">↗</span></button>';
     }).join("");
     hydrateSubmissionThumbnails(submissions);
@@ -241,29 +367,35 @@
     return photoDbPromise;
   }
 
-  function cachePhotoPreview(id, dataUrl) {
+  function photoCacheKey(id, index) {
+    return id + "::" + (Number(index) || 0);
+  }
+
+  function cachePhotoPreview(id, index, dataUrl) {
     if (!id || !dataUrl) return Promise.resolve();
-    photoPreviewCache[id] = dataUrl;
+    var key = photoCacheKey(id, index);
+    photoPreviewCache[key] = dataUrl;
     return openPhotoDb().then(function (db) {
       if (!db) return;
       return new Promise(function (resolve) {
         var transaction = db.transaction("photoPreviews", "readwrite");
-        transaction.objectStore("photoPreviews").put({ id: id, dataUrl: dataUrl, updatedAt: Date.now() });
+        transaction.objectStore("photoPreviews").put({ id: key, dataUrl: dataUrl, updatedAt: Date.now() });
         transaction.oncomplete = function () { resolve(); };
         transaction.onerror = function () { resolve(); };
       });
     });
   }
 
-  function getCachedPhotoPreview(id) {
-    if (photoPreviewCache[id]) return Promise.resolve(photoPreviewCache[id]);
+  function getCachedPhotoPreview(id, index) {
+    var key = photoCacheKey(id, index);
+    if (photoPreviewCache[key]) return Promise.resolve(photoPreviewCache[key]);
     return openPhotoDb().then(function (db) {
       if (!db) return "";
       return new Promise(function (resolve) {
-        var request = db.transaction("photoPreviews", "readonly").objectStore("photoPreviews").get(id);
+        var request = db.transaction("photoPreviews", "readonly").objectStore("photoPreviews").get(key);
         request.onsuccess = function () {
           var value = request.result && request.result.dataUrl || "";
-          if (value) photoPreviewCache[id] = value;
+          if (value) photoPreviewCache[key] = value;
           resolve(value);
         };
         request.onerror = function () { resolve(""); };
@@ -279,8 +411,8 @@
 
   function hydrateSubmissionThumbnails(submissions) {
     submissions.forEach(function (item) {
-      if (!item.photoId && !item.photoName) return;
-      getCachedPhotoPreview(item.id).then(function (dataUrl) {
+      if (!submissionPhotoIds(item).length && !submissionPhotoNames(item).length) return;
+      getCachedPhotoPreview(item.id, 0).then(function (dataUrl) {
         if (!dataUrl) return;
         var slot = Array.from(document.querySelectorAll("[data-photo-slot]")).find(function (node) { return node.dataset.photoSlot === item.id; });
         setPhotoNode(slot, dataUrl, "投稿写真");
@@ -324,27 +456,42 @@
     });
   }
 
+  function filePayloads(files) {
+    var selected = Array.from(files || []).filter(function (file) { return file && file.name && file.size; });
+    if (selected.length > 5) return Promise.reject(new Error("写真は5枚まで選択できます。"));
+    return Promise.all(selected.map(filePayload));
+  }
+
   function bindPhotoPreview(input, preview, altText) {
-    var objectUrl = "";
+    var objectUrls = [];
 
     function clearPreview() {
-      if (objectUrl) URL.revokeObjectURL(objectUrl);
-      objectUrl = "";
+      objectUrls.forEach(function (url) { URL.revokeObjectURL(url); });
+      objectUrls = [];
       preview.replaceChildren();
       preview.hidden = true;
     }
 
     input.addEventListener("change", function () {
       clearPreview();
-      var file = input.files && input.files[0];
-      if (!file) return;
-      if (!file.type.match(/^image\//)) {
+      var files = Array.from(input.files || []);
+      if (!files.length) return;
+      if (files.length > 5) {
+        preview.innerHTML = '<p>写真は5枚まで選択できます。</p>';
+        preview.hidden = false;
+        input.value = "";
+        return;
+      }
+      if (files.some(function (file) { return !file.type.match(/^image\//); })) {
         preview.innerHTML = '<p>写真ファイルを選んでください。</p>';
         preview.hidden = false;
         return;
       }
-      objectUrl = URL.createObjectURL(file);
-      preview.innerHTML = '<img src="' + objectUrl + '" alt="' + escapeHtml(altText) + '"><p>' + escapeHtml(file.name) + '</p>';
+      preview.innerHTML = files.map(function (file, index) {
+        var url = URL.createObjectURL(file);
+        objectUrls.push(url);
+        return '<figure><img src="' + url + '" alt="' + escapeHtml(altText + " " + (index + 1)) + '"><figcaption>' + escapeHtml(file.name) + '</figcaption></figure>';
+      }).join("");
       preview.hidden = false;
     });
 
@@ -352,10 +499,12 @@
   }
 
   var clearSubmissionPhotoPreview = bindPhotoPreview(form.elements.photo, document.getElementById("submissionPhotoPreview"), "投稿する写真のプレビュー");
+  var clearCommentPhotoPreview = bindPhotoPreview(document.getElementById("commentForm").elements.photo, document.getElementById("commentPhotoPreview"), "コメントに添える写真のプレビュー");
   var clearEditPhotoPreview = bindPhotoPreview(editForm.elements.photo, document.getElementById("editPhotoPreview"), "変更後の写真のプレビュー");
 
   function submitRecord(options) {
-    return filePayload(options.file).then(function (photo) {
+    return filePayloads(options.files).then(function (photos) {
+      var firstPhoto = photos[0] || { photoData: "", photoName: "", photoType: "" };
       var values = Object.assign({
         action: options.action || "addSubmission",
         submissionId: options.id,
@@ -368,11 +517,12 @@
         locationUnknown: String(Boolean(options.locationUnknown)),
         latitude: options.latitude || "",
         longitude: options.longitude || "",
-        photoData: photo.photoData,
-        photoName: photo.photoName,
-        photoType: photo.photoType,
+        photosJson: JSON.stringify(photos.map(function (photo) { return { data: photo.photoData, name: photo.photoName, type: photo.photoType }; })),
+        photoData: firstPhoto.photoData,
+        photoName: firstPhoto.photoName,
+        photoType: firstPhoto.photoType,
         website: options.website || ""
-      }, options.keepPhotoId ? { keepPhotoId: options.keepPhotoId } : {});
+      }, options.keepPhotoIds && options.keepPhotoIds.length ? { keepPhotoIds: JSON.stringify(options.keepPhotoIds), keepPhotoId: options.keepPhotoIds[0] } : {});
       return post(values).then(function () {
         var now = new Date().toISOString();
         var existing = options.existing || {};
@@ -387,12 +537,14 @@
           locationUnknown: Boolean(options.locationUnknown),
           latitude: options.latitude || "",
           longitude: options.longitude || "",
-          photoName: photo.photoName || existing.photoName || "",
-          photoId: photo.photoData ? "pending" : (existing.photoId || ""),
+          photoNames: photos.length ? photos.map(function (photo) { return photo.photoName; }) : submissionPhotoNames(existing),
+          photoIds: photos.length ? photos.map(function () { return "pending"; }) : submissionPhotoIds(existing),
+          photoName: photos.length ? firstPhoto.photoName : (existing.photoName || ""),
+          photoId: photos.length ? "pending" : (existing.photoId || ""),
           createdAt: existing.createdAt || now,
           updatedAt: now
         });
-        return cachePhotoPreview(options.id, photo.photoPreview).then(function () {
+        return Promise.all(photos.map(function (photo, index) { return cachePhotoPreview(options.id, index, photo.photoPreview); })).then(function () {
           writeLocalSubmission(record);
           return record;
         });
@@ -466,16 +618,23 @@
     editPoint = isComment || editUnknown.checked ? null : pointFromCoordinates(activeSubmission.latitude, activeSubmission.longitude);
     if (!isComment) renderEditMap();
     var currentPhotoNode = document.getElementById("currentPhoto");
-    currentPhotoNode.innerHTML = activeSubmission.photoId ? '<p>写真を読み込んでいます…</p>' : "";
+    var photoIds = submissionPhotoIds(activeSubmission);
+    currentPhotoNode.innerHTML = photoIds.length ? '<p>写真を読み込んでいます…</p>' : "";
     document.getElementById("editStatus").textContent = "";
     editDialog.showModal();
-    if (activeSubmission.photoId) {
-      getCachedPhotoPreview(activeSubmission.id).then(function (dataUrl) {
-        if (dataUrl) setPhotoNode(currentPhotoNode, dataUrl, "現在の写真");
-        else if (activeSubmission.photoId === "pending") currentPhotoNode.innerHTML = '<p>写真を保存しています…</p>';
+    if (photoIds.length) {
+      Promise.all(photoIds.map(function (_, index) { return getCachedPhotoPreview(activeSubmission.id, index); })).then(function (dataUrls) {
+        var available = dataUrls.filter(Boolean);
+        if (available.length) renderCurrentPhotos(currentPhotoNode, available);
+        else if (photoIds.every(function (id) { return id === "pending"; })) currentPhotoNode.innerHTML = '<p>写真を保存しています…</p>';
         else loadSubmissionDetails(activeSubmission.id);
       });
     }
+  }
+
+  function renderCurrentPhotos(node, dataUrls) {
+    if (!node) return;
+    node.innerHTML = '<div class="current-photo-grid">' + dataUrls.map(function (dataUrl, index) { return '<img src="' + dataUrl + '" alt="現在の写真 ' + (index + 1) + '">'; }).join("") + '</div>';
   }
 
   function loadSubmissionDetails(submissionId) {
@@ -484,11 +643,14 @@
     var script = document.createElement("script");
     window[callback] = function (payload) {
       var photoNode = document.getElementById("currentPhoto");
-      if (payload && payload.ok && payload.submission && payload.submission.photoData) {
+      if (payload && payload.ok && payload.submission) {
         var detail = payload.submission;
-        var dataUrl = "data:" + escapeHtml(detail.photoType || "image/jpeg") + ";base64," + detail.photoData;
-        setPhotoNode(photoNode, dataUrl, "現在の写真");
-        cachePhotoPreview(submissionId, dataUrl);
+        var photos = detail.photos && detail.photos.length ? detail.photos : (detail.photoData ? [{ data: detail.photoData, type: detail.photoType || "image/jpeg" }] : []);
+        var dataUrls = photos.map(function (photo) { return "data:" + escapeHtml(photo.type || "image/jpeg") + ";base64," + photo.data; });
+        if (dataUrls.length) {
+          renderCurrentPhotos(photoNode, dataUrls);
+          dataUrls.forEach(function (dataUrl, index) { cachePhotoPreview(submissionId, index, dataUrl); });
+        } else photoNode.innerHTML = '<p>写真を読み込めませんでした。</p>';
       } else if (photoNode) {
         photoNode.innerHTML = '<p>写真を読み込めませんでした。</p>';
       }
@@ -519,7 +681,7 @@
         reconcileLikeOverrides();
         renderWorks();
         renderMySubmissions();
-        if (dialog.open) renderDialog();
+        if (dialog.open) updateDialogReactionState();
       }
       delete window[callback];
       script.remove();
@@ -556,7 +718,7 @@
     submitRecord({
       id: makeId(), type: "place", placeLabel: values.get("placeLabel"), body: values.get("body"),
       locationUnknown: unknown.checked, latitude: selectedPoint ? selectedPoint.latitude : "", longitude: selectedPoint ? selectedPoint.longitude : "",
-      file: values.get("photo"), website: values.get("website")
+      files: values.getAll("photo"), website: values.get("website")
     }).then(function () {
       form.reset();
       clearSubmissionPhotoPreview();
@@ -573,8 +735,9 @@
     var values = new FormData(event.currentTarget);
     var status = document.getElementById("commentStatus");
     status.textContent = "投稿しています…";
-    submitRecord({ id: makeId(), type: "comment", workId: activeWork.id, workTitle: activeWork.title, body: values.get("body"), file: values.get("photo") }).then(function () {
+    submitRecord({ id: makeId(), type: "comment", workId: activeWork.id, workTitle: activeWork.title, body: values.get("body"), files: values.getAll("photo") }).then(function () {
       event.target.reset();
+      clearCommentPhotoPreview();
       status.textContent = "投稿を受け付けました。";
       setTimeout(loadRemote, 700);
       setTimeout(function () { commentDialog.close(); }, 650);
@@ -598,7 +761,7 @@
       locationUnknown: activeSubmission.type === "comment" ? activeSubmission.locationUnknown : editUnknown.checked,
       latitude: activeSubmission.type === "comment" ? activeSubmission.latitude : (editPoint ? editPoint.latitude : ""),
       longitude: activeSubmission.type === "comment" ? activeSubmission.longitude : (editPoint ? editPoint.longitude : ""),
-      file: values.get("photo"), keepPhotoId: activeSubmission.photoId, existing: activeSubmission
+      files: values.getAll("photo"), keepPhotoIds: submissionPhotoIds(activeSubmission), existing: activeSubmission
     }).then(function (record) {
       activeSubmission = record;
       status.textContent = "修正を保存しました。";
@@ -626,6 +789,7 @@
     item.addEventListener("click", function (event) { if (event.target === item) { if (item === dialog) stopSpeech(); item.close(); } });
   });
   editDialog.addEventListener("close", clearEditPhotoPreview);
+  commentDialog.addEventListener("close", clearCommentPhotoPreview);
   document.getElementById("likedFilter").addEventListener("click", function (event) {
     likedOnly = !likedOnly;
     event.currentTarget.setAttribute("aria-pressed", likedOnly);
@@ -635,9 +799,7 @@
 
   document.title = store.name + "｜ランドリーシアター";
   document.getElementById("headerStoreName").textContent = store.name;
-  document.getElementById("storeKicker").textContent = "STORE " + store.index + " / " + store.area;
   document.getElementById("storeTitle").textContent = store.name;
-  document.getElementById("storeDescription").textContent = store.description;
   renderWorks();
   renderSubmissionMap();
   renderMySubmissions();

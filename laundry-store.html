@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="ランドリーシアターの店舗ページです。作品を見たり聴いたり、場所の記憶を投稿できます。">
   <title>店舗｜ランドリーシアター</title>
-  <link rel="stylesheet" href="laundry.css?v=20261011-2">
+  <link rel="stylesheet" href="laundry.css?v=20261011-3">
 </head>
 <body class="store-page">
   <header class="site-header">
@@ -32,7 +32,7 @@
         <div class="section-heading"><span class="section-index">01</span><div><h2>作品を見る・聴く</h2><p>地図の印または作品名を選んでください。</p></div></div>
         <div class="works-toolbar"><button id="likedFilter" class="button" type="button" aria-pressed="false">「いいね」した作品を表示</button></div>
         <div class="experience-grid">
-          <div class="map-card map-card-flat"><div class="map-label-row"><span>AREA MAP</span><span class="map-provisional">仮地図</span></div><div id="mapCanvas" class="map-canvas" role="group" aria-label="店舗周辺の仮地図"></div></div>
+          <div class="map-card map-card-flat"><div class="map-label-row"><span>AREA MAP</span></div><div id="mapCanvas" class="map-canvas" role="group" aria-label="店舗周辺地図"></div></div>
           <div><p id="workCount" class="section-note"></p><div id="workList" class="work-list"></div></div>
         </div>
       </div>
@@ -44,7 +44,7 @@
         <form id="submissionForm" class="submission-form"><input class="honeypot" type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
           <div class="submission-layout">
             <div>
-              <div class="map-card map-card-flat"><div class="map-label-row"><span>場所を選ぶ</span><span class="map-provisional">仮地図</span></div><button id="submissionMap" class="map-canvas submission-map" type="button" aria-label="仮地図上で投稿する場所を選ぶ"><span class="map-help">地図上の場所を押してください</span></button></div>
+              <div class="map-card map-card-flat"><div class="map-label-row"><span>場所を選ぶ</span></div><button id="submissionMap" class="map-canvas submission-map" type="button" aria-label="地図上で投稿する場所を選ぶ"><span class="map-help">地図上の場所を押してください</span></button></div>
               <p id="selectedLocation" class="selected-location">場所はまだ選ばれていません。</p>
               <label class="unknown-row"><input id="locationUnknown" type="checkbox" name="locationUnknown"><span>地図では場所がわからない</span></label>
             </div>
@@ -96,7 +96,7 @@
     <form id="editForm" class="dialog-form">
       <p class="dialog-index">あなたの投稿</p><h2 id="editDialogTitle">投稿を見る</h2><p id="editTypeLabel" class="dialog-context"></p>
       <div id="editLocationFields" class="edit-location-fields">
-        <div class="map-card map-card-flat"><div class="map-label-row"><span>場所を変更する</span><span class="map-provisional">仮地図</span></div><button id="editSubmissionMap" class="map-canvas submission-map" type="button" aria-label="仮地図上で投稿場所を変更する"></button></div>
+        <div class="map-card map-card-flat"><div class="map-label-row"><span>場所を変更する</span></div><button id="editSubmissionMap" class="map-canvas submission-map" type="button" aria-label="地図上で投稿場所を変更する"></button></div>
         <p id="editSelectedLocation" class="selected-location"></p>
         <label class="unknown-row"><input id="editLocationUnknown" type="checkbox" name="locationUnknown"><span>地図では場所がわからない</span></label>
       </div>
@@ -110,7 +110,7 @@
     </form>
   </dialog>
 
-  <script src="data/laundry-waiting-room.js?v=20261011-1"></script>
-  <script src="laundry-store.js?v=20261011-2"></script>
+  <script src="data/laundry-waiting-room.js?v=20261011-2"></script>
+  <script src="laundry-store.js?v=20261011-3"></script>
 </body>
 </html>

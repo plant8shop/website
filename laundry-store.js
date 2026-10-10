@@ -86,6 +86,7 @@
   }
 
   function mapScenery() {
+    if (store.mapImage) return '<img class="map-base-image" src="' + escapeHtml(store.mapImage) + '" alt="' + escapeHtml(store.mapAlt || "店舗周辺地図") + '" draggable="false">';
     return '<span class="map-road map-road-a"></span><span class="map-road map-road-b"></span><span class="map-road map-road-c"></span><span class="map-block map-block-a"></span><span class="map-block map-block-b"></span><span class="map-block map-block-c"></span><span class="map-shop"><i></i>' + escapeHtml(store.name) + '</span>';
   }
 
@@ -872,6 +873,7 @@
   });
 
   document.title = store.name + "｜ランドリーシアター";
+  [mapNode, submitMap, editMap].forEach(function (node) { node.classList.toggle("has-map-image", Boolean(store.mapImage)); });
   document.getElementById("headerStoreName").textContent = store.name;
   document.getElementById("storeTitle").textContent = store.name;
   renderWorks();

@@ -432,32 +432,55 @@
       const documentXml = new DOMParser().parseFromString(await response.text(), "application/xml");
       if (documentXml.querySelector("parsererror")) throw new Error("Podcast feed parse failed");
 
-      const toPlainText = value => {
-        if (!value) return "";
+      const setSafeDescription = (element, value) => {
+        element.replaceChildren();
+        if (!value) return;
 
         const htmlDocument = new DOMParser().parseFromString(value, "text/html");
-        htmlDocument.body.querySelectorAll("br").forEach(element => element.replaceWith("\n"));
-        htmlDocument.body.querySelectorAll("p, div, li").forEach(element => element.append("\n"));
+        const appendSafeNode = (source, target) => {
+          if (source.nodeType === 3) {
+            target.append(document.createTextNode(source.textContent || ""));
+            return;
+          }
+          if (source.nodeType !== 1) return;
 
-        return (htmlDocument.body.textContent || "")
-          .replace(/\u00a0/g, " ")
-          .split("\n")
-          .map(line => line.replace(/\s+/g, " ").trim())
-          .filter(Boolean)
-          .join("\n");
+          const tagName = source.tagName.toLowerCase();
+          if (tagName === "br") {
+            target.append(document.createElement("br"));
+            return;
+          }
+          if (tagName === "a") {
+            const href = source.getAttribute("href")?.trim() || "";
+            if (href.startsWith("https://")) {
+              const link = document.createElement("a");
+              link.href = href;
+              link.target = "_blank";
+              link.rel = "noopener noreferrer";
+              link.textContent = source.textContent || href;
+              target.append(link);
+            } else {
+              [...source.childNodes].forEach(node => appendSafeNode(node, target));
+            }
+            return;
+          }
+          if (["p", "div", "li"].includes(tagName)) {
+            const paragraph = document.createElement("p");
+            [...source.childNodes].forEach(node => appendSafeNode(node, paragraph));
+            target.append(paragraph);
+            return;
+          }
+
+          [...source.childNodes].forEach(node => appendSafeNode(node, target));
+        };
+
+        [...htmlDocument.body.childNodes].forEach(node => appendSafeNode(node, element));
       };
-
-      const feedDescription = toPlainText(
-        documentXml.querySelector("channel > description")?.textContent?.trim() || ""
-      );
-      const description = $(".podcast-description", wrap);
-      if (description && feedDescription) description.textContent = feedDescription;
 
       const episodes = [...documentXml.querySelectorAll("item")].map((item, index) => {
         const enclosureUrl = item.querySelector("enclosure")?.getAttribute("url") || "";
         const publishedAt = item.querySelector("pubDate")?.textContent?.trim() || "";
         const duration = item.getElementsByTagName("itunes:duration")[0]?.textContent?.trim() || "";
-        const description = toPlainText(
+        const descriptionHtml = (
           item.querySelector("description")?.textContent?.trim()
             || item.getElementsByTagName("itunes:summary")[0]?.textContent?.trim()
             || ""
@@ -468,7 +491,7 @@
           enclosureUrl,
           publishedAt,
           duration,
-          description
+          descriptionHtml
         };
       }).filter(episode => episode.enclosureUrl.startsWith("https://"));
 
@@ -483,7 +506,7 @@
         </select>
         <div class="podcast-episode-current">
           <div class="podcast-episode-meta"></div>
-          <p class="podcast-episode-description"></p>
+          <div class="podcast-episode-description" hidden></div>
         </div>
         <audio controls preload="metadata">
           お使いのブラウザは音声再生に対応していません。
@@ -503,8 +526,8 @@
             : "",
           episode.duration ? `再生時間 ${episode.duration}` : ""
         ].filter(Boolean).join(" ／ ");
-        episodeDescription.textContent = episode.description;
-        episodeDescription.hidden = !episode.description;
+        setSafeDescription(episodeDescription, episode.descriptionHtml);
+        episodeDescription.hidden = !episode.descriptionHtml;
         audio.src = episode.enclosureUrl;
         audio.load();
       };

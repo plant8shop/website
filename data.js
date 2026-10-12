@@ -65,11 +65,11 @@ const SITE_DATA = {
     },
 
     operatingMembers: [
-      { memberId: "aoki", roles: ["全体進行", "渉外", "広報・Instagram", "広報・note", "記録"] },
-      { memberId: "umeda", roles: ["会計", "Webサイト運営", "機材備品管理"] },
-      { memberId: "akiyama", roles: ["広報・X", "広報・note"] },
+      { memberId: "aoki", roles: ["全体進行", "渉外", "Instagram", "note", "記録"] },
+      { memberId: "umeda", roles: ["会計", "Webサイト", "機材備品管理"] },
+      { memberId: "akiyama", roles: ["X", "note"] },
       { memberId: "yoshimura", roles: ["分析"] },
-      { memberId: "okubo", roles: [] }
+      { memberId: "okubo", roles: ["歩く植木鉢"] }
     ],
 
     podcast: {

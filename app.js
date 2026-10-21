@@ -1004,12 +1004,10 @@
         ${work.thumbnail ? `<img src="${work.thumbnail}" alt="${escapeHtml(work.title)}" decoding="async">` : ""}
         <div class="meta">${work.status ? `状況: ${escapeHtml(work.status)} ／ ` : ""}期間: ${escapeHtml(work.period)}</div>
         <div>
-          <h3>参加者</h3>
-          <div class="member-detail-list" id="workMemberList"></div>
-        </div>
-        <div>
           <h3>概要</h3>
           <p>${escapeHtml(work.summary)}</p>
+          <p class="meta">参加者</p>
+          <div class="member-detail-list" id="workMemberList"></div>
         </div>
         ${
           work.detailHtml

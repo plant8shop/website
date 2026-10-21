@@ -294,7 +294,7 @@ const SITE_DATA = {
       detailHtml: `
       <section>
         <p>
-          立ち上げに関しては、<a href="https://umedakouki.github.io/practice/2026_plantshop.html">梅田航輝によるブログ</a>に少し書かれています。
+          立ち上げに関しては、<a href="https://umedakouki.work/practice/2026_plantshop.html">梅田航輝によるブログ</a>に少し書かれています。
         </p>
       </section>
       `,

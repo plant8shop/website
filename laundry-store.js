@@ -86,6 +86,7 @@
   }
 
   function mapScenery() {
+    if (store.mapReady === false) return '<span class="map-empty">地図では場所がわからない</span>';
     if (store.mapImage) return '<img class="map-base-image" src="' + escapeHtml(store.mapImage) + '" alt="' + escapeHtml(store.mapAlt || "店舗周辺地図") + '" draggable="false">';
     return '<span class="map-road map-road-a"></span><span class="map-road map-road-b"></span><span class="map-road map-road-c"></span><span class="map-block map-block-a"></span><span class="map-block map-block-b"></span><span class="map-block map-block-c"></span><span class="map-shop"><i></i>' + escapeHtml(store.name) + '</span>';
   }
@@ -609,6 +610,7 @@
   }
 
   function positionFromEvent(event, mapElement) {
+    if (store.mapReady === false) return null;
     var rect = mapElement.getBoundingClientRect();
     var x = Math.max(0, Math.min(1, (event.clientX - rect.left) / rect.width));
     var y = Math.max(0, Math.min(1, (event.clientY - rect.top) / rect.height));
@@ -616,6 +618,7 @@
   }
 
   function pointFromCoordinates(latitude, longitude) {
+    if (!store.center) return null;
     if (latitude == null || longitude == null || String(latitude).trim() === "" || String(longitude).trim() === "") return null;
     var lat = Number(latitude);
     var lng = Number(longitude);
@@ -670,7 +673,7 @@
     document.getElementById("editPlaceField").hidden = isComment;
     document.getElementById("editLocationFields").hidden = isComment;
     document.getElementById("editTypeLabel").textContent = isComment ? "「" + (activeSubmission.workTitle || "作品") + "」へのコメント" : "場所の投稿";
-    editUnknown.checked = locationIsUnknown(activeSubmission.locationUnknown);
+    editUnknown.checked = store.mapReady === false || locationIsUnknown(activeSubmission.locationUnknown);
     editPoint = isComment || editUnknown.checked ? null : pointFromCoordinates(activeSubmission.latitude, activeSubmission.longitude);
     if (!isComment) renderEditMap();
     var currentPhotoNode = document.getElementById("currentPhoto");
@@ -878,6 +881,19 @@
   [mapNode, submitMap, editMap].forEach(function (node) { node.classList.toggle("has-map-image", Boolean(store.mapImage)); });
   document.getElementById("headerStoreName").textContent = store.name;
   document.getElementById("storeTitle").textContent = store.name;
+  document.getElementById("storeDrinkOffer").hidden = !store.drinkOffer;
+  if (store.mapReady === false) {
+    unknown.defaultChecked = true;
+    unknown.checked = true;
+    unknown.disabled = true;
+    editUnknown.disabled = true;
+    submitMap.disabled = true;
+    editMap.disabled = true;
+    [mapNode, submitMap, editMap].forEach(function (node) { node.closest(".map-card").hidden = true; });
+    document.getElementById("selectedLocation").textContent = "場所の名前を入力してください。";
+    document.querySelector("#works .section-heading p").hidden = true;
+  }
+  document.getElementById("likedFilter").hidden = !store.works.length;
   renderWorks();
   renderSubmissionMap();
   renderMySubmissions();

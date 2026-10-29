@@ -9,7 +9,7 @@
   }
   list.innerHTML = data.stores.map(function (store) {
     return '<a class="store-link-card" href="laundry-store.html?store=' + encodeURIComponent(store.id) + '">' +
-      '<span class="store-index">STORE ' + escapeHtml(store.index) + '</span>' +
+      '<span class="store-index">' + escapeHtml(store.index) + '</span>' +
       '<div><p>' + escapeHtml(store.area) + '</p><h2>' + escapeHtml(store.name) + '</h2><small>' + escapeHtml(store.description) + '</small></div>' +
       '<span class="store-link-arrow" aria-hidden="true">→</span>' +
     '</a>';

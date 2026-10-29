@@ -1,0 +1,131 @@
+/* Colors and artwork follow the 2026-10-28/29 printed materials. */
+@import url("https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600&display=swap");
+
+.poster-page, .poster-store-page {
+  --font-sans: "Noto Sans JP", "Yu Gothic", sans-serif;
+  --font-ui: var(--font-sans);
+  --bg: #f9fcf9;
+  --surface: #f9fcf9;
+  --text: #25312f;
+  --text-soft: #44514c;
+  --muted: #64716b;
+  --violet: #7251b5;
+  --violet-dark: #176b60;
+  --violet-soft: #eee9f5;
+  --mint-soft: #e9f2ee;
+  --line: #d3e1da;
+  --line-strong: #176b60;
+  background: #f9fcf9;
+  color: #25312f;
+  font-family: var(--font-sans);
+  line-height: 1.95;
+}
+.poster-page { background-image: linear-gradient(#f9fcf955, #f9fcf955), url("assets/laundry/map-texture.svg"); background-size: auto, 1200px auto; }
+.poster-page [id] { scroll-margin-top: 110px; }
+.poster-page a:focus-visible, .poster-store-page a:focus-visible { outline: 2px solid #7251b5; outline-offset: 5px; }
+.poster-header {
+  width: min(100% - 96px, 1200px); margin: auto; padding: 23px 0;
+  display: flex; align-items: center; justify-content: space-between; gap: 32px;
+  border-bottom: 1px solid #c7dbd2;
+}
+.poster-header > a { flex: 0 0 210px; }
+.poster-header img { width: 210px; height: auto; }
+.poster-header nav { display: flex; flex-wrap: wrap; gap: 32px; color: #176b60; font-size: 14px; }
+.poster-header nav a:last-child { color: #7251b5; }
+.poster-main { width: min(100% - 96px, 1200px); margin: auto; }
+.poster-hero { padding-top: clamp(32px, 4vw, 48px); }
+.poster-hero h1 { width: min(100%, 760px); max-width: none; margin: 0 auto 30px; }
+.poster-hero h1 img { width: 100%; height: auto; }
+.poster-tagline { color: #176b60; font-size: clamp(18px, 2.1vw, 25px); margin: 0; letter-spacing: .035em; }
+.translation { color: #64716b; font: 14px/1.65 Arial, sans-serif; margin: 9px 0 0; }
+.poster-photo { width: 100%; height: auto; margin: 30px 0 48px; }
+.poster-columns { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); gap: clamp(40px, 6vw, 90px); }
+.poster-columns section { min-width: 0; }
+.poster-section-title { border-top: 1px solid #176b60; padding-top: 15px; display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 24px; color: #176b60; }
+.poster-section-title h2 { margin: 0; font-weight: 500; font-size: clamp(24px, 2.5vw, 31px); line-height: 1.5; letter-spacing: .04em; }
+.poster-section-title p { margin: 3px 0 0; font-size: 15px; }
+.poster-section-title .theater-date { font-size: 25px; white-space: nowrap; }
+.poster-columns section > p { margin: 0 0 14px; }
+.poster-columns .translation { font-size: 14px; }
+.poster-workshop .poster-section-title { color: #7251b5; border-color: #7251b5; }
+.poster-stores { margin: 32px 0 36px; }
+.poster-stores h3 { font-size: 15px; font-weight: 500; color: #176b60; margin: 0 0 10px; }
+.poster-stores .store-list { gap: 0; }
+.poster-stores .store-link-card { border: 0; border-top: 1px solid #c7dbd2; padding: 20px 4px; grid-template-columns: 35px minmax(0,1fr) 24px; gap: 15px; background: transparent; }
+.poster-stores .store-link-card:last-child { border-bottom: 1px solid #c7dbd2; }
+.poster-stores .store-link-card:hover { background: #e9f2ee; }
+.poster-stores .store-index { color: #176b60; font-size: 13px; grid-column: auto; }
+.poster-stores .store-link-card h2 { font: 500 clamp(16px, 1.8vw, 21px)/1.5 var(--font-sans); color: #176b60; margin: 0 0 4px; overflow-wrap: anywhere; }
+.poster-stores .store-link-card small { color: #64716b; }
+.poster-stores .store-link-arrow { color: #176b60; }
+.poster-steps { counter-reset: step; list-style: none; padding: 0; margin: 30px 0; }
+.poster-steps li { counter-increment: step; display: grid; grid-template-columns: 30px minmax(0, 1fr); gap: 15px; margin: 0 0 22px; }
+.poster-steps li::before { content: counter(step); color: #176b60; font: 400 29px/1.4 Arial, sans-serif; }
+.poster-steps p { margin: 0; }
+.poster-steps .translation { margin-top: 8px; }
+.poster-note { font-size: 13px; color: #64716b; margin: 24px 0; }
+.poster-note p { margin: 0 0 10px; }
+.poster-note .translation { font-size: 12px; }
+.workshop-schedule { margin: 26px 0; }
+.workshop-schedule p { margin: 0; }
+.workshop-year { font: 18px/1.5 Arial,sans-serif; color: #7251b5; }
+.workshop-dates { font-size: clamp(28px, 3.4vw, 42px); color: #7251b5; line-height: 1.6; letter-spacing: -.02em; }
+.workshop-time { padding-top: 15px; font-size: 21px; }
+.workshop-venue { font-size: clamp(14px, 1.7vw, 19px); overflow-wrap: anywhere; }
+.workshop-details { font-size: 14px; margin: 24px 0; }
+.workshop-details > div { border-top: 1px solid #d3e1da; padding: 12px 0; display: grid; grid-template-columns: 65px 1fr; gap: 10px; }
+.workshop-details dt { color: #7251b5; }
+.workshop-details dd { margin: 0; }
+.workshop-details .translation { display: block; font-size: 12px; }
+.workshop-apply { display: flex; align-items: center; gap: 16px; padding: 16px 20px; color: #7251b5; border: 1px solid #7251b5; background: #f9fcf9; }
+.workshop-apply span[lang] { font: 13px Arial,sans-serif; }
+.workshop-apply span:last-child { margin-left: auto; }
+.workshop-apply:hover { background: #eee9f5; }
+.workshop-steps { padding-top: 10px; }
+.workshop-steps li { padding-bottom: 16px; border-bottom: 1px solid #e0d9ee; }
+.workshop-steps img { width: 48px; height: 48px; object-fit: contain; margin: 0 0 10px; }
+.poster-footer { width: min(100% - 96px, 1200px); margin: 45px auto 0; padding: 25px 0 38px; border-top: 1px solid #c7dbd2; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 15px; font-size: 13px; color: #176b60; }
+.map-credit { color: #64716b; font: 11px/2 Arial,sans-serif; }
+
+/* The store interface keeps its existing controls and submission storage. */
+.poster-store-page .site-header { background: #f9fcf9f5; }
+.poster-store-page .theater-wordmark img { width: 200px; height: auto; }
+.poster-store-page .store-hero { background: #f9fcf9 url("assets/laundry/map-texture.svg") center top / 1100px auto; }
+.poster-store-page .store-hero h1 { color: #176b60; font-size: clamp(26px, 4vw, 44px); overflow-wrap: anywhere; }
+.store-poster-intro { max-width: 720px; margin: 18px 0 30px; }
+.store-poster-intro p { margin: 8px 0; }
+.store-start-date { color: #176b60; }
+.drink-offer { border-left: 2px solid #7251b5; padding: 10px 16px; color: #7251b5; }
+.drink-offer .translation { display: block; }
+.poster-store-page .works-section, .poster-store-page .submit-section, .poster-store-page .mine-section, .poster-store-page .theater-footer { background: #f9fcf9; }
+.poster-store-page .theater-footer { color: #176b60; }
+.poster-store-page .footer-links a { border-color: #c7dbd2; }
+.poster-store-page .experience-grid { grid-template-columns: minmax(0,1fr); }
+.poster-store-page .submission-layout { grid-template-columns: minmax(0,1fr); }
+.poster-store-page .mode-button { box-shadow: none; }
+.poster-store-page .button { box-shadow: none; background: #f9fcf9; }
+.poster-store-page .button-primary { color: #176b60; border-color: #176b60; }
+.poster-store-page .work-dialog, .poster-store-page .form-dialog { background: #f9fcf9; }
+[hidden] { display: none !important; }
+
+@media (max-width: 760px) {
+  .poster-header, .poster-main, .poster-footer { width: calc(100% - 40px); }
+  .poster-header { padding: 16px 0; gap: 16px; }
+  .poster-header > a { flex-basis: 145px; }
+  .poster-header nav { gap: 10px; font-size: 11px; justify-content: flex-end; }
+  .poster-header img { width: 145px; }
+  .poster-hero { padding-top: 40px; }
+  .poster-hero h1 { margin-bottom: 26px; }
+  .poster-tagline { font-size: 19px; line-height: 1.85; }
+  .poster-photo { margin: 25px 0 34px; min-height: 100px; object-fit: cover; }
+  .poster-columns { grid-template-columns: minmax(0,1fr); gap: 38px; }
+  .poster-section-title .theater-date { font-size: 22px; }
+  .poster-section-title h2 { font-size: 25px; }
+  .workshop-dates { font-size: 35px; }
+  .workshop-dates br { display: none; }
+  .workshop-dates time { display: inline-block; margin-right: 15px; }
+  .workshop-steps img { width: 44px; height: 44px; }
+  .poster-store-page .header-store-name { font-size: 11px; max-width: 130px; text-align: right; overflow-wrap: anywhere; }
+  .poster-store-page .theater-wordmark img { width: 145px; }
+}
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }

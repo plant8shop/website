@@ -3,40 +3,55 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="コインランドリーの周辺から生まれた作品を見たり聴いたり、場所の記憶を投稿したりできるランドリーシアターです。">
+  <meta name="description" content="まちの写真や記憶を、短い戯曲と朗読にして共有するプロジェクト">
   <title>ランドリーシアター｜プラントショップ</title>
-  <link rel="canonical" href="https://plantshop.work/laundry.html">
-  <link rel="stylesheet" href="laundry.css?v=20261009-3">
+  <link rel="canonical" href="https://www.plantshop.work/laundry.html">
+  <link rel="stylesheet" href="laundry.css?v=20261029-1">
+  <link rel="stylesheet" href="laundry-poster.css?v=20261029-1">
 </head>
-<body>
-  <header class="site-header">
-    <nav class="nav" aria-label="ランドリーシアター">
-      <a href="laundry.html" class="theater-wordmark">ランドリーシアター</a>
-    </nav>
+<body class="poster-page">
+  <header class="poster-header">
+    <a href="laundry.html" aria-label="ランドリーシアター"><img src="assets/laundry/logo.svg" alt="ランドリーシアター" width="228" height="72"></a>
+    <nav aria-label="ランドリーシアター"><a href="#theater">シアター</a><a href="#workshop">ワークショップ</a></nav>
   </header>
-  <main>
-    <section class="hero hero-compact" aria-labelledby="pageTitle">
-      <div class="hero-inner">
-        <p class="eyebrow">LAUNDRY THEATER</p>
-        <h1 id="pageTitle">ランドリーシアター</h1>
-        <p class="hero-copy">洗濯や乾燥を待つあいだ、店のまわりの場所から生まれた作品を見たり、聴いたり。あなたが覚えている場所の断片も残せます。</p>
-      </div>
-      <div class="hero-orbit" aria-hidden="true"><span class="orbit orbit-a"></span><span class="orbit orbit-b"></span><span class="orbit orbit-c"></span><span class="hero-dot"></span></div>
+  <main class="poster-main">
+    <section class="poster-hero" aria-labelledby="projectTitle">
+      <h1 id="projectTitle"><img src="assets/laundry/logo.svg" alt="ランドリーシアター 居合わせる都市を想像する" width="760" height="240"></h1>
+      <p class="poster-tagline">まちの写真や記憶を、短い戯曲と朗読にして共有するプロジェクト</p>
+      <p class="translation" lang="en">A project sharing short plays and audio readings created from local photographs and memories.</p>
+      <img class="poster-photo" src="assets/laundry/poster-photo.webp" alt="" width="2934" height="522" fetchpriority="high">
     </section>
-    <section id="stores" class="section stores-section">
-      <div class="section-inner section-inner-wide">
-        <div class="section-heading"><span class="section-index">01</span><div><h2>店舗を選ぶ</h2><p>作品と投稿は店舗ごとに分かれています。</p></div></div>
-        <div id="storeList" class="store-list"></div>
-      </div>
-    </section>
-  </main>
-  <footer class="theater-footer">
-    <div class="section-inner section-inner-wide footer-links">
-      <a href="work.html?id=coin-laundry">企画について</a>
-      <a href="index.html">プラントショップ（企画・運営）</a>
+    <div class="poster-columns">
+      <section id="theater" class="poster-theater" aria-labelledby="theaterTitle">
+        <div class="poster-section-title"><div><h2 id="theaterTitle">シアター</h2><p lang="en">Theater</p></div><p class="theater-date">10/31（土）〜</p></div>
+        <p>京都市内のいくつかのコインランドリーで、その周辺のまちの写真や記憶をもとにつくった戯曲や朗読を、洗濯や乾燥を待ちながら楽しめます。<br>まだ知らない誰かの経験を通して、いつものまちを違う視点から想像してみませんか。</p>
+        <p class="translation" lang="en">At laundries across Kyoto, read short plays and listen to recordings based on local photographs and memories while you wait.<br>Imagine familiar places through someone else's experience.</p>
+        <div id="stores" class="poster-stores"><h3>店舗を選ぶ</h3><div id="storeList" class="store-list"></div></div>
+        <ol class="poster-steps">
+          <li><div><p>店内の机にある案内のQRコードを読み取り、その店舗の作品サイトを開く。</p><p class="translation" lang="en">Scan the QR code on the table to open the site for that laundry.</p></div></li>
+          <li><div><p>地図や写真から気になる場所を選び、戯曲を読んだり、朗読を聴く。</p><p class="translation" lang="en">Choose a place on the map to read a play or listen to a recording.</p></div></li>
+          <li><div><p>周辺のまちの写真や記憶、ふと感じたことを投稿する。</p><p>投稿はワークショップで戯曲化し、サイトで共有します。</p><p class="translation" lang="en">Contributions become plays in workshops and are shared online.</p></div></li>
+        </ol>
+        <div class="poster-note"><p>戯曲は、演劇の上演のために書かれた脚本です。ここでは、短いエッセイや詩的な表現も含め、読む・聴くだけでも楽しめる作品を指します。</p><p class="translation" lang="en">Plays are scripts written for theatrical performance. Here, the term also includes short essays and poetic writing: works to enjoy simply by reading or listening.</p><p>音声は、周りの方の迷惑にならない音量や、イヤホン等でお楽しみください。</p><p class="translation" lang="en">Please keep the volume low enough not to disturb others.</p></div>
+      </section>
+      <section id="workshop" class="poster-workshop" aria-labelledby="workshopTitle">
+        <div class="poster-section-title"><div><h2 id="workshopTitle">戯曲をつくる<br>ワークショップ</h2><p lang="en">Playwriting workshop</p></div></div>
+        <p>シアターに投稿された写真や記憶、物語を手がかりに、短い戯曲を一緒につくり、朗読します。</p>
+        <p class="translation" lang="en">Create and read a short play using photographs, memories and stories posted to the Theater.</p>
+        <div class="workshop-schedule"><p class="workshop-year">2026</p><p class="workshop-dates"><time datetime="2026-11-21">11/21（土）</time><br><time datetime="2026-12-06">12/6（日）</time></p><p class="translation" lang="en">Nov 21 (Sat) &amp; Dec 6 (Sun), 2026</p><p class="workshop-time">各日 13:00–17:00</p><p class="workshop-venue">@KYOTO LAUNDRY CAFE</p></div>
+        <dl class="workshop-details"><div><dt>参加費</dt><dd>カフェでワンドリンクのご注文<span class="translation" lang="en">Please order one drink at the café.</span></dd></div><div><dt>使用言語</dt><dd>日本語<span class="translation" lang="en">Conducted in Japanese.</span></dd></div></dl>
+        <a class="workshop-apply" href="https://forms.gle/m9qSm7JduqGGKdV89">お申し込み <span lang="en">Apply</span><span aria-hidden="true">↗</span></a>
+        <ol class="poster-steps workshop-steps">
+          <li><div><img src="assets/laundry/workshop-1.svg" alt="" width="52" height="52" loading="lazy"><p>3〜4人程度のグループをつくります。</p><p class="translation" lang="en">Form groups of around 3–4 people.</p></div></li>
+          <li><div><img src="assets/laundry/workshop-2.svg" alt="" width="52" height="52" loading="lazy"><p>シアターに投稿された情報を手がかりに戯曲をつくります。</p><p class="translation" lang="en">Use contributions to the Theater to create a short play.</p></div></li>
+          <li><div><img src="assets/laundry/workshop-3.svg" alt="" width="52" height="52" loading="lazy"><p>完成した戯曲を全体で朗読します。</p><p class="translation" lang="en">Read the completed plays aloud together.</p></div></li>
+        </ol>
+        <p class="poster-note">完成した作品と朗読音声は、場所の位置情報や写真とともに、シアターのサイトへ掲載します。</p>
+      </section>
     </div>
-  </footer>
-  <script src="data/laundry-waiting-room.js?v=20261009-3"></script>
-  <script src="laundry.js?v=20261009-3"></script>
+  </main>
+  <footer class="poster-footer"><a href="index.html">企画・運営：プラントショップ</a><a href="https://www.openstreetmap.org/copyright" class="map-credit" lang="en">© OpenStreetMap contributors</a></footer>
+  <script src="data/laundry-waiting-room.js?v=20261029-1"></script>
+  <script src="laundry.js?v=20261029-1"></script>
 </body>
 </html>

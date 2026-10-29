@@ -5,12 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="ランドリーシアターの店舗ページです。作品を見たり聴いたり、場所の記憶を投稿できます。">
   <title>店舗｜ランドリーシアター</title>
-  <link rel="stylesheet" href="laundry.css?v=20261011-4">
+  <link rel="stylesheet" href="laundry.css?v=20261029-1">
+  <link rel="stylesheet" href="laundry-poster.css?v=20261029-1">
 </head>
-<body class="store-page">
+<body class="store-page poster-store-page">
   <header class="site-header">
     <nav class="nav store-header" aria-label="ランドリーシアター">
-      <a href="laundry.html" class="theater-wordmark">ランドリーシアター</a>
+      <a href="laundry.html" class="theater-wordmark"><img src="assets/laundry/logo.svg" alt="ランドリーシアター" width="228" height="72"></a>
       <span id="headerStoreName" class="header-store-name"></span>
     </nav>
   </header>
@@ -19,6 +20,7 @@
     <section class="store-hero">
       <div class="section-inner section-inner-wide">
         <h1 id="storeTitle"></h1>
+        <div class="store-poster-intro"><p class="store-start-date">10/31（土）〜</p><p>このランドリーの周辺のまちの写真や記憶から生まれた短い戯曲や朗読を、洗濯や乾燥の待ち時間に楽しめます。</p><p class="translation" lang="en">Enjoy short plays and audio readings inspired by local photos and memories while you wait for your laundry.</p><p>店の外からも投稿できます</p><p id="storeDrinkOffer" class="drink-offer" hidden>投稿画面をカフェの店員に見せると、ドリンクが50円引きになります。<span class="translation" lang="en">Show your post to café staff for ¥50 off a drink.</span></p></div>
         <nav class="mode-nav" aria-label="店舗ページの機能">
           <button class="mode-button is-active" type="button" data-mode="works" aria-pressed="true"><span>01</span>作品を見る・聴く</button>
           <button class="mode-button" type="button" data-mode="submit" aria-pressed="false"><span>02</span>投稿する</button>
@@ -73,6 +75,7 @@
   <footer class="theater-footer">
     <div class="section-inner section-inner-wide footer-links">
       <a href="laundry.html">店舗を選びなおす</a>
+      <a href="laundry.html#workshop">戯曲をつくるワークショップ</a>
       <a href="index.html">プラントショップ（企画・運営）</a>
     </div>
   </footer>
@@ -110,7 +113,7 @@
     </form>
   </dialog>
 
-  <script src="data/laundry-waiting-room.js?v=20261011-3"></script>
-  <script src="laundry-store.js?v=20261011-4"></script>
+  <script src="data/laundry-waiting-room.js?v=20261029-1"></script>
+  <script src="laundry-store.js?v=20261029-1"></script>
 </body>
 </html>

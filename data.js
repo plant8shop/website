@@ -159,11 +159,12 @@ const SITE_DATA = {
       title: "ランドリーシアター",
       period: "2026.09–",
       status: "進行中",
-      thumbnail: "",
-      summary: "コインランドリーの待ち時間に、街の記憶や他者の存在を想像する小さな演劇的状況をつくるプロジェクトです。写真・地図・短い戯曲・音声を公開し、ワークショップを通じて戯曲を制作する計画です。",
+      thumbnail: "assets/laundry/poster-photo.webp",
+      summary: "まちの写真や記憶を、短い戯曲と朗読にして共有するプロジェクト",
       detailHtml: `
       <section>
-        <p>実施場所の確保、参加者募集、広報などを分担し、2026年10月後半から11月末の実施に向けて準備しています。</p>
+        <p>シアターに投稿された写真や記憶、物語を手がかりに、短い戯曲を一緒につくり、朗読します。</p>
+        <p>2026 11/21（土）・12/6（日） 各日 13:00–17:00 @KYOTO LAUNDRY CAFE</p>
         <p><a class="member-detail-link" href="laundry.html">「ランドリーシアター」を開く</a></p>
       </section>
       `,

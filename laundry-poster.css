@@ -1,4 +1,4 @@
-/* Colors and artwork follow the 2026-10-28/29 printed materials. */
+/* Colors and artwork follow the 2026-10-31/11-01 printed materials. */
 @import url("https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600&display=swap");
 
 .poster-page, .poster-store-page {
@@ -34,7 +34,7 @@
 .poster-header nav a:last-child { color: #7251b5; }
 .poster-main { width: min(100% - 96px, 1200px); margin: auto; }
 .poster-hero { padding-top: clamp(32px, 4vw, 48px); }
-.poster-hero h1 { width: min(100%, 760px); max-width: none; margin: 0 auto 30px; }
+.poster-hero h1 { width: min(100%, 608px); max-width: none; margin: 0 auto 30px; }
 .poster-hero h1 img { width: 100%; height: auto; }
 .poster-tagline { color: #176b60; font-size: clamp(18px, 2.1vw, 25px); margin: 0; letter-spacing: .035em; }
 .translation { color: #64716b; font: 14px/1.65 Arial, sans-serif; margin: 9px 0 0; }
@@ -129,3 +129,28 @@
   .poster-store-page .theater-wordmark img { width: 145px; }
 }
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+
+/* Shared wording and small components from the final printed materials. */
+.poster-stores h3 { color: var(--muted); }
+.poster-stores .store-list { margin-top: 14px; }
+.theater-actions-title { color: #176b60; font-size: 18px; font-weight: 500; }
+.theater-steps img { float: right; margin: 2px 0 14px 18px; width: 40px; height: 40px; }
+.theater-steps li { margin-bottom: 30px; }
+.workshop-attendance { padding-top: 14px; }
+.workshop-schedule .workshop-venue { padding-top: 20px; color: #25312f; }
+.workshop-schedule .workshop-access { padding-top: 8px; font-size: 13px; color: #64716b; }
+.workshop-details dt { color: #25312f; }
+.organizer-credit { display: inline-flex; align-items: center; gap: 16px; }
+.organizer-credit img { width: 100px; height: auto; }
+.project-site-link { display: flex; flex-direction: column; gap: 4px; }
+.project-site-link small { color: #64716b; font-size: 12px; }
+.project-site-link small[lang] { font-family: Arial, sans-serif; }
+.poster-store-page .footer-links { align-items: center; gap: 24px; }
+.poster-store-page .footer-links .organizer-credit { display: inline-flex; }
+.store-post-use { padding-top: 12px; }
+.store-audio-note { max-width: 760px; }
+@media (max-width: 760px) {
+  .organizer-credit { gap: 12px; }
+  .organizer-credit img { width: 90px; }
+  .theater-steps img { width: 34px; height: 34px; margin-left: 12px; }
+}

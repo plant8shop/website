@@ -160,11 +160,13 @@ const SITE_DATA = {
       period: "2026.09–",
       status: "進行中",
       thumbnail: "assets/laundry/poster-photo.webp",
-      summary: "まちの写真や記憶を、短い戯曲と朗読にして共有するプロジェクト",
+      summary: "まちの場所にまつわる記憶を、短い戯曲と朗読にして共有するプロジェクト",
       detailHtml: `
       <section>
-        <p>シアターに投稿された写真や記憶、物語を手がかりに、短い戯曲を一緒につくり、朗読します。</p>
+        <p>シアターに投稿された情報を手がかりに、短い戯曲を一緒につくり、朗読します。</p>
         <p>2026 11/21（土）・12/6（日） 各日 13:00–17:00 @KYOTO LAUNDRY CAFE</p>
+        <p>1日でも両日でも参加可</p>
+        <p>参加費：ワンドリンクのご注文／使用言語：日本語</p>
         <p><a class="member-detail-link" href="laundry.html">「ランドリーシアター」を開く</a></p>
       </section>
       `,

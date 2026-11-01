@@ -3,7 +3,12 @@
 
   var data = window.LAUNDRY_WAITING_ROOM_DATA || { stores: [] };
   var params = new URL(window.location.href).searchParams;
-  var store = data.stores.find(function (item) { return item.id === params.get("store"); }) || data.stores[0];
+  var requestedStoreId = params.get("store");
+  var store = data.stores.find(function (item) { return item.id === requestedStoreId; });
+  if (!store) {
+    window.location.replace("laundry.html#stores");
+    return;
+  }
   var visitorId = localStorage.getItem("plantshop_laundry_theater_visitor_id");
   if (!visitorId) {
     visitorId = "v_" + (crypto.randomUUID ? crypto.randomUUID() : Date.now() + "_" + Math.random().toString(36).slice(2));

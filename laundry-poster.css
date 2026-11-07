@@ -273,3 +273,117 @@
   .drink-discount-receipt dl { grid-template-columns: 1fr; }
   .drink-discount-receipt dl div + div { border-top: 1px solid rgba(114,81,181,.35); border-left: 0; }
 }
+
+/* Store pages use a quiet folder-like workspace. Explanations live in Help. */
+.poster-store-page { min-height: 100svh; background: #f4f1ea; }
+.poster-store-page .site-header { border-bottom: 1px solid #d8d3c9; }
+.store-workspace-head {
+  padding: clamp(24px, 5vw, 48px) var(--section-pad-x) 0;
+  background: #f4f1ea;
+}
+.store-workspace-head h1 {
+  margin: 0 0 22px;
+  color: #176b60;
+  font-size: clamp(22px, 4vw, 36px);
+  font-weight: 500;
+  overflow-wrap: anywhere;
+}
+.poster-store-page .folder-tabs {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.75fr);
+  gap: 5px;
+  max-width: none;
+  margin: 0;
+  border-bottom: 1px solid #7251b5;
+}
+.poster-store-page .folder-tabs .mode-button {
+  min-height: 56px;
+  justify-content: center;
+  padding: 10px 12px;
+  border: 1px solid #cfc6df;
+  border-bottom: 0;
+  border-radius: 12px 12px 0 0;
+  background: #e8e2dc;
+  color: #4f4a52;
+  font-size: .78rem;
+  line-height: 1.35;
+  text-align: center;
+}
+.poster-store-page .folder-tabs .mode-button:hover,
+.poster-store-page .folder-tabs .mode-button:focus-visible { background: #f2eef7; }
+.poster-store-page .folder-tabs .mode-button.is-active {
+  position: relative;
+  z-index: 2;
+  margin-bottom: -1px;
+  border-color: #7251b5;
+  background: #fff;
+  color: #176b60;
+  outline: 0;
+}
+.poster-store-page .mode-panel {
+  min-height: calc(100svh - 230px);
+  padding: clamp(24px, 5vw, 54px) var(--section-pad-x) 90px;
+  border-top: 0;
+  background: #fff;
+}
+.poster-store-page .store-play-map { margin-top: 0; }
+.visually-hidden {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+.store-help-button {
+  position: fixed;
+  z-index: 30;
+  right: max(18px, env(safe-area-inset-right));
+  bottom: max(18px, env(safe-area-inset-bottom));
+  width: 52px;
+  height: 52px;
+  border: 0;
+  border-radius: 50%;
+  color: #fff;
+  background: #7251b5;
+  box-shadow: 0 8px 24px rgba(55, 42, 87, .25);
+  font: 600 24px/1 Arial, sans-serif;
+  cursor: pointer;
+}
+.store-help-button:hover,
+.store-help-button:focus-visible { background: #176b60; outline: 3px solid #fff; }
+.store-help-content { display: grid; gap: 16px; padding: clamp(36px, 7vw, 64px); }
+.store-help-content h2 { margin: 0; color: #176b60; font-size: clamp(24px, 5vw, 36px); font-weight: 500; }
+.store-help-content p { margin: 0; }
+.store-help-content .store-audio-note { padding: 14px 16px; border-left: 2px solid #7251b5; background: #f2eef7; }
+.store-help-links { display: grid; margin-top: 8px; border-top: 1px solid #c7dbd2; }
+.store-help-links a { padding: 14px 0; border-bottom: 1px solid #c7dbd2; color: #176b60; }
+.drink-discount-dialog {
+  width: min(680px, calc(100% - 28px));
+  max-height: calc(100svh - 28px);
+  padding: 0;
+  overflow: auto;
+  border: 2px solid #7251b5;
+  background: #fff;
+  box-shadow: 0 32px 90px rgba(39, 36, 61, .32);
+}
+.drink-discount-dialog::backdrop { background: rgba(39, 36, 61, .55); backdrop-filter: blur(5px); }
+.drink-discount-dialog .drink-discount-receipt { max-width: none; margin: 0; border: 0; box-shadow: none; }
+.drink-discount-dialog .dialog-close { z-index: 3; }
+.discount-reopen { margin: 0 0 22px auto; }
+.poster-store-page .my-submission-list { grid-template-columns: minmax(0, 1fr); max-width: 880px; }
+.poster-store-page .my-submission-card { min-height: 0; padding: 18px 54px 18px 20px; }
+.poster-store-page .my-submission-card strong { margin: 8px 0 4px; }
+.poster-store-page .my-submission-card small { padding-top: 10px; }
+
+@media (max-width: 600px) {
+  .store-workspace-head { padding-inline: 12px; }
+  .store-workspace-head h1 { margin-inline: 8px; }
+  .poster-store-page .folder-tabs { grid-template-columns: .85fr .85fr 1.45fr; }
+  .poster-store-page .folder-tabs .mode-button { min-height: 62px; padding: 8px 5px; font-size: .68rem; }
+  .poster-store-page .mode-panel { padding-inline: 20px; }
+  .store-help-button { width: 48px; height: 48px; }
+}

@@ -6,7 +6,7 @@
   <meta name="description" content="このランドリーの周辺のまちにまつわる記憶をもとにつくった戯曲や朗読を、洗濯や乾燥を待ちながら楽しめます。">
   <title>店舗｜ランドリーシアター</title>
   <link rel="stylesheet" href="laundry.css?v=20261101-1">
-  <link rel="stylesheet" href="laundry-poster.css?v=20261107-4">
+  <link rel="stylesheet" href="laundry-poster.css?v=20261107-6">
 </head>
 <body class="store-page poster-store-page">
   <header class="site-header">
@@ -17,25 +17,21 @@
   </header>
 
   <main>
-    <section class="store-hero">
+    <section class="store-workspace-head">
       <div class="section-inner section-inner-wide">
         <h1 id="storeTitle"></h1>
-        <div class="store-poster-intro"><div id="storeStart"><p class="store-start-date">11/7（土）〜</p><p class="translation" lang="en">From Nov 7 (Sat), 2026</p></div><p>このランドリーの周辺のまちにまつわる記憶をもとにつくった戯曲や朗読を、洗濯や乾燥を待ちながら楽しめます。</p><p class="translation" lang="en">Enjoy short plays and audio readings based on memories of the surrounding area while you wait for washing or drying.</p><p>店の外からも投稿できます</p><p class="translation" lang="en">You can post from anywhere.</p><p id="storeDrinkOffer" class="drink-offer" hidden>投稿画面をカフェの店員に見せると、ドリンクが50円引きになります。<span class="translation" lang="en">Show your post to café staff for ¥50 off a drink.</span></p><p class="store-post-use">投稿された情報を手がかりに、ワークショップで戯曲をつくり、再びサイトに反映します。</p><p class="translation" lang="en">Using posted information, we create plays in workshops and add them to the site.</p></div>
-        <nav class="mode-nav" aria-label="店舗ページの機能">
-          <button class="mode-button is-active" type="button" data-mode="works" aria-pressed="true"><span>01</span>作品を読む・聴く</button>
-          <button class="mode-button" type="button" data-mode="submit" aria-pressed="false"><span>02</span>投稿する</button>
-          <button class="mode-button" type="button" data-mode="mine" aria-pressed="false"><span>03</span>あなたが投稿・コメントしたもの</button>
+        <nav class="mode-nav folder-tabs" aria-label="店舗ページの機能">
+          <button class="mode-button is-active" type="button" data-mode="works" aria-pressed="true">読む・聴く</button>
+          <button class="mode-button" type="button" data-mode="submit" aria-pressed="false">投稿する</button>
+          <button class="mode-button" type="button" data-mode="mine" aria-pressed="false">あなたが投稿・コメントしたもの</button>
         </nav>
       </div>
     </section>
 
     <section id="works" class="section mode-panel works-section is-active" data-panel="works">
       <div class="section-inner section-inner-wide">
-        <div class="section-heading"><span class="section-index">01</span><div><h2>作品を読む・聴く</h2><p>地図や一覧から気になる場所を選び、戯曲を読み、朗読を聴く。</p></div></div>
-        <div class="poster-note store-audio-note"><p>音声はイヤホン、または周囲の方の迷惑にならない音量でお楽しみください。</p><p class="translation" lang="en">Use headphones or keep the volume low enough not to disturb others.</p></div>
         <section class="play-map-section store-play-map" aria-labelledby="playMapTitle">
-          <h3 id="playMapTitle">戯曲の場所</h3>
-          <p>店舗から半径500mの地図です。地図の番号から作品を選べます。</p>
+          <h2 id="playMapTitle" class="visually-hidden">戯曲の場所</h2>
           <div id="laundryAreaMap"></div>
         </section>
         <div class="works-toolbar"><button id="likedFilter" class="button" type="button" aria-pressed="false">「いいね」した作品を表示</button></div>
@@ -48,16 +44,7 @@
 
     <section id="submit" class="section mode-panel submit-section" data-panel="submit" hidden>
       <div class="section-inner section-inner-wide">
-        <div class="section-heading"><span class="section-index">02</span><div><h2>投稿する</h2><p>まちの写真・印象・記憶を投稿する。</p></div></div>
-        <section id="drinkDiscountReceipt" class="drink-discount-receipt" aria-labelledby="discountTitle" hidden>
-          <p class="discount-kicker">投稿特典</p>
-          <h3 id="discountTitle">投稿しました<br><strong>ドリンク50円引き</strong></h3>
-          <p>この画面をKYOTO LAUNDRY CAFEの店員に見せてください。</p>
-          <dl><div><dt>投稿日時</dt><dd id="discountSubmittedAt"></dd></div><div><dt>有効期限</dt><dd id="discountExpiresAt"></dd></div></dl>
-          <p class="discount-now"><span>現在時刻</span><time id="discountCurrentTime"></time></p>
-          <p class="discount-note">投稿完了から24時間有効です。</p>
-          <button id="showSubmissionForm" class="button" type="button">続けて投稿する</button>
-        </section>
+        <button id="showDiscountReceipt" class="discount-reopen button" type="button" hidden>ドリンク50円引き画面を表示</button>
         <form id="submissionForm" class="submission-form"><input class="honeypot" type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
           <div class="submission-layout">
             <div>
@@ -70,7 +57,7 @@
               <label><span>テキスト</span><textarea name="body" required maxlength="1200" rows="8" placeholder="そこで見たこと、聞こえた音、思い出したことなど"></textarea></label>
               <label class="photo-field"><span>写真（任意）</span><span class="button photo-add-button">写真を追加</span><input class="photo-input" name="photo" type="file" accept="image/*" multiple><small>最大5枚。JPEG・PNGなど。大きな写真は送信時に縮小されます。</small></label>
               <div id="submissionPhotoPreview" class="photo-preview" aria-live="polite" hidden></div>
-              <label class="consent-row"><input name="consent" type="checkbox" required><span>投稿内容を、作品制作や本サイトへの掲載素材として確認することに同意します。</span></label>
+              <label class="consent-row"><input name="consent" type="checkbox" required><span>投稿内容は、作品制作や本サイトへの掲載素材になる可能性があります。同意しますか？</span></label>
               <button class="button button-primary" type="submit">投稿する</button>
               <p id="formStatus" class="form-status" role="status" aria-live="polite"></p>
             </div>
@@ -81,19 +68,42 @@
 
     <section id="mine" class="section mode-panel mine-section" data-panel="mine" hidden>
       <div class="section-inner section-inner-wide">
-        <div class="section-heading"><span class="section-index">03</span><div><h2>あなたが投稿・コメントしたもの</h2><p>このブラウザから送った投稿とコメントを確認・修正・削除できます。</p></div></div>
         <div id="mySubmissionList" class="my-submission-list"></div>
       </div>
     </section>
   </main>
 
-  <footer class="theater-footer">
-    <div class="section-inner section-inner-wide footer-links">
-      <a class="project-site-link" href="laundry.html#stores"><span>プロジェクトサイト</span><small>ランドリーシアターの開催店舗はこちら</small><small lang="en">Project website / Theater locations</small></a>
-      <a href="laundry.html#workshop">戯曲をつくるワークショップ<br><small>詳細・お申し込み</small></a>
-      <a class="organizer-credit" href="index.html"><span>企画・運営</span><img src="assets/laundry/plantshop-logo.png" alt="プラントショップ" width="120" height="39" loading="lazy"></a>
+  <button id="storeHelpButton" class="store-help-button" type="button" aria-label="このページについて">?</button>
+
+  <dialog id="storeHelpDialog" class="form-dialog store-help-dialog" aria-labelledby="storeHelpTitle">
+    <button class="dialog-close" type="button" data-close-dialog="storeHelpDialog" aria-label="説明を閉じる">×</button>
+    <div class="store-help-content">
+      <h2 id="storeHelpTitle">ランドリーシアターについて</h2>
+      <div id="storeStart"><p class="store-start-date">11/7（土）〜</p><p class="translation" lang="en">From Nov 7 (Sat), 2026</p></div>
+      <p>このランドリーの周辺のまちにまつわる記憶をもとにつくった戯曲や朗読を、洗濯や乾燥を待ちながら楽しめます。</p>
+      <p>店の外からも投稿できます。投稿された情報を手がかりに、ワークショップで戯曲をつくり、再びサイトに反映します。</p>
+      <p id="storeDrinkOffer" class="drink-offer" hidden>投稿後に表示される画面をカフェの店員に見せると、24時間以内はドリンクが50円引きになります。</p>
+      <p class="store-audio-note">音声はイヤホン、または周囲の方の迷惑にならない音量でお楽しみください。</p>
+      <nav class="store-help-links" aria-label="関連リンク">
+        <a href="laundry.html#stores">開催店舗一覧</a>
+        <a href="laundry.html#workshop">戯曲をつくるワークショップ</a>
+        <a href="index.html">企画・運営　プラントショップ</a>
+      </nav>
     </div>
-  </footer>
+  </dialog>
+
+  <dialog id="drinkDiscountReceipt" class="drink-discount-dialog" aria-labelledby="discountTitle">
+    <button class="dialog-close" type="button" data-close-dialog="drinkDiscountReceipt" aria-label="割引画面を閉じる">×</button>
+    <div class="drink-discount-receipt">
+      <p class="discount-kicker">投稿特典</p>
+      <h2 id="discountTitle">投稿しました<br><strong>ドリンク50円引き</strong></h2>
+      <p>この画面をKYOTO LAUNDRY CAFEの店員に見せてください。</p>
+      <dl><div><dt>投稿日時</dt><dd id="discountSubmittedAt"></dd></div><div><dt>有効期限</dt><dd id="discountExpiresAt"></dd></div></dl>
+      <p class="discount-now"><span>現在時刻</span><time id="discountCurrentTime"></time></p>
+      <p class="discount-note">投稿完了から24時間有効です。</p>
+      <button id="discountCloseButton" class="button" type="button">閉じる</button>
+    </div>
+  </dialog>
 
   <dialog id="workDialog" class="work-dialog" aria-labelledby="dialogTitle"><button id="dialogClose" class="dialog-close" type="button" aria-label="作品を閉じる">×</button><div id="dialogContent"></div></dialog>
 
@@ -104,7 +114,7 @@
       <label><span>テキスト</span><textarea name="body" required maxlength="1200" rows="7"></textarea></label>
       <label class="photo-field"><span>写真（任意）</span><span class="button photo-add-button">写真を追加</span><input class="photo-input" name="photo" type="file" accept="image/*" multiple><small>最大5枚。大きな写真は送信時に縮小されます。</small></label>
       <div id="commentPhotoPreview" class="photo-preview" aria-live="polite" hidden></div>
-      <label class="consent-row"><input name="consent" type="checkbox" required><span>投稿内容を、作品制作や本サイトへの掲載素材として確認することに同意します。</span></label>
+      <label class="consent-row"><input name="consent" type="checkbox" required><span>投稿内容は、作品制作や本サイトへの掲載素材になる可能性があります。同意しますか？</span></label>
       <button class="button button-primary" type="submit">投稿する</button><p id="commentStatus" class="form-status" role="status" aria-live="polite"></p>
     </form>
   </dialog>
@@ -123,14 +133,14 @@
       <div id="currentPhoto" class="current-photo"></div>
       <label class="photo-field"><span>写真を変更（任意）</span><span class="button photo-add-button">写真を変更</span><input class="photo-input" name="photo" type="file" accept="image/*" multiple><small>最大5枚。選択すると現在の写真をまとめて置き換えます。</small></label>
       <div id="editPhotoPreview" class="photo-preview" aria-live="polite" hidden></div>
-      <label class="consent-row"><input name="consent" type="checkbox" required><span>修正内容を、作品制作や本サイトへの掲載素材として確認することに同意します。</span></label>
+      <label class="consent-row"><input name="consent" type="checkbox" required><span>修正した内容は、作品制作や本サイトへの掲載素材になる可能性があります。同意しますか？</span></label>
       <div class="edit-actions"><button class="button button-primary" type="submit">修正を保存する</button><button id="deleteSubmissionButton" class="button button-danger" type="button">削除する</button></div><p id="editStatus" class="form-status" role="status" aria-live="polite"></p>
     </form>
   </dialog>
 
-  <script src="data/laundry-waiting-room.js?v=20261107-4"></script>
-  <script src="data/laundry-area-maps.js?v=20261107-3"></script>
-  <script src="laundry-area-maps.js?v=20261107-3"></script>
-  <script src="laundry-store.js?v=20261107-4"></script>
+  <script src="data/laundry-waiting-room.js?v=20261107-6"></script>
+  <script src="data/laundry-area-maps.js?v=20261107-6"></script>
+  <script src="laundry-area-maps.js?v=20261107-6"></script>
+  <script src="laundry-store.js?v=20261107-6"></script>
 </body>
 </html>

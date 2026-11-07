@@ -10,7 +10,7 @@ window.LAUNDRY_WAITING_ROOM_DATA = {
       "mapReady": true,
       "center": { "lat": 35.0054665, "lng": 135.7333229 },
       "mapSpanMeters": 1050,
-      "mapImage": "assets/laundry/area-maps/kyoto-laundry-cafe.svg?v=20261107-3",
+      "mapImage": "assets/laundry/area-maps/kyoto-laundry-cafe.svg?v=20261107-6",
       "mapAlt": "KYOTO LAUNDRY CAFEから半径500mの地図",
       "works": [],
       "drinkOffer": true
@@ -24,7 +24,7 @@ window.LAUNDRY_WAITING_ROOM_DATA = {
       "mapReady": true,
       "center": { "lat": 34.9912611, "lng": 135.7205511 },
       "mapSpanMeters": 1050,
-      "mapImage": "assets/laundry/area-maps/laundromat-nishikyogoku.svg?v=20261107-3",
+      "mapImage": "assets/laundry/area-maps/laundromat-nishikyogoku.svg?v=20261107-6",
       "mapAlt": "laundromat 西京極から半径500mの地図",
       "works": [],
       "drinkOffer": false
@@ -38,7 +38,7 @@ window.LAUNDRY_WAITING_ROOM_DATA = {
       "mapReady": true,
       "center": { "lat": 35.0037354, "lng": 135.7389614 },
       "mapSpanMeters": 1050,
-      "mapImage": "assets/laundry/area-maps/laundromat-mibu.svg?v=20261107-3",
+      "mapImage": "assets/laundry/area-maps/laundromat-mibu.svg?v=20261107-6",
       "mapAlt": "laundromat MIBUから半径500mの地図",
       "works": [],
       "drinkOffer": false

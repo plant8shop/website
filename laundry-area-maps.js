@@ -2,7 +2,7 @@
   "use strict";
 
   var data = window.LAUNDRY_AREA_MAPS;
-  var creditUrl = "https://github.com/gsi-cyberjapan/gsimaps-vector-experiment";
+  var creditUrl = "https://maps.gsi.go.jp/help/use.html";
 
   function element(tag, className, content) {
     var node = document.createElement(tag);
@@ -36,7 +36,7 @@
     surface.append(image);
 
     var caption = element("figcaption", "play-map-caption");
-    var credit = element("a", null, "国土地理院ベクトルタイル提供実験のデータを加工して作成");
+    var credit = element("a", null, "国土地理院の地理院タイルを加工して作成");
     credit.href = creditUrl;
     caption.append(credit);
     figure.append(surface, caption);

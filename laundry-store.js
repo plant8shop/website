@@ -54,6 +54,8 @@
   var editForm = document.getElementById("editForm");
   var formStatus = document.getElementById("formStatus");
   var discountReceipt = document.getElementById("drinkDiscountReceipt");
+  var discountTrigger = document.getElementById("showDiscountReceipt");
+  var helpDialog = document.getElementById("storeHelpDialog");
   var discountTimer = null;
 
   function escapeHtml(value) {
@@ -88,21 +90,21 @@
     });
   }
 
-  function renderDiscountReceipt(hideForm) {
+  function renderDiscountReceipt() {
     var receipt = readDiscountReceipt();
-    discountReceipt.hidden = !receipt;
+    discountTrigger.hidden = !receipt;
     if (!receipt) {
       if (discountTimer) clearInterval(discountTimer);
       discountTimer = null;
+      if (discountReceipt.open) discountReceipt.close();
       return false;
     }
     document.getElementById("discountSubmittedAt").textContent = formatReceiptTime(receipt.submittedAt, false);
     document.getElementById("discountExpiresAt").textContent = formatReceiptTime(receipt.expiresAt, false);
     document.getElementById("discountCurrentTime").textContent = formatReceiptTime(Date.now(), true);
-    if (hideForm) form.hidden = true;
     if (!discountTimer) {
       discountTimer = setInterval(function () {
-        if (!renderDiscountReceipt(false)) form.hidden = false;
+        renderDiscountReceipt();
       }, 1000);
     }
     return true;
@@ -115,8 +117,8 @@
       submittedAt: submittedAt,
       expiresAt: submittedAt + discountDuration
     }));
-    renderDiscountReceipt(true);
-    discountReceipt.scrollIntoView({ behavior: "smooth", block: "start" });
+    renderDiscountReceipt();
+    if (!discountReceipt.open) discountReceipt.showModal();
   }
 
   function stateFor(workId) {
@@ -449,10 +451,8 @@
     node.innerHTML = submissions.map(function (item) {
       var isComment = item.type === "comment";
       var title = isComment ? (item.workTitle || "作品へのコメント") : (item.placeLabel || "場所の投稿");
-      var photoSlot = submissionPhotoIds(item).length || submissionPhotoNames(item).length ? '<span class="my-submission-thumb" data-photo-slot="' + escapeHtml(item.id) + '" hidden></span>' : '';
-      return '<button class="my-submission-card" type="button" data-submission-id="' + escapeHtml(item.id) + '">' + photoSlot + '<span class="submission-type">' + (isComment ? "作品へのコメント" : "場所の投稿") + '</span><strong>' + escapeHtml(title) + '</strong><p>' + escapeHtml(item.body) + '</p><small>' + escapeHtml(formatDate(item.updatedAt || item.createdAt)) + '</small><span class="work-arrow" aria-hidden="true">↗</span></button>';
+      return '<button class="my-submission-card" type="button" data-submission-id="' + escapeHtml(item.id) + '"><span class="submission-type">' + (isComment ? "作品へのコメント" : "場所の投稿") + '</span><strong>' + escapeHtml(title) + '</strong><p>' + escapeHtml(item.body) + '</p><small>' + escapeHtml(formatDate(item.updatedAt || item.createdAt)) + '</small><span class="work-arrow" aria-hidden="true">↗</span></button>';
     }).join("");
-    hydrateSubmissionThumbnails(submissions);
   }
 
   function openPhotoDb() {
@@ -833,8 +833,6 @@
       panel.classList.toggle("is-active", active);
     });
     if (mode === "mine") renderMySubmissions();
-    var panel = document.querySelector('[data-panel="' + mode + '"]');
-    if (panel) panel.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
   function openEditForm(id) {
@@ -1058,7 +1056,7 @@
   document.querySelectorAll("[data-close-dialog]").forEach(function (button) {
     button.addEventListener("click", function () { document.getElementById(button.dataset.closeDialog).close(); });
   });
-  [dialog, commentDialog, editDialog].forEach(function (item) {
+  [dialog, commentDialog, editDialog, helpDialog, discountReceipt].forEach(function (item) {
     item.addEventListener("click", function (event) { if (event.target === item) { if (item === dialog) stopSpeech(); item.close(); } });
   });
   dialog.addEventListener("close", function () {
@@ -1094,15 +1092,18 @@
     editMap.disabled = true;
     [mapNode, submitMap, editMap].forEach(function (node) { node.closest(".map-card").hidden = true; });
     document.getElementById("selectedLocation").textContent = "場所の名前を入力してください。";
-    document.querySelector("#works .section-heading p").hidden = true;
   }
   document.getElementById("likedFilter").hidden = !store.works.length;
-  document.getElementById("showSubmissionForm").addEventListener("click", function () {
-    form.hidden = false;
-    form.scrollIntoView({ behavior: "smooth", block: "start" });
+  document.getElementById("storeHelpButton").addEventListener("click", function () {
+    if (!helpDialog.open) helpDialog.showModal();
   });
-  var hasValidDiscount = renderDiscountReceipt(store.drinkOffer);
-  if (hasValidDiscount) setMode("submit");
+  discountTrigger.addEventListener("click", function () {
+    if (renderDiscountReceipt() && !discountReceipt.open) discountReceipt.showModal();
+  });
+  document.getElementById("discountCloseButton").addEventListener("click", function () {
+    discountReceipt.close();
+  });
+  renderDiscountReceipt();
   renderWorks();
   renderSubmissionMap();
   renderMySubmissions();

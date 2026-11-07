@@ -29,6 +29,8 @@
   var likedOnly = false;
   var selectedPoint = null;
   var editPoint = null;
+  var submitMapView = { scale: 1, x: 0, y: 0 };
+  var editMapView = { scale: 1, x: 0, y: 0 };
   var activeWork = null;
   var activeSubmission = null;
   var speech = null;
@@ -684,12 +686,14 @@
     });
   }
 
-  function positionFromEvent(event, mapElement) {
-    if (store.mapReady === false) return null;
-    var rect = mapElement.getBoundingClientRect();
-    var x = Math.max(0, Math.min(1, (event.clientX - rect.left) / rect.width));
-    var y = Math.max(0, Math.min(1, (event.clientY - rect.top) / rect.height));
-    return { x: x, y: y, latitude: store.center.lat + (0.5 - y) * 0.02, longitude: store.center.lng + (x - 0.5) * 0.03 };
+  function positionFromNormalized(x, y) {
+    if (!store.center) return null;
+    var span = Number(store.mapSpanMeters) || 1050;
+    var northMeters = (0.5 - y) * span;
+    var eastMeters = (x - 0.5) * span;
+    var latitude = store.center.lat + northMeters / 111320;
+    var longitude = store.center.lng + eastMeters / (111320 * Math.cos(store.center.lat * Math.PI / 180));
+    return { x: x, y: y, latitude: latitude, longitude: longitude };
   }
 
   function pointFromCoordinates(latitude, longitude) {
@@ -698,9 +702,10 @@
     var lat = Number(latitude);
     var lng = Number(longitude);
     if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
+    var span = Number(store.mapSpanMeters) || 1050;
     return {
-      x: Math.max(0, Math.min(1, 0.5 + (lng - store.center.lng) / 0.03)),
-      y: Math.max(0, Math.min(1, 0.5 - (lat - store.center.lat) / 0.02)),
+      x: Math.max(0, Math.min(1, 0.5 + (lng - store.center.lng) * 111320 * Math.cos(store.center.lat * Math.PI / 180) / span)),
+      y: Math.max(0, Math.min(1, 0.5 - (lat - store.center.lat) * 111320 / span)),
       latitude: lat,
       longitude: lng
     };
@@ -710,14 +715,110 @@
     return value === true || String(value).toLowerCase() === "true";
   }
 
+  function constrainMapView(mapElement, view) {
+    var limitX = Math.max(0, (view.scale - 1) * mapElement.clientWidth / 2);
+    var limitY = Math.max(0, (view.scale - 1) * mapElement.clientHeight / 2);
+    view.x = Math.max(-limitX, Math.min(limitX, view.x));
+    view.y = Math.max(-limitY, Math.min(limitY, view.y));
+  }
+
+  function mapLayerStyle(view) {
+    return '--map-scale:' + view.scale + ';--map-x:' + view.x + 'px;--map-y:' + view.y + 'px';
+  }
+
+  function renderInteractiveMap(mapElement, point, view) {
+    var pin = point ? '<span class="submission-pin" style="--x:' + (point.x * 100) + '%;--y:' + (point.y * 100) + '%">＋</span>' : '';
+    mapElement.innerHTML = '<div class="submission-map-layer" style="' + mapLayerStyle(view) + '">' + mapScenery() + pin + '</div>' +
+      '<span class="map-help">地図を押して場所を選択</span>';
+  }
+
   function renderSubmissionMap() {
-    submitMap.innerHTML = mapScenery() + (selectedPoint && !unknown.checked ? '<span class="submission-pin" style="--x:' + (selectedPoint.x * 100) + '%;--y:' + (selectedPoint.y * 100) + '%">＋</span>' : '<span class="map-help">地図上の場所を押してください</span>');
+    renderInteractiveMap(submitMap, selectedPoint && !unknown.checked ? selectedPoint : null, submitMapView);
     document.getElementById("selectedLocation").textContent = unknown.checked ? "場所の名前を入力してください。" : (selectedPoint ? "地図上の場所を選びました。" : "場所はまだ選ばれていません。");
   }
 
   function renderEditMap() {
-    editMap.innerHTML = mapScenery() + (editPoint && !editUnknown.checked ? '<span class="submission-pin" style="--x:' + (editPoint.x * 100) + '%;--y:' + (editPoint.y * 100) + '%">＋</span>' : '<span class="map-help">地図上の場所を押してください</span>');
+    renderInteractiveMap(editMap, editPoint && !editUnknown.checked ? editPoint : null, editMapView);
     document.getElementById("editSelectedLocation").textContent = editUnknown.checked ? "場所の名前で記録されています。" : (editPoint ? "現在の投稿場所です。地図を押すと変更できます。" : "場所はまだ選ばれていません。");
+  }
+
+  function bindInteractiveMap(mapElement, view, onSelect) {
+    var drag = null;
+    var pinch = null;
+    var pointers = new Map();
+    var ignoreClick = false;
+    function updateLayer() {
+      constrainMapView(mapElement, view);
+      var layer = mapElement.querySelector(".submission-map-layer");
+      if (layer) layer.setAttribute("style", mapLayerStyle(view));
+    }
+    function zoomTo(nextScale, clientX, clientY) {
+      var rect = mapElement.getBoundingClientRect();
+      var oldScale = view.scale;
+      nextScale = Math.max(1, Math.min(4, nextScale));
+      var focusX = (clientX == null ? rect.left + rect.width / 2 : clientX) - rect.left - rect.width / 2;
+      var focusY = (clientY == null ? rect.top + rect.height / 2 : clientY) - rect.top - rect.height / 2;
+      view.x = focusX - (focusX - view.x) * nextScale / oldScale;
+      view.y = focusY - (focusY - view.y) * nextScale / oldScale;
+      view.scale = nextScale;
+      updateLayer();
+    }
+    mapElement.addEventListener("click", function (event) {
+      if (ignoreClick || (drag && drag.moved)) return;
+      var rect = mapElement.getBoundingClientRect();
+      var x = ((event.clientX - rect.left - rect.width / 2 - view.x) / view.scale + rect.width / 2) / rect.width;
+      var y = ((event.clientY - rect.top - rect.height / 2 - view.y) / view.scale + rect.height / 2) / rect.height;
+      if (x >= 0 && x <= 1 && y >= 0 && y <= 1) onSelect(positionFromNormalized(x, y));
+    });
+    mapElement.addEventListener("wheel", function (event) {
+      event.preventDefault();
+      zoomTo(view.scale * (event.deltaY < 0 ? 1.2 : 1 / 1.2), event.clientX, event.clientY);
+    }, { passive: false });
+    mapElement.addEventListener("pointerdown", function (event) {
+      pointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
+      drag = { startX: event.clientX, startY: event.clientY, baseX: view.x, baseY: view.y, moved: false };
+      mapElement.setPointerCapture(event.pointerId);
+      if (pointers.size === 2) {
+        var pair = Array.from(pointers.values());
+        pinch = {
+          distance: Math.hypot(pair[1].x - pair[0].x, pair[1].y - pair[0].y),
+          scale: view.scale,
+          centerX: (pair[0].x + pair[1].x) / 2,
+          centerY: (pair[0].y + pair[1].y) / 2
+        };
+        ignoreClick = true;
+      }
+    });
+    mapElement.addEventListener("pointermove", function (event) {
+      if (pointers.has(event.pointerId)) pointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
+      if (pinch && pointers.size >= 2) {
+        var pair = Array.from(pointers.values()).slice(0, 2);
+        var distance = Math.hypot(pair[1].x - pair[0].x, pair[1].y - pair[0].y);
+        zoomTo(pinch.scale * distance / Math.max(1, pinch.distance), pinch.centerX, pinch.centerY);
+        return;
+      }
+      if (!drag || view.scale === 1) return;
+      var dx = event.clientX - drag.startX;
+      var dy = event.clientY - drag.startY;
+      if (Math.abs(dx) + Math.abs(dy) > 5) drag.moved = true;
+      view.x = drag.baseX + dx;
+      view.y = drag.baseY + dy;
+      updateLayer();
+    });
+    mapElement.addEventListener("pointerup", function (event) {
+      pointers.delete(event.pointerId);
+      if (pinch) {
+        pinch = null;
+        setTimeout(function () { ignoreClick = false; }, 80);
+      }
+      setTimeout(function () { drag = null; }, 0);
+    });
+    mapElement.addEventListener("pointercancel", function (event) {
+      pointers.delete(event.pointerId);
+      drag = null;
+      pinch = null;
+      setTimeout(function () { ignoreClick = false; }, 80);
+    });
   }
 
   function setMode(mode) {
@@ -827,15 +928,15 @@
     });
   }
 
-  submitMap.addEventListener("click", function (event) {
+  bindInteractiveMap(submitMap, submitMapView, function (point) {
     if (unknown.checked) return;
-    selectedPoint = positionFromEvent(event, submitMap);
+    selectedPoint = point;
     renderSubmissionMap();
   });
   unknown.addEventListener("change", renderSubmissionMap);
-  editMap.addEventListener("click", function (event) {
+  bindInteractiveMap(editMap, editMapView, function (point) {
     if (editUnknown.checked) return;
-    editPoint = positionFromEvent(event, editMap);
+    editPoint = point;
     renderEditMap();
   });
   editUnknown.addEventListener("change", renderEditMap);

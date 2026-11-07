@@ -197,6 +197,28 @@
 }
 .play-map-pin .play-map-number { width: 30px; height: 30px; border: 2px solid white; }
 .play-map-pin:focus-visible, .play-map-entry:focus-visible { outline: 2px solid #7251b5; outline-offset: 3px; }
+
+.submission-map {
+  touch-action: none;
+  overscroll-behavior: contain;
+}
+.submission-map-layer {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  overflow: hidden;
+  transform: translate(var(--map-x), var(--map-y)) scale(var(--map-scale));
+  transform-origin: center;
+  will-change: transform;
+}
+.submission-map-layer .map-base-image { pointer-events: none; }
+.submission-map .map-help { pointer-events: none; }
+.map-label-row small {
+  color: var(--muted);
+  font-size: .68rem;
+  font-weight: 400;
+  letter-spacing: .02em;
+}
 .play-map-entry:hover { text-decoration: underline; }
 .play-map-number {
   display: grid;

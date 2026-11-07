@@ -320,15 +320,8 @@
 .poster-store-page { min-height: 100svh; background: #f4f1ea; }
 .poster-store-page .site-header { background: transparent; border-bottom: 0; backdrop-filter: none; }
 .store-workspace-head {
-  padding: clamp(20px, 3.5vw, 36px) var(--section-pad-x) 0;
+  padding: 10px var(--section-pad-x) 0;
   background: #f4f1ea;
-}
-.store-workspace-head h1 {
-  margin: 0 0 18px;
-  color: #176b60;
-  font-size: clamp(22px, 4vw, 36px);
-  font-weight: 500;
-  overflow-wrap: anywhere;
 }
 .poster-store-page .folder-tabs {
   display: flex;
@@ -473,8 +466,7 @@
 .work-navigation small { overflow: hidden; color: var(--muted); font-size: .68rem; text-overflow: ellipsis; white-space: nowrap; }
 
 @media (max-width: 600px) {
-  .store-workspace-head { padding-inline: 12px; }
-  .store-workspace-head h1 { margin-inline: 8px; }
+  .store-workspace-head { padding: 8px 12px 0; }
   .poster-store-page .folder-tabs { margin-right: -12px; }
   .poster-store-page .folder-tabs .mode-button { min-height: 40px; padding: 8px 12px; font-size: .68rem; }
   .poster-store-page .mode-panel { padding-inline: 20px; }

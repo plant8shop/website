@@ -155,9 +155,8 @@
   .theater-steps img { width: 34px; height: 34px; margin-left: 12px; }
 }
 
-.play-map-section { margin-top: 64px; }
 .store-play-map { margin-top: 24px; }
-.play-map-section h2, .play-map-section h3 { margin: 0 0 8px; }
+.play-map-section h3 { margin: 0 0 8px; }
 .play-map-section > p { margin: 0 0 18px; }
 .play-map-layout {
   display: grid;
@@ -166,7 +165,7 @@
   align-items: start;
 }
 .play-map-figure { margin: 0; }
-.play-map-image-link { display: block; }
+.play-map-surface { position: relative; }
 .play-map-figure img { display: block; width: 100%; height: auto; }
 .play-map-caption {
   display: flex;
@@ -178,7 +177,27 @@
   color: var(--text-soft);
 }
 .play-map-legend { display: grid; gap: 9px; list-style: none; margin: 0; padding: 0; }
-.play-map-legend li { display: flex; align-items: center; gap: 10px; }
+.play-map-pin, .play-map-entry {
+  padding: 0;
+  border: 0;
+  color: inherit;
+  background: transparent;
+  font: inherit;
+  cursor: pointer;
+}
+.play-map-entry { display: flex; align-items: center; gap: 10px; text-align: left; min-height: 38px; }
+.play-map-pin {
+  position: absolute;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+}
+.play-map-pin .play-map-number { width: 30px; height: 30px; border: 2px solid white; }
+.play-map-pin:focus-visible, .play-map-entry:focus-visible { outline: 2px solid #7251b5; outline-offset: 3px; }
+.play-map-entry:hover { text-decoration: underline; }
 .play-map-number {
   display: grid;
   flex: 0 0 26px;
@@ -190,7 +209,6 @@
   font: 700 .8rem/1 Arial, sans-serif;
 }
 @media (max-width: 700px) {
-  .play-map-section { margin-top: 38px; }
   .store-play-map { margin-top: 20px; }
   .play-map-layout { grid-template-columns: minmax(0, 1fr); }
 }

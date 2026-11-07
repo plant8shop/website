@@ -14,5 +14,4 @@
       '<span class="store-link-arrow" aria-hidden="true">→</span>' +
     '</a>';
   }).join("");
-  window.renderLaundryAreaMap(document.getElementById("laundryAreaMap"), "overview");
 })();

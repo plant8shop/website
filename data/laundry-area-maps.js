@@ -2,43 +2,65 @@ window.LAUNDRY_AREA_MAPS = {
   "maps": {
     "laundromat-nishikyogoku": {
       "title": "laundromat 西京極周辺・半径500m",
-      "image": "assets/laundry/area-maps/laundromat-nishikyogoku.svg",
+      "image": "assets/laundry/area-maps/laundromat-nishikyogoku.svg?v=20261107-2",
       "locations": [
-        6,
-        7,
-        8
+        {
+          "id": 6,
+          "x": 14.909,
+          "y": 30.63
+        },
+        {
+          "id": 7,
+          "x": 25.66,
+          "y": 67.007
+        },
+        {
+          "id": 8,
+          "x": 63.896,
+          "y": 61.749
+        }
       ]
     },
     "laundromat-mibu": {
       "title": "laundromat MIBU周辺・半径500m",
-      "image": "assets/laundry/area-maps/laundromat-mibu.svg",
+      "image": "assets/laundry/area-maps/laundromat-mibu.svg?v=20261107-2",
       "locations": [
-        1,
-        2,
-        3
+        {
+          "id": 1,
+          "x": 85.558,
+          "y": 55.258
+        },
+        {
+          "id": 2,
+          "x": 38.695,
+          "y": 80.501
+        },
+        {
+          "id": 3,
+          "x": 32.624,
+          "y": 29.379
+        }
       ]
     },
     "kyoto-laundry-cafe": {
       "title": "KYOTO LAUNDRY CAFE周辺・半径500m",
-      "image": "assets/laundry/area-maps/kyoto-laundry-cafe.svg",
+      "image": "assets/laundry/area-maps/kyoto-laundry-cafe.svg?v=20261107-2",
       "locations": [
-        3,
-        4,
-        5
-      ]
-    },
-    "overview": {
-      "title": "店舗と戯曲の場所の全体図",
-      "image": "assets/laundry/area-maps/overview.svg",
-      "locations": [
-        1,
-        2,
-        3,
-        4,
-        5,
-        6,
-        7,
-        8
+        {
+          "id": 3,
+          "x": 81.643,
+          "y": 47.669
+        },
+        {
+          "id": 4,
+          "x": 53.138,
+          "y": 44.707
+        },
+        {
+          "id": 5,
+          "x": 31.588,
+          "y": 73.309
+        }
       ]
     }
   },

@@ -11,41 +11,55 @@
     return node;
   }
 
+  function locationButton(className, point, number, title) {
+    var button = element("button", className);
+    button.type = "button";
+    button.dataset.playLocation = point.id;
+    button.setAttribute("aria-label", number + " " + title + "を開く");
+    button.append(element("span", "play-map-number", String(number)));
+    return button;
+  }
+
   window.renderLaundryAreaMap = function (root, key) {
     var map = data.maps[key];
-    if (!root || !map) return;
+    if (!root || !map) return false;
 
     var layout = element("div", "play-map-layout");
     var figure = element("figure", "play-map-figure");
-    var fullSize = element("a", "play-map-image-link");
-    fullSize.href = map.image;
-    fullSize.setAttribute("aria-label", map.title + "を拡大表示");
+    var surface = element("div", "play-map-surface");
     var image = element("img");
     image.src = map.image;
-    image.alt = map.title + "。緑の番号は隣の一覧に対応します。";
+    image.alt = map.title;
     image.width = 1000;
     image.height = 1000;
     image.loading = "lazy";
-    fullSize.append(image);
+    surface.append(image);
 
     var caption = element("figcaption", "play-map-caption");
-    var expand = element("a", null, "地図を拡大");
-    expand.href = map.image;
     var credit = element("a", null, "国土地理院ベクトルタイル提供実験のデータを加工して作成");
     credit.href = creditUrl;
-    caption.append(expand, credit);
-    figure.append(fullSize, caption);
+    caption.append(credit);
+    figure.append(surface, caption);
 
     var legend = element("ol", "play-map-legend");
-    legend.setAttribute("aria-label", "戯曲の地点一覧");
-    map.locations.forEach(function (number) {
+    legend.setAttribute("aria-label", "この店舗の戯曲の場所");
+    map.locations.forEach(function (point, index) {
+      var number = index + 1;
+      var title = data.locations[point.id];
+      var pin = locationButton("play-map-pin", point, number, title);
+      pin.style.left = point.x + "%";
+      pin.style.top = point.y + "%";
+      surface.append(pin);
+
       var item = element("li");
-      item.value = number;
-      item.append(element("span", "play-map-number", String(number)), element("span", null, data.locations[number]));
+      var entry = locationButton("play-map-entry", point, number, title);
+      entry.append(element("span", null, title));
+      item.append(entry);
       legend.append(item);
     });
 
     layout.append(figure, legend);
     root.replaceChildren(layout);
+    return true;
   };
 })();

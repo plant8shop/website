@@ -135,7 +135,20 @@
     var areaMap = areaMapImage + notes.map(function (note) { return '<span class="map-note" style="--x:' + Number(note.x || 50) + '%;--y:' + Number(note.y || 50) + '%">' + escapeHtml(note.text) + '</span>'; }).join("");
     var areaMapClass = 'detailed-map' + (areaMapImage ? ' has-image' : '');
     dialogContent.innerHTML = '<h2 id="dialogTitle">' + escapeHtml(activeWork.title) + '</h2><p class="dialog-place">' + escapeHtml(activeWork.place) + '</p><div id="workGallery" class="work-gallery">' + gallery + '</div><div class="gallery-toolbar"><span id="galleryCounter" class="gallery-counter">1 / ' + images.length + '</span><div><button id="galleryPrev" type="button" aria-label="前の写真">←</button><button id="galleryNext" type="button" aria-label="次の写真">→</button></div></div><button id="areaMapToggle" class="area-map-toggle" type="button" aria-expanded="false" aria-controls="areaMapPanel">周辺図を表示する</button><div id="areaMapPanel" class="area-map-panel" hidden><div class="' + areaMapClass + '" role="group" aria-label="' + escapeHtml(activeWork.title) + 'の場所周辺図">' + areaMap + '</div></div><p class="dialog-summary">' + escapeHtml(activeWork.summary) + '</p><div class="audio-player"><button id="listenButton" class="audio-play" type="button" aria-label="朗読を再生">▶</button><div class="audio-track"><progress id="audioProgress" class="audio-progress" max="100" value="0"></progress><div class="audio-time"><span id="audioCurrent">0:00</span><span id="audioDuration">' + formatTime(estimateSpeechDuration()) + '</span></div></div><p class="audio-caption">ブラウザの音声でテキストを再生します</p></div><div class="script"><h3>テキスト</h3>' + activeWork.script.map(function (paragraph) { return '<p>' + escapeHtml(paragraph) + '</p>'; }).join("") + '</div><section class="reactions"><button id="likeButton" class="like-button' + (state.liked ? ' is-liked' : '') + '" type="button" aria-pressed="' + state.liked + '">♡ <strong>' + (state.liked ? 'いいね済み' : 'いいね') + '</strong><span>' + state.likeCount + '</span>' + (state.syncing ? '<small>保存中</small>' : '') + '</button><button id="commentButton" class="button" type="button">コメントする</button></section>';
-    document.getElementById("listenButton").addEventListener("click", toggleSpeech);
+    var listenButton = document.getElementById("listenButton");
+    if (activeWork.audioUrl) {
+      var recording = document.createElement("audio");
+      recording.src = activeWork.audioUrl;
+      recording.controls = true;
+      recording.preload = "none";
+      recording.setAttribute("aria-label", activeWork.title + "の朗読");
+      listenButton.closest(".audio-player").replaceWith(recording);
+    } else if ("speechSynthesis" in window) {
+      listenButton.addEventListener("click", toggleSpeech);
+    } else {
+      listenButton.disabled = true;
+      dialogContent.querySelector(".audio-caption").textContent = "このブラウザは読み上げに対応していません。";
+    }
     document.getElementById("likeButton").addEventListener("click", toggleLike);
     document.getElementById("commentButton").addEventListener("click", openCommentForm);
     document.getElementById("areaMapToggle").addEventListener("click", toggleAreaMap);
@@ -861,6 +874,22 @@
   document.getElementById("works").addEventListener("click", function (event) {
     var trigger = event.target.closest("[data-work-id]");
     if (trigger) openWork(trigger.dataset.workId);
+    var location = event.target.closest("[data-play-location]");
+    if (!location) return;
+
+    var locationId = location.dataset.playLocation;
+    var work = store.works.find(function (item) { return String(item.locationId) === locationId; });
+    if (work) {
+      openWork(work.id);
+      return;
+    }
+
+    activeWork = null;
+    stopSpeech();
+    dialogContent.innerHTML = '<h2 id="dialogTitle">' +
+      escapeHtml(window.LAUNDRY_AREA_MAPS.locations[locationId]) +
+      '</h2><p>戯曲の本文と朗読は準備中です。</p>';
+    dialog.showModal();
   });
   document.getElementById("mySubmissionList").addEventListener("click", function (event) {
     var trigger = event.target.closest("[data-submission-id]");
@@ -872,6 +901,11 @@
   });
   [dialog, commentDialog, editDialog].forEach(function (item) {
     item.addEventListener("click", function (event) { if (event.target === item) { if (item === dialog) stopSpeech(); item.close(); } });
+  });
+  dialog.addEventListener("close", function () {
+    stopSpeech();
+    var recording = dialogContent.querySelector("audio");
+    if (recording) recording.pause();
   });
   editDialog.addEventListener("close", clearEditPhotoPreview);
   commentDialog.addEventListener("close", clearCommentPhotoPreview);
@@ -887,7 +921,10 @@
   document.getElementById("headerStoreName").textContent = store.name;
   document.getElementById("storeTitle").textContent = store.name;
   document.getElementById("storeStart").hidden = !store.description;
-  window.renderLaundryAreaMap(document.getElementById("laundryAreaMap"), store.id);
+  var hasAreaMap = window.renderLaundryAreaMap(document.getElementById("laundryAreaMap"), store.id);
+  if (hasAreaMap && !store.works.length) {
+    listNode.closest(".experience-grid").hidden = true;
+  }
   document.getElementById("storeDrinkOffer").hidden = !store.drinkOffer;
   if (store.mapReady === false) {
     unknown.defaultChecked = true;

@@ -10,25 +10,26 @@
     return node;
   }
 
-  function locationButton(className, point, number, title) {
+  function locationButton(className, point, number, title, english) {
     var button = element("button", className);
     button.type = "button";
     button.dataset.playLocation = point.id;
-    button.setAttribute("aria-label", number + " " + title + "を開く");
+    button.setAttribute("aria-label", english ? "Open " + number + " " + title : number + " " + title + "を開く");
     button.append(element("span", "play-map-number", String(number)));
     return button;
   }
 
-  window.renderLaundryAreaMap = function (root, key) {
+  window.renderLaundryAreaMap = function (root, key, language) {
     var map = data.maps[key];
     if (!root || !map) return false;
+    var english = language === "en";
 
     var layout = element("div", "play-map-layout");
     var figure = element("figure", "play-map-figure");
     var surface = element("div", "play-map-surface");
     var image = element("img");
     image.src = map.image;
-    image.alt = map.title;
+    image.alt = english && map.titleEn ? map.titleEn : map.title;
     image.width = 1000;
     image.height = 1000;
     image.loading = "lazy";
@@ -37,17 +38,17 @@
     figure.append(surface);
 
     var legend = element("ol", "play-map-legend");
-    legend.setAttribute("aria-label", "この店舗の戯曲の場所");
+    legend.setAttribute("aria-label", english ? "Locations in the works at this laundry" : "この店舗の戯曲の場所");
     map.locations.forEach(function (point, index) {
       var number = index + 1;
-      var title = data.locations[point.id];
-      var pin = locationButton("play-map-pin", point, number, title);
+      var title = english && data.locationsEn ? data.locationsEn[point.id] : data.locations[point.id];
+      var pin = locationButton("play-map-pin", point, number, title, english);
       pin.style.left = point.x + "%";
       pin.style.top = point.y + "%";
       surface.append(pin);
 
       var item = element("li");
-      var entry = locationButton("play-map-entry", point, number, title);
+      var entry = locationButton("play-map-entry", point, number, title, english);
       entry.append(element("span", null, title));
       item.append(entry);
       legend.append(item);

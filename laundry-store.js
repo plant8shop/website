@@ -32,7 +32,9 @@
   var editMapView = { scale: 1, x: 0, y: 0 };
   var activeWork = null;
   var activeLocationId = null;
-  var dialogLanguage = "ja";
+  var languageKey = "plantshop_laundry_theater_language";
+  var pageLanguage = localStorage.getItem(languageKey) === "en" ? "en" : "ja";
+  var dialogLanguage = pageLanguage;
   var activeSubmission = null;
   var dialog = document.getElementById("workDialog");
   var dialogContent = document.getElementById("dialogContent");
@@ -50,6 +52,38 @@
   var discountTrigger = document.getElementById("showDiscountReceipt");
   var helpDialog = document.getElementById("storeHelpDialog");
   var discountTimer = null;
+
+  function isEnglish() { return pageLanguage === "en"; }
+
+  function applyPageLanguage() {
+    var english = isEnglish();
+    document.documentElement.lang = english ? "en" : "ja";
+    document.title = store.name + (english ? " | Laundry Theater" : "｜ランドリーシアター");
+    document.body.classList.toggle("is-english", english);
+    document.querySelector(".theater-wordmark img").alt = english ? "Laundry Theater" : "ランドリーシアター";
+    document.getElementById("storeLanguageToggle").textContent = english ? "日本語" : "English";
+    document.querySelectorAll("[data-ja][data-en]").forEach(function (node) {
+      node.textContent = english ? node.dataset.en : node.dataset.ja;
+    });
+    document.querySelectorAll("[data-placeholder-ja][data-placeholder-en]").forEach(function (node) {
+      node.placeholder = english ? node.dataset.placeholderEn : node.dataset.placeholderJa;
+    });
+    document.getElementById("modeNav").setAttribute("aria-label", english ? "Laundry page sections" : "店舗ページの機能");
+    document.getElementById("submissionMap").setAttribute("aria-label", english ? "Choose a contribution location on the map" : "地図上で投稿する場所を選ぶ");
+    document.getElementById("editSubmissionMap").setAttribute("aria-label", english ? "Change the contribution location on the map" : "地図上で投稿場所を変更する");
+    document.getElementById("storeHelpButton").setAttribute("aria-label", english ? "About this page" : "このページについて");
+    document.getElementById("storeHelpClose").setAttribute("aria-label", english ? "Close information" : "説明を閉じる");
+    document.querySelector(".store-help-links").setAttribute("aria-label", english ? "Related links" : "関連リンク");
+    document.getElementById("discountDialogClose").setAttribute("aria-label", english ? "Close discount screen" : "割引画面を閉じる");
+    discountReceipt.lang = english ? "en" : "ja";
+    document.getElementById("editDialogClose").setAttribute("aria-label", english ? "Close contribution" : "投稿を閉じる");
+    dialogLanguage = pageLanguage;
+    window.renderLaundryAreaMap(document.getElementById("laundryAreaMap"), store.id, pageLanguage);
+    renderSubmissionMap();
+    renderMySubmissions();
+    renderDiscountReceipt();
+    if (dialog.open && activeWork) renderDialog();
+  }
 
   function escapeHtml(value) {
     return String(value || "").replace(/[&<>'"]/g, function (character) {
@@ -77,7 +111,7 @@
   }
 
   function formatReceiptTime(timestamp, includeSeconds) {
-    return new Date(timestamp).toLocaleString("ja-JP", {
+    return new Date(timestamp).toLocaleString(isEnglish() ? "en-US" : "ja-JP", {
       year: "numeric", month: "numeric", day: "numeric",
       hour: "2-digit", minute: "2-digit", second: includeSeconds ? "2-digit" : undefined
     });
@@ -146,8 +180,8 @@
   }
 
   function mapScenery() {
-    if (store.mapReady === false) return '<span class="map-empty">地図では場所がわからない</span>';
-    if (store.mapImage) return '<img class="map-base-image" src="' + escapeHtml(store.mapImage) + '" alt="' + escapeHtml(store.mapAlt || "店舗周辺地図") + '" draggable="false">';
+    if (store.mapReady === false) return '<span class="map-empty">' + (isEnglish() ? 'Location not identified on the map' : '地図では場所がわからない') + '</span>';
+    if (store.mapImage) return '<img class="map-base-image" src="' + escapeHtml(store.mapImage) + '" alt="' + escapeHtml(isEnglish() ? "Map within 500 m of " + store.name : store.mapAlt || "店舗周辺地図") + '" draggable="false">';
     return '<span class="map-road map-road-a"></span><span class="map-road map-road-b"></span><span class="map-road map-road-c"></span><span class="map-block map-block-a"></span><span class="map-block map-block-b"></span><span class="map-block map-block-c"></span><span class="map-shop"><i></i>' + escapeHtml(store.name) + '</span>';
   }
 
@@ -201,11 +235,11 @@
       button(-1, previous, english ? 'Previous work' : '前の作品', '←') + button(1, next, english ? 'Next work' : '次の作品', '→') + '</nav>';
   }
 
-  function openDialogEntry(entry, language) {
+  function openDialogEntry(entry) {
     if (!entry) return;
     activeWork = entry.work;
     activeLocationId = entry.locationId;
-    dialogLanguage = language || "ja";
+    dialogLanguage = pageLanguage;
     if (activeWork) renderDialog();
     else renderPlaceholderDialog(entry);
     if (!dialog.open) dialog.showModal();
@@ -220,7 +254,7 @@
         var current = activeDialogEntry();
         var index = current ? entries.findIndex(function (entry) { return entry.key === current.key; }) : -1;
         if (!entries.length || index < 0) return;
-        openDialogEntry(entries[(index + Number(button.dataset.workNavigation) + entries.length) % entries.length], dialogLanguage);
+        openDialogEntry(entries[(index + Number(button.dataset.workNavigation) + entries.length) % entries.length]);
       });
     });
   }
@@ -258,13 +292,9 @@
     var photoPanel = '<details class="photo-disclosure"><summary><span>' + (english ? 'View photos' : '写真を見る') + '</span><small>' + images.length + (english ? (images.length === 1 ? ' photo' : ' photos') : '枚') + '</small></summary><div class="photo-panel"><div id="workGallery" class="work-gallery">' + gallery + '</div><div class="gallery-toolbar"><span id="galleryCounter" class="gallery-counter">1 / ' + images.length + '</span><div><button id="galleryPrev" type="button" aria-label="' + (english ? 'Previous photo' : '前の写真') + '">←</button><button id="galleryNext" type="button" aria-label="' + (english ? 'Next photo' : '次の写真') + '">→</button></div></div></div></details>';
     var mapPanel = '<div class="area-map-panel"><div class="' + areaMapClass + '" role="group" aria-label="' + escapeHtml(english ? "Area map around " + title : title + "の場所周辺図") + '">' + areaMap + '</div></div>';
     var audioPlayer = !english && activeWork.audioUrl ? '<audio class="work-recording" src="' + escapeHtml(activeWork.audioUrl) + '" controls preload="none" aria-label="' + escapeHtml(activeWork.title) + 'の朗読"></audio>' : '';
-    dialogContent.innerHTML = dialogNumberHtml(entry) + '<div class="work-language"><button id="workLanguageToggle" type="button" lang="' + (english ? 'ja' : 'en') + '">' + (english ? '日本語' : 'English') + '</button></div><p class="dialog-place">' + escapeHtml(place) + '</p>' + mapPanel + photoPanel + (summary ? '<p class="dialog-summary">' + escapeHtml(summary) + '</p>' : '') + audioPlayer + '<div class="script" lang="' + (english ? 'en' : 'ja') + '"><h2 id="dialogTitle" class="script-title">' + escapeHtml(title) + '</h2>' + scriptText.map(function (paragraph) { return '<p>' + escapeHtml(paragraph) + '</p>'; }).join("") + '</div><section class="reactions"><button id="likeButton" class="like-button' + (state.liked ? ' is-liked' : '') + '" type="button" aria-pressed="' + state.liked + '">♡ <strong>' + (state.liked ? (english ? 'Liked' : 'いいね済み') : (english ? 'Like' : 'いいね')) + '</strong><span>' + state.likeCount + '</span>' + (state.syncing ? '<small>' + (english ? 'Saving' : '保存中') + '</small>' : '') + '</button><button id="openCommentForm" class="like-button" type="button">✎ <strong>' + (english ? 'Comment' : 'コメントする') + '</strong></button></section>' + dialogNavigationHtml(entry);
+    dialogContent.innerHTML = dialogNumberHtml(entry) + '<p class="dialog-place">' + escapeHtml(place) + '</p>' + mapPanel + photoPanel + (summary ? '<p class="dialog-summary">' + escapeHtml(summary) + '</p>' : '') + audioPlayer + '<div class="script" lang="' + (english ? 'en' : 'ja') + '"><h2 id="dialogTitle" class="script-title">' + escapeHtml(title) + '</h2>' + scriptText.map(function (paragraph) { return '<p>' + escapeHtml(paragraph) + '</p>'; }).join("") + '</div><section class="reactions"><button id="likeButton" class="like-button' + (state.liked ? ' is-liked' : '') + '" type="button" aria-pressed="' + state.liked + '">♡ <strong>' + (state.liked ? (english ? 'Liked' : 'いいね済み') : (english ? 'Like' : 'いいね')) + '</strong><span>' + state.likeCount + '</span>' + (state.syncing ? '<small>' + (english ? 'Saving' : '保存中') + '</small>' : '') + '</button><button id="openCommentForm" class="like-button" type="button">✎ <strong>' + (english ? 'Comment' : 'コメントする') + '</strong></button></section>' + dialogNavigationHtml(entry);
     document.getElementById("dialogClose").setAttribute("aria-label", english ? "Close work" : "作品を閉じる");
     document.getElementById("likeButton").addEventListener("click", toggleLike);
-    document.getElementById("workLanguageToggle").addEventListener("click", function () {
-      dialogLanguage = english ? "ja" : "en";
-      renderDialog();
-    });
     bindCommentButton();
     bindWorkNavigation();
     document.getElementById("galleryPrev").addEventListener("click", function () { moveGallery(-1); });
@@ -305,7 +335,7 @@
   }
 
   function post(values) {
-    if (!api) return Promise.reject(new Error("投稿受付の準備中です"));
+    if (!api) return Promise.reject(new Error(isEnglish() ? "Submissions are not available yet." : "投稿受付の準備中です"));
     values.visitorId = visitorId;
     return fetch(api, {
       method: "POST",
@@ -424,13 +454,13 @@
     var node = document.getElementById("mySubmissionList");
     var submissions = mySubmissions();
     if (!submissions.length) {
-      node.innerHTML = '<div class="empty-card"><strong>まだ投稿・コメントはありません</strong><p>「投稿する」または作品の「コメントする」から送った内容がここに並びます。</p></div>';
+      node.innerHTML = isEnglish() ? '<div class="empty-card"><strong>No contributions yet</strong><p>Posts and comments you submit will appear here.</p></div>' : '<div class="empty-card"><strong>まだ投稿・コメントはありません</strong><p>「投稿する」または作品の「コメントする」から送った内容がここに並びます。</p></div>';
       return;
     }
     node.innerHTML = submissions.map(function (item) {
       var isComment = item.type === "comment";
-      var title = isComment ? (item.workTitle || "作品へのコメント") : (item.placeLabel || "場所の投稿");
-      return '<button class="my-submission-card" type="button" data-submission-id="' + escapeHtml(item.id) + '"><span class="submission-type">' + (isComment ? "作品へのコメント" : "場所の投稿") + '</span><strong>' + escapeHtml(title) + '</strong><p>' + escapeHtml(item.body) + '</p><small>' + escapeHtml(formatDate(item.updatedAt || item.createdAt)) + '</small><span class="work-arrow" aria-hidden="true">↗</span></button>';
+      var title = isComment ? (item.workTitle || (isEnglish() ? "Comment on a work" : "作品へのコメント")) : (item.placeLabel || (isEnglish() ? "Location post" : "場所の投稿"));
+      return '<button class="my-submission-card" type="button" data-submission-id="' + escapeHtml(item.id) + '"><span class="submission-type">' + (isComment ? (isEnglish() ? "Comment on a work" : "作品へのコメント") : (isEnglish() ? "Location post" : "場所の投稿")) + '</span><strong>' + escapeHtml(title) + '</strong><p>' + escapeHtml(item.body) + '</p><small>' + escapeHtml(formatDate(item.updatedAt || item.createdAt)) + '</small><span class="work-arrow" aria-hidden="true">↗</span></button>';
     }).join("");
   }
 
@@ -505,7 +535,7 @@
     if (!value) return "送信済み";
     var date = new Date(value);
     if (Number.isNaN(date.getTime())) return String(value);
-    return date.toLocaleDateString("ja-JP", { year: "numeric", month: "numeric", day: "numeric" });
+    return date.toLocaleDateString(isEnglish() ? "en-US" : "ja-JP", { year: "numeric", month: "numeric", day: "numeric" });
   }
 
   function filePayload(file) {
@@ -564,7 +594,7 @@
     }
 
     function renderPreview() {
-      var englishPreview = preview.id === "commentPhotoPreview" && dialogLanguage === "en";
+      var englishPreview = isEnglish();
       objectUrls.forEach(function (url) { URL.revokeObjectURL(url); });
       objectUrls = [];
       if (!selectedFiles.length) {
@@ -575,7 +605,7 @@
       preview.innerHTML = selectedFiles.map(function (file, index) {
         var url = URL.createObjectURL(file);
         objectUrls.push(url);
-        return '<figure><img src="' + url + '" alt="' + escapeHtml(englishPreview ? "Comment photo " + (index + 1) : altText + " " + (index + 1)) + '"><figcaption>' + escapeHtml(file.name) + '</figcaption><button class="photo-remove" type="button" data-remove-photo="' + index + '" aria-label="' + escapeHtml(englishPreview ? "Remove " + file.name : file.name + "を削除") + '">' + (englishPreview ? 'Remove' : '削除') + '</button></figure>';
+        return '<figure><img src="' + url + '" alt="' + escapeHtml(englishPreview ? "Selected photo " + (index + 1) : altText + " " + (index + 1)) + '"><figcaption>' + escapeHtml(file.name) + '</figcaption><button class="photo-remove" type="button" data-remove-photo="' + index + '" aria-label="' + escapeHtml(englishPreview ? "Remove " + file.name : file.name + "を削除") + '">' + (englishPreview ? 'Remove' : '削除') + '</button></figure>';
       }).join("");
       preview.hidden = false;
     }
@@ -586,13 +616,13 @@
         return !selectedFiles.some(function (selected) { return selected.name === file.name && selected.size === file.size && selected.lastModified === file.lastModified; });
       }));
       if (files.length > 5) {
-        preview.innerHTML = '<p>' + (preview.id === "commentPhotoPreview" && dialogLanguage === "en" ? 'You can select up to 5 photos.' : '写真は5枚まで選択できます。') + '</p>';
+        preview.innerHTML = '<p>' + (isEnglish() ? 'You can select up to 5 photos.' : '写真は5枚まで選択できます。') + '</p>';
         preview.hidden = false;
         input.value = "";
         return;
       }
       if (files.some(function (file) { return !file.type.match(/^image\//); })) {
-        preview.innerHTML = '<p>' + (preview.id === "commentPhotoPreview" && dialogLanguage === "en" ? 'Please select image files.' : '写真ファイルを選んでください。') + '</p>';
+        preview.innerHTML = '<p>' + (isEnglish() ? 'Please select image files.' : '写真ファイルを選んでください。') + '</p>';
         preview.hidden = false;
         return;
       }
@@ -709,23 +739,23 @@
   function renderInteractiveMap(mapElement, point, view) {
     var pin = point ? '<span class="submission-pin" style="--x:' + (point.x * 100) + '%;--y:' + (point.y * 100) + '%">＋</span>' : '';
     mapElement.innerHTML = '<div class="submission-map-layer" style="' + mapLayerStyle(view) + '">' + mapScenery() + pin + '</div>' +
-      '<span class="map-help">地図を押して場所を選択</span>';
+      '<span class="map-help">' + (isEnglish() ? 'Tap the map to choose a location' : '地図を押して場所を選択') + '</span>';
   }
 
   function renderSubmissionMap() {
     renderInteractiveMap(submitMap, selectedPoint && !unknown.checked ? selectedPoint : null, submitMapView);
-    document.getElementById("selectedLocation").textContent = unknown.checked ? "場所の名前を入力してください。" : (selectedPoint ? (selectedPoint.isCurrentLocation ? "現在位置を選びました。" : "地図上の場所を選びました。") : "場所はまだ選ばれていません。");
+    document.getElementById("selectedLocation").textContent = unknown.checked ? (isEnglish() ? "Enter the location name." : "場所の名前を入力してください。") : (selectedPoint ? (selectedPoint.isCurrentLocation ? (isEnglish() ? "Current location selected." : "現在位置を選びました。") : (isEnglish() ? "Location selected on the map." : "地図上の場所を選びました。")) : (isEnglish() ? "No location selected yet." : "場所はまだ選ばれていません。"));
   }
 
   function useCurrentLocation() {
     var message = document.getElementById("selectedLocation");
     if (!navigator.geolocation) {
-      message.textContent = "この端末では現在位置を取得できません。";
+      message.textContent = isEnglish() ? "This device cannot provide its current location." : "この端末では現在位置を取得できません。";
       return;
     }
     currentLocationButton.disabled = true;
-    currentLocationButton.textContent = "取得中…";
-    message.textContent = "現在位置を取得しています…";
+    currentLocationButton.textContent = isEnglish() ? "Locating…" : "取得中…";
+    message.textContent = isEnglish() ? "Getting your current location…" : "現在位置を取得しています…";
     navigator.geolocation.getCurrentPosition(function (position) {
       var lat = position.coords.latitude;
       var lng = position.coords.longitude;
@@ -733,7 +763,7 @@
       var x = 0.5 + (lng - store.center.lng) * 111320 * Math.cos(store.center.lat * Math.PI / 180) / span;
       var y = 0.5 - (lat - store.center.lat) * 111320 / span;
       if (x < 0 || x > 1 || y < 0 || y > 1) {
-        message.textContent = "現在位置はこの地図の範囲外です。地図を押して場所を選んでください。";
+        message.textContent = isEnglish() ? "Your current location is outside this map. Tap the map to choose a location." : "現在位置はこの地図の範囲外です。地図を押して場所を選んでください。";
       } else {
         unknown.checked = false;
         selectedPoint = { x: x, y: y, latitude: lat, longitude: lng, isCurrentLocation: true };
@@ -741,17 +771,17 @@
         renderSubmissionMap();
       }
       currentLocationButton.disabled = false;
-      currentLocationButton.textContent = "現在位置を使う";
+      currentLocationButton.textContent = isEnglish() ? "Use current location" : "現在位置を使う";
     }, function (error) {
-      message.textContent = error && error.code === 1 ? "位置情報の利用が許可されていません。" : "現在位置を取得できませんでした。";
+      message.textContent = error && error.code === 1 ? (isEnglish() ? "Location access was not allowed." : "位置情報の利用が許可されていません。") : (isEnglish() ? "Could not get your current location." : "現在位置を取得できませんでした。");
       currentLocationButton.disabled = false;
-      currentLocationButton.textContent = "現在位置を使う";
+      currentLocationButton.textContent = isEnglish() ? "Use current location" : "現在位置を使う";
     }, { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 });
   }
 
   function renderEditMap() {
     renderInteractiveMap(editMap, editPoint && !editUnknown.checked ? editPoint : null, editMapView);
-    document.getElementById("editSelectedLocation").textContent = editUnknown.checked ? "場所の名前で記録されています。" : (editPoint ? "現在の投稿場所です。地図を押すと変更できます。" : "場所はまだ選ばれていません。");
+    document.getElementById("editSelectedLocation").textContent = editUnknown.checked ? (isEnglish() ? "Recorded by location name." : "場所の名前で記録されています。") : (editPoint ? (isEnglish() ? "This is the current location. Tap the map to change it." : "現在の投稿場所です。地図を押すと変更できます。") : (isEnglish() ? "No location selected yet." : "場所はまだ選ばれていません。"));
   }
 
   function bindInteractiveMap(mapElement, view, onSelect) {
@@ -858,20 +888,20 @@
     var isComment = activeSubmission.type === "comment";
     document.getElementById("editPlaceField").hidden = isComment;
     document.getElementById("editLocationFields").hidden = isComment;
-    document.getElementById("editTypeLabel").textContent = isComment ? "「" + (activeSubmission.workTitle || "作品") + "」へのコメント" : "場所の投稿";
+    document.getElementById("editTypeLabel").textContent = isComment ? (isEnglish() ? "Comment on “" + (activeSubmission.workTitle || "work") + "”" : "「" + (activeSubmission.workTitle || "作品") + "」へのコメント") : (isEnglish() ? "Location post" : "場所の投稿");
     editUnknown.checked = store.mapReady === false || locationIsUnknown(activeSubmission.locationUnknown);
     editPoint = isComment || editUnknown.checked ? null : pointFromCoordinates(activeSubmission.latitude, activeSubmission.longitude);
     if (!isComment) renderEditMap();
     var currentPhotoNode = document.getElementById("currentPhoto");
     var photoIds = submissionPhotoIds(activeSubmission);
-    currentPhotoNode.innerHTML = photoIds.length ? '<p>写真を読み込んでいます…</p>' : "";
+    currentPhotoNode.innerHTML = photoIds.length ? '<p>' + (isEnglish() ? 'Loading photos…' : '写真を読み込んでいます…') + '</p>' : "";
     document.getElementById("editStatus").textContent = "";
     editDialog.showModal();
     if (photoIds.length) {
       Promise.all(photoIds.map(function (_, index) { return getCachedPhotoPreview(activeSubmission.id, index); })).then(function (dataUrls) {
         var available = dataUrls.filter(Boolean);
         if (available.length) renderCurrentPhotos(currentPhotoNode, available);
-        else if (photoIds.every(function (id) { return id === "pending"; })) currentPhotoNode.innerHTML = '<p>写真を保存しています…</p>';
+        else if (photoIds.every(function (id) { return id === "pending"; })) currentPhotoNode.innerHTML = '<p>' + (isEnglish() ? 'Saving photos…' : '写真を保存しています…') + '</p>';
         else loadSubmissionDetails(activeSubmission.id);
       });
     }
@@ -879,7 +909,7 @@
 
   function renderCurrentPhotos(node, dataUrls) {
     if (!node) return;
-    node.innerHTML = '<div class="current-photo-grid">' + dataUrls.map(function (dataUrl, index) { return '<img src="' + dataUrl + '" alt="現在の写真 ' + (index + 1) + '">'; }).join("") + '</div>';
+    node.innerHTML = '<div class="current-photo-grid">' + dataUrls.map(function (dataUrl, index) { return '<img src="' + dataUrl + '" alt="' + (isEnglish() ? 'Current photo ' : '現在の写真 ') + (index + 1) + '">'; }).join("") + '</div>';
   }
 
   function loadSubmissionDetails(submissionId) {
@@ -958,10 +988,10 @@
     if (!form.reportValidity()) return;
     var values = new FormData(form);
     if (!unknown.checked && !selectedPoint) {
-      formStatus.textContent = "地図上の場所を選ぶか、「地図では場所がわからない」を選んでください。";
+      formStatus.textContent = isEnglish() ? "Choose a location on the map or select “I cannot identify the location on the map.”" : "地図上の場所を選ぶか、「地図では場所がわからない」を選んでください。";
       return;
     }
-    formStatus.textContent = "投稿しています…";
+    formStatus.textContent = isEnglish() ? "Submitting…" : "投稿しています…";
     submitRecord({
       id: makeId(), type: "place", placeLabel: values.get("placeLabel"), body: values.get("body"),
       locationUnknown: unknown.checked, latitude: selectedPoint ? selectedPoint.latitude : "", longitude: selectedPoint ? selectedPoint.longitude : "",
@@ -971,10 +1001,10 @@
       clearSubmissionPhotoPreview();
       selectedPoint = null;
       renderSubmissionMap();
-      formStatus.textContent = "投稿を受け付けました。";
+      formStatus.textContent = isEnglish() ? "Your contribution was submitted." : "投稿を受け付けました。";
       createDiscountReceipt();
       setTimeout(loadRemote, 700);
-    }).catch(function (error) { formStatus.textContent = error.message; });
+    }).catch(function (error) { formStatus.textContent = isEnglish() ? "Unable to submit. Please try again." : error.message; });
   });
 
   document.getElementById("commentForm").addEventListener("submit", function (event) {
@@ -999,10 +1029,10 @@
     var values = new FormData(event.currentTarget);
     var status = document.getElementById("editStatus");
     if (activeSubmission.type !== "comment" && !editUnknown.checked && !editPoint) {
-      status.textContent = "地図上の場所を選ぶか、「地図では場所がわからない」を選んでください。";
+      status.textContent = isEnglish() ? "Choose a location on the map or select “I cannot identify the location on the map.”" : "地図上の場所を選ぶか、「地図では場所がわからない」を選んでください。";
       return;
     }
-    status.textContent = "修正を保存しています…";
+    status.textContent = isEnglish() ? "Saving changes…" : "修正を保存しています…";
     submitRecord({
       action: "updateSubmission", id: activeSubmission.id, type: activeSubmission.type,
       workId: activeSubmission.workId, workTitle: activeSubmission.workTitle,
@@ -1013,7 +1043,7 @@
       files: values.getAll("photo"), keepPhotoIds: submissionPhotoIds(activeSubmission), existing: activeSubmission
     }).then(function (record) {
       activeSubmission = record;
-      status.textContent = "修正を保存しました。";
+      status.textContent = isEnglish() ? "Changes saved." : "修正を保存しました。";
       setTimeout(loadRemote, 700);
       setTimeout(function () { editDialog.close(); }, 650);
     }).catch(function (error) { status.textContent = error.message; });
@@ -1023,15 +1053,15 @@
     if (!activeSubmission) return;
     var item = activeSubmission;
     var label = item.type === "comment" ? "コメント" : "投稿";
-    if (!window.confirm("この" + label + "を削除しますか？\n削除すると元に戻せません。")) return;
+    if (!window.confirm(isEnglish() ? "Delete this contribution?\nThis cannot be undone." : "この" + label + "を削除しますか？\n削除すると元に戻せません。")) return;
     var button = event.currentTarget;
     var status = document.getElementById("editStatus");
     button.disabled = true;
-    status.textContent = "削除しています…";
+    status.textContent = isEnglish() ? "Deleting…" : "削除しています…";
     post({ action: "deleteSubmission", submissionId: item.id }).then(function () {
       removeLocalSubmission(item.id);
       activeSubmission = null;
-      status.textContent = "削除しました。";
+      status.textContent = isEnglish() ? "Deleted." : "削除しました。";
       setTimeout(loadRemote, 700);
       setTimeout(function () { editDialog.close(); button.disabled = false; }, 500);
     }).catch(function (error) {
@@ -1042,6 +1072,11 @@
 
   document.querySelectorAll("[data-mode]").forEach(function (button) {
     button.addEventListener("click", function () { setMode(button.dataset.mode); });
+  });
+  document.getElementById("storeLanguageToggle").addEventListener("click", function () {
+    pageLanguage = isEnglish() ? "ja" : "en";
+    localStorage.setItem(languageKey, pageLanguage);
+    applyPageLanguage();
   });
   document.getElementById("works").addEventListener("click", function (event) {
     var location = event.target.closest("[data-play-location]");
@@ -1072,7 +1107,7 @@
   document.getElementById("headerStoreName").textContent = store.name;
   document.getElementById("storeTitle").textContent = store.name;
   document.getElementById("storeStart").hidden = !store.description;
-  window.renderLaundryAreaMap(document.getElementById("laundryAreaMap"), store.id);
+  window.renderLaundryAreaMap(document.getElementById("laundryAreaMap"), store.id, pageLanguage);
   document.getElementById("storeDrinkOffer").hidden = !store.drinkOffer;
   if (store.mapReady === false) {
     unknown.defaultChecked = true;
@@ -1094,9 +1129,7 @@
   document.getElementById("discountCloseButton").addEventListener("click", function () {
     discountReceipt.close();
   });
-  renderDiscountReceipt();
-  renderSubmissionMap();
-  renderMySubmissions();
+  applyPageLanguage();
   loadRemote();
   setInterval(function () { if (!document.hidden) loadRemote(); }, 10000);
   document.addEventListener("visibilitychange", function () { if (!document.hidden) loadRemote(); });

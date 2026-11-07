@@ -5,14 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="このランドリーの周辺のまちにまつわる記憶をもとにつくった戯曲や朗読を、洗濯や乾燥を待ちながら楽しめます。">
   <title>店舗｜ランドリーシアター</title>
-  <link rel="stylesheet" href="laundry.css?v=20261107-6">
-  <link rel="stylesheet" href="laundry-poster.css?v=20261107-10">
+  <link rel="stylesheet" href="laundry.css?v=20261107-7">
+  <link rel="stylesheet" href="laundry-poster.css?v=20261107-11">
 </head>
 <body class="store-page poster-store-page">
   <header class="site-header">
     <nav class="nav store-header" aria-label="ランドリーシアター">
       <a href="laundry.html" class="theater-wordmark"><img src="assets/laundry/logo.svg" alt="ランドリーシアター" width="228" height="72"></a>
       <span id="headerStoreName" class="header-store-name"></span>
+      <button id="storeLanguageToggle" class="store-language-toggle" type="button">English</button>
     </nav>
   </header>
 
@@ -20,10 +21,10 @@
     <section class="store-workspace-head">
       <div class="section-inner section-inner-wide">
         <h1 id="storeTitle"></h1>
-        <nav class="mode-nav folder-tabs" aria-label="店舗ページの機能">
-          <button class="mode-button is-active" type="button" data-mode="works" aria-pressed="true">読む・聴く</button>
-          <button class="mode-button" type="button" data-mode="submit" aria-pressed="false">投稿する</button>
-          <button class="mode-button" type="button" data-mode="mine" aria-pressed="false">あなたが投稿・コメントしたもの</button>
+        <nav id="modeNav" class="mode-nav folder-tabs" aria-label="店舗ページの機能">
+          <button class="mode-button is-active" type="button" data-mode="works" aria-pressed="true" data-ja="読む・聴く" data-en="Read / Listen">読む・聴く</button>
+          <button class="mode-button" type="button" data-mode="submit" aria-pressed="false" data-ja="投稿する" data-en="Contribute">投稿する</button>
+          <button class="mode-button" type="button" data-mode="mine" aria-pressed="false" data-ja="あなたが投稿・コメントしたもの" data-en="Your contributions">あなたが投稿・コメントしたもの</button>
         </nav>
       </div>
     </section>
@@ -31,7 +32,7 @@
     <section id="works" class="section mode-panel works-section is-active" data-panel="works">
       <div class="section-inner section-inner-wide">
         <section class="play-map-section store-play-map" aria-labelledby="playMapTitle">
-          <h2 id="playMapTitle" class="visually-hidden">戯曲の場所</h2>
+          <h2 id="playMapTitle" class="visually-hidden" data-ja="戯曲の場所" data-en="Locations in the works">戯曲の場所</h2>
           <div id="laundryAreaMap"></div>
         </section>
       </div>
@@ -39,21 +40,21 @@
 
     <section id="submit" class="section mode-panel submit-section" data-panel="submit" hidden>
       <div class="section-inner section-inner-wide">
-        <button id="showDiscountReceipt" class="discount-reopen button" type="button" hidden>ドリンク50円引き画面を表示</button>
+        <button id="showDiscountReceipt" class="discount-reopen button" type="button" hidden data-ja="ドリンク50円引き画面を表示" data-en="Show ¥50 drink discount">ドリンク50円引き画面を表示</button>
         <form id="submissionForm" class="submission-form"><input class="honeypot" type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
           <div class="submission-layout">
             <div>
-              <div class="map-card map-card-flat"><div class="map-label-row"><span>場所を選ぶ</span><div class="map-label-actions"><button id="currentLocationButton" class="current-location-button" type="button">現在位置を使う</button><small>ピンチ・ホイールで拡大縮小</small></div></div><div id="submissionMap" class="map-canvas submission-map" role="group" aria-label="地図上で投稿する場所を選ぶ"></div></div>
+              <div class="map-card map-card-flat"><div class="map-label-row"><span data-ja="場所を選ぶ" data-en="Choose a location">場所を選ぶ</span><div class="map-label-actions"><button id="currentLocationButton" class="current-location-button" type="button" data-ja="現在位置を使う" data-en="Use current location">現在位置を使う</button><small data-ja="ピンチ・ホイールで拡大縮小" data-en="Pinch or scroll to zoom">ピンチ・ホイールで拡大縮小</small></div></div><div id="submissionMap" class="map-canvas submission-map" role="group" aria-label="地図上で投稿する場所を選ぶ"></div></div>
               <p id="selectedLocation" class="selected-location">場所はまだ選ばれていません。</p>
-              <label class="unknown-row"><input id="locationUnknown" type="checkbox" name="locationUnknown"><span>地図では場所がわからない</span></label>
+              <label class="unknown-row"><input id="locationUnknown" type="checkbox" name="locationUnknown"><span data-ja="地図では場所がわからない" data-en="I cannot identify the location on the map">地図では場所がわからない</span></label>
             </div>
             <div class="form-fields">
-              <label><span>場所の名前</span><input name="placeLabel" type="text" maxlength="120" placeholder="例：角の自動販売機の前"></label>
-              <label><span>テキスト</span><textarea name="body" required maxlength="1200" rows="8" placeholder="そこで見たこと、聞こえた音、思い出したことなど"></textarea></label>
-              <label class="photo-field"><span>写真（任意）</span><span class="button photo-add-button">写真を追加</span><input class="photo-input" name="photo" type="file" accept="image/*" multiple><small>最大5枚。JPEG・PNGなど。大きな写真は送信時に縮小されます。</small></label>
+              <label><span data-ja="場所の名前" data-en="Location name">場所の名前</span><input name="placeLabel" type="text" maxlength="120" placeholder="例：角の自動販売機の前" data-placeholder-ja="例：角の自動販売機の前" data-placeholder-en="e.g. In front of the vending machine on the corner"></label>
+              <label><span data-ja="テキスト" data-en="Text">テキスト</span><textarea name="body" required maxlength="1200" rows="8" placeholder="そこで見たこと、聞こえた音、思い出したことなど" data-placeholder-ja="そこで見たこと、聞こえた音、思い出したことなど" data-placeholder-en="What you saw, heard, remembered, or felt there"></textarea></label>
+              <label class="photo-field"><span data-ja="写真（任意）" data-en="Photos (optional)">写真（任意）</span><span class="button photo-add-button" data-ja="写真を追加" data-en="Add photos">写真を追加</span><input class="photo-input" name="photo" type="file" accept="image/*" multiple><small data-ja="最大5枚。JPEG・PNGなど。大きな写真は送信時に縮小されます。" data-en="Up to 5 JPEG or PNG images. Large files are resized on submission.">最大5枚。JPEG・PNGなど。大きな写真は送信時に縮小されます。</small></label>
               <div id="submissionPhotoPreview" class="photo-preview" aria-live="polite" hidden></div>
-              <label class="consent-row"><input name="consent" type="checkbox" required><span>投稿内容は、作品制作や本サイトへの掲載素材になる可能性があります。同意しますか？</span></label>
-              <button class="button button-primary" type="submit">投稿する</button>
+              <label class="consent-row"><input name="consent" type="checkbox" required><span data-ja="投稿内容は、作品制作や本サイトへの掲載素材になる可能性があります。同意しますか？" data-en="I agree that my contribution may be used in creating works or as material published on this website.">投稿内容は、作品制作や本サイトへの掲載素材になる可能性があります。同意しますか？</span></label>
+              <button class="button button-primary" type="submit" data-ja="投稿する" data-en="Submit">投稿する</button>
               <p id="formStatus" class="form-status" role="status" aria-live="polite"></p>
             </div>
           </div>
@@ -71,7 +72,7 @@
   <button id="storeHelpButton" class="store-help-button" type="button" aria-label="このページについて">?</button>
 
   <dialog id="storeHelpDialog" class="form-dialog store-help-dialog" aria-labelledby="storeHelpTitle">
-    <button class="dialog-close" type="button" data-close-dialog="storeHelpDialog" aria-label="説明を閉じる">×</button>
+    <button id="storeHelpClose" class="dialog-close" type="button" data-close-dialog="storeHelpDialog" aria-label="説明を閉じる">×</button>
     <div class="store-help-content">
       <h2 id="storeHelpTitle">ランドリーシアターについて<small lang="en">About Laundry Theater</small></h2>
       <div id="storeStart"><p class="store-start-date">11/7（土）〜</p><p class="translation" lang="en">From Nov 7 (Sat), 2026</p></div>
@@ -81,7 +82,7 @@
       <section class="store-help-section"><h3>ここでいう「戯曲」<small lang="en">What we mean by “play”</small></h3><p>戯曲は、演劇の上演のために書かれた脚本です。本企画では、短いエッセイや詩的な表現も含め、読む・聴くだけでも楽しめる作品を戯曲として扱います。</p><p class="translation" lang="en">A play is a script written for performance. Here, the term also includes short essays and poetic writing: works made to be enjoyed simply by reading or listening.</p></section>
       <div id="storeDrinkOffer" class="drink-offer" hidden><p>投稿後に表示される画面をカフェの店員に見せると、24時間以内はドリンクが50円引きになります。</p><p class="translation" lang="en">Show the screen displayed after posting to café staff to receive ¥50 off a drink within 24 hours.</p></div>
       <div class="store-audio-note"><p>音声はイヤホン、または周囲の方の迷惑にならない音量でお楽しみください。</p><p class="translation" lang="en">Please use headphones or keep the volume low enough not to disturb others.</p></div>
-      <section class="store-help-section store-map-source"><h3>地図について<small lang="en">About the maps</small></h3><p>国土地理院「地理院地図Vector提供実験」のデータを加工し、店舗・作品の位置と必要な名称を加えて作成しています。</p><p class="translation" lang="en">The maps are adapted from GSI Maps Vector data, with laundry and work locations and selected labels added.</p><a href="https://maps.gsi.go.jp/development/vt.html" target="_blank" rel="noopener">地図データについて <span aria-hidden="true">↗</span></a></section>
+      <section class="store-help-section store-map-source"><h3>地図について<small lang="en">About the maps</small></h3><p>国土地理院「地理院地図Vector提供実験」のデータを加工し、店舗・作品の位置と必要な名称を加えて作成しています。</p><p class="translation" lang="en">The maps are adapted from GSI Maps Vector data, with laundry and work locations and selected labels added.</p><a href="https://maps.gsi.go.jp/development/vt.html" target="_blank" rel="noopener"><span data-help-ja>地図データについて</span><span data-help-en>About the map data</span> <span aria-hidden="true">↗</span></a></section>
       <nav class="store-help-links" aria-label="関連リンク">
         <a href="laundry.html#stores"><span>開催店舗一覧</span><small lang="en">Theater locations</small></a>
         <a href="laundry.html#workshop"><span>戯曲をつくるワークショップ</span><small lang="en">Playwriting workshop</small></a>
@@ -91,15 +92,15 @@
   </dialog>
 
   <dialog id="drinkDiscountReceipt" class="drink-discount-dialog" aria-labelledby="discountTitle">
-    <button class="dialog-close" type="button" data-close-dialog="drinkDiscountReceipt" aria-label="割引画面を閉じる">×</button>
+    <button id="discountDialogClose" class="dialog-close" type="button" data-close-dialog="drinkDiscountReceipt" aria-label="割引画面を閉じる">×</button>
     <div class="drink-discount-receipt">
-      <p class="discount-kicker">投稿特典</p>
-      <h2 id="discountTitle">投稿しました<br><strong>ドリンク50円引き</strong></h2>
-      <p>この画面をKYOTO LAUNDRY CAFEの店員に見せてください。</p>
-      <dl><div><dt>投稿日時</dt><dd id="discountSubmittedAt"></dd></div><div><dt>有効期限</dt><dd id="discountExpiresAt"></dd></div></dl>
-      <p class="discount-now"><span>現在時刻</span><time id="discountCurrentTime"></time></p>
-      <p class="discount-note">投稿完了から24時間有効です。</p>
-      <button id="discountCloseButton" class="button" type="button">閉じる</button>
+      <p class="discount-kicker" data-ja="投稿特典" data-en="Contribution benefit">投稿特典</p>
+      <h2 id="discountTitle"><span data-ja="投稿しました" data-en="Submitted">投稿しました</span><br><strong data-ja="ドリンク50円引き" data-en="¥50 off a drink">ドリンク50円引き</strong></h2>
+      <p data-ja="この画面をKYOTO LAUNDRY CAFEの店員に見せてください。" data-en="Show this screen to staff at KYOTO LAUNDRY CAFE.">この画面をKYOTO LAUNDRY CAFEの店員に見せてください。</p>
+      <dl><div><dt data-ja="投稿日時" data-en="Submitted">投稿日時</dt><dd id="discountSubmittedAt"></dd></div><div><dt data-ja="有効期限" data-en="Expires">有効期限</dt><dd id="discountExpiresAt"></dd></div></dl>
+      <p class="discount-now"><span data-ja="現在時刻" data-en="Current time">現在時刻</span><time id="discountCurrentTime"></time></p>
+      <p class="discount-note" data-ja="投稿完了から24時間有効です。" data-en="Valid for 24 hours after submission.">投稿完了から24時間有効です。</p>
+      <button id="discountCloseButton" class="button" type="button" data-ja="閉じる" data-en="Close">閉じる</button>
     </div>
   </dialog>
 
@@ -118,28 +119,28 @@
   </dialog>
 
   <dialog id="editDialog" class="form-dialog" aria-labelledby="editDialogTitle">
-    <button class="dialog-close" type="button" data-close-dialog="editDialog" aria-label="投稿を閉じる">×</button>
+    <button id="editDialogClose" class="dialog-close" type="button" data-close-dialog="editDialog" aria-label="投稿を閉じる">×</button>
     <form id="editForm" class="dialog-form">
-      <p class="dialog-index">あなたの投稿</p><h2 id="editDialogTitle">投稿を見る</h2><p id="editTypeLabel" class="dialog-context"></p>
+      <p class="dialog-index" data-ja="あなたの投稿" data-en="Your contribution">あなたの投稿</p><h2 id="editDialogTitle" data-ja="投稿を見る" data-en="View contribution">投稿を見る</h2><p id="editTypeLabel" class="dialog-context"></p>
       <div id="editLocationFields" class="edit-location-fields">
-        <div class="map-card map-card-flat"><div class="map-label-row"><span>場所を変更する</span><small>ピンチ・ホイールで拡大縮小</small></div><div id="editSubmissionMap" class="map-canvas submission-map" role="group" aria-label="地図上で投稿場所を変更する"></div></div>
+        <div class="map-card map-card-flat"><div class="map-label-row"><span data-ja="場所を変更する" data-en="Change location">場所を変更する</span><small data-ja="ピンチ・ホイールで拡大縮小" data-en="Pinch or scroll to zoom">ピンチ・ホイールで拡大縮小</small></div><div id="editSubmissionMap" class="map-canvas submission-map" role="group" aria-label="地図上で投稿場所を変更する"></div></div>
         <p id="editSelectedLocation" class="selected-location"></p>
-        <label class="unknown-row"><input id="editLocationUnknown" type="checkbox" name="locationUnknown"><span>地図では場所がわからない</span></label>
+        <label class="unknown-row"><input id="editLocationUnknown" type="checkbox" name="locationUnknown"><span data-ja="地図では場所がわからない" data-en="I cannot identify the location on the map">地図では場所がわからない</span></label>
       </div>
-      <label id="editPlaceField"><span>場所の名前</span><input name="placeLabel" type="text" maxlength="120"></label>
-      <label><span>テキスト</span><textarea name="body" required maxlength="1200" rows="7"></textarea></label>
+      <label id="editPlaceField"><span data-ja="場所の名前" data-en="Location name">場所の名前</span><input name="placeLabel" type="text" maxlength="120"></label>
+      <label><span data-ja="テキスト" data-en="Text">テキスト</span><textarea name="body" required maxlength="1200" rows="7"></textarea></label>
       <div id="currentPhoto" class="current-photo"></div>
-      <label class="photo-field"><span>写真を変更（任意）</span><span class="button photo-add-button">写真を変更</span><input class="photo-input" name="photo" type="file" accept="image/*" multiple><small>最大5枚。選択すると現在の写真をまとめて置き換えます。</small></label>
+      <label class="photo-field"><span data-ja="写真を変更（任意）" data-en="Replace photos (optional)">写真を変更（任意）</span><span class="button photo-add-button" data-ja="写真を変更" data-en="Choose replacement photos">写真を変更</span><input class="photo-input" name="photo" type="file" accept="image/*" multiple><small data-ja="最大5枚。選択すると現在の写真をまとめて置き換えます。" data-en="Up to 5 photos. New selections replace all current photos.">最大5枚。選択すると現在の写真をまとめて置き換えます。</small></label>
       <div id="editPhotoPreview" class="photo-preview" aria-live="polite" hidden></div>
-      <label class="consent-row"><input name="consent" type="checkbox" required><span>修正した内容は、作品制作や本サイトへの掲載素材になる可能性があります。同意しますか？</span></label>
-      <div class="edit-actions"><button class="button button-primary" type="submit">修正を保存する</button><button id="deleteSubmissionButton" class="button button-danger" type="button">削除する</button></div><p id="editStatus" class="form-status" role="status" aria-live="polite"></p>
+      <label class="consent-row"><input name="consent" type="checkbox" required><span data-ja="修正した内容は、作品制作や本サイトへの掲載素材になる可能性があります。同意しますか？" data-en="I agree that the revised content may be used in creating works or as material published on this website.">修正した内容は、作品制作や本サイトへの掲載素材になる可能性があります。同意しますか？</span></label>
+      <div class="edit-actions"><button class="button button-primary" type="submit" data-ja="修正を保存する" data-en="Save changes">修正を保存する</button><button id="deleteSubmissionButton" class="button button-danger" type="button" data-ja="削除する" data-en="Delete">削除する</button></div><p id="editStatus" class="form-status" role="status" aria-live="polite"></p>
     </form>
   </dialog>
 
   <script src="data/laundry-works.js?v=20261107-1"></script>
   <script src="data/laundry-waiting-room.js?v=20261107-12"></script>
-  <script src="data/laundry-area-maps.js?v=20261107-7"></script>
-  <script src="laundry-area-maps.js?v=20261107-7"></script>
-  <script src="laundry-store.js?v=20261107-17"></script>
+  <script src="data/laundry-area-maps.js?v=20261107-8"></script>
+  <script src="laundry-area-maps.js?v=20261107-8"></script>
+  <script src="laundry-store.js?v=20261107-18"></script>
 </body>
 </html>

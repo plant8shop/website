@@ -26,7 +26,6 @@
   var likeOverrides = readLikeOverrides();
   var photoPreviewCache = {};
   var photoDbPromise = null;
-  var likedOnly = false;
   var selectedPoint = null;
   var editPoint = null;
   var submitMapView = { scale: 1, x: 0, y: 0 };
@@ -35,9 +34,6 @@
   var activeLocationId = null;
   var dialogLanguage = "ja";
   var activeSubmission = null;
-  var mapNode = document.getElementById("mapCanvas");
-  var listNode = document.getElementById("workList");
-  var countNode = document.getElementById("workCount");
   var dialog = document.getElementById("workDialog");
   var dialogContent = document.getElementById("dialogContent");
   var commentDialog = document.getElementById("commentDialog");
@@ -153,32 +149,6 @@
     if (store.mapReady === false) return '<span class="map-empty">地図では場所がわからない</span>';
     if (store.mapImage) return '<img class="map-base-image" src="' + escapeHtml(store.mapImage) + '" alt="' + escapeHtml(store.mapAlt || "店舗周辺地図") + '" draggable="false">';
     return '<span class="map-road map-road-a"></span><span class="map-road map-road-b"></span><span class="map-road map-road-c"></span><span class="map-block map-block-a"></span><span class="map-block map-block-b"></span><span class="map-block map-block-c"></span><span class="map-shop"><i></i>' + escapeHtml(store.name) + '</span>';
-  }
-
-  function visibleWork(work) {
-    return !likedOnly || stateFor(work.id).liked;
-  }
-
-  function renderMap() {
-    var markers = store.works.filter(visibleWork).map(function (work) {
-      return '<button class="map-marker" type="button" data-work-id="' + escapeHtml(work.id) + '" style="--x:' + Number(work.x || 50) + '%;--y:' + Number(work.y || 50) + '%" aria-label="' + escapeHtml(work.title) + 'を開く"><span>' + escapeHtml(work.number) + '</span><em>' + escapeHtml(work.title) + '</em></button>';
-    }).join("");
-    mapNode.innerHTML = mapScenery() + markers + (store.works.length ? "" : '<p class="map-empty">作品の位置を準備しています。</p>');
-  }
-
-  function renderWorks() {
-    var works = store.works.filter(visibleWork);
-    countNode.textContent = likedOnly ? works.length + "件の「いいね」した作品" : (works.length ? works.length + "作品" : "公開準備中です");
-    if (!works.length) {
-      listNode.innerHTML = '<div class="empty-card"><strong>' + (likedOnly ? "「いいね」した作品はまだありません" : "この店舗の作品は準備中です") + '</strong></div>';
-      renderMap();
-      return;
-    }
-    listNode.innerHTML = works.map(function (work) {
-      var state = stateFor(work.id);
-      return '<button class="work-card" type="button" data-work-id="' + escapeHtml(work.id) + '"><span class="work-number">' + escapeHtml(work.number) + '</span><span class="work-card-main"><strong>' + escapeHtml(work.title) + '</strong></span><span class="work-reactions">♡ ' + state.likeCount + '</span><span class="work-arrow" aria-hidden="true">↗</span></button>';
-    }).join("");
-    renderMap();
   }
 
   function dialogEntries() {
@@ -373,7 +343,6 @@
     likeOverrides[workId] = { liked: !state.liked, changedAt: Date.now() };
     saveLikeOverrides();
     updateDialogReactionState();
-    renderWorks();
     post({ action: "toggleLike", workId: workId }).then(function () {
       setTimeout(loadRemote, 1200);
       setTimeout(loadRemote, 3500);
@@ -382,7 +351,6 @@
       else delete likeOverrides[workId];
       saveLikeOverrides();
       updateDialogReactionState();
-      renderWorks();
     });
   }
 
@@ -965,7 +933,6 @@
         remote.works = remote.works || {};
         remote.submissions = remote.submissions || remote.mine || [];
         reconcileLikeOverrides();
-        renderWorks();
         renderMySubmissions();
         if (dialog.open && activeWork) {
           updateDialogReactionState();
@@ -1086,8 +1053,6 @@
     button.addEventListener("click", function () { setMode(button.dataset.mode); });
   });
   document.getElementById("works").addEventListener("click", function (event) {
-    var trigger = event.target.closest("[data-work-id]");
-    if (trigger) openWork(trigger.dataset.workId);
     var location = event.target.closest("[data-play-location]");
     if (!location) return;
     var locationId = location.dataset.playLocation;
@@ -1111,22 +1076,12 @@
   });
   editDialog.addEventListener("close", clearEditPhotoPreview);
   commentDialog.addEventListener("close", clearCommentPhotoPreview);
-  document.getElementById("likedFilter").addEventListener("click", function (event) {
-    likedOnly = !likedOnly;
-    event.currentTarget.setAttribute("aria-pressed", likedOnly);
-    event.currentTarget.textContent = likedOnly ? "すべての作品を表示" : "「いいね」した作品を表示";
-    renderWorks();
-  });
-
   document.title = store.name + "｜ランドリーシアター";
-  [mapNode, submitMap, editMap].forEach(function (node) { node.classList.toggle("has-map-image", Boolean(store.mapImage)); });
+  [submitMap, editMap].forEach(function (node) { node.classList.toggle("has-map-image", Boolean(store.mapImage)); });
   document.getElementById("headerStoreName").textContent = store.name;
   document.getElementById("storeTitle").textContent = store.name;
   document.getElementById("storeStart").hidden = !store.description;
-  var hasAreaMap = window.renderLaundryAreaMap(document.getElementById("laundryAreaMap"), store.id);
-  if (hasAreaMap && !store.works.length) {
-    listNode.closest(".experience-grid").hidden = true;
-  }
+  window.renderLaundryAreaMap(document.getElementById("laundryAreaMap"), store.id);
   document.getElementById("storeDrinkOffer").hidden = !store.drinkOffer;
   if (store.mapReady === false) {
     unknown.defaultChecked = true;
@@ -1136,10 +1091,9 @@
     editUnknown.disabled = true;
     submitMap.disabled = true;
     editMap.disabled = true;
-    [mapNode, submitMap, editMap].forEach(function (node) { node.closest(".map-card").hidden = true; });
+    [submitMap, editMap].forEach(function (node) { node.closest(".map-card").hidden = true; });
     document.getElementById("selectedLocation").textContent = "場所の名前を入力してください。";
   }
-  document.getElementById("likedFilter").hidden = !store.works.length;
   document.getElementById("storeHelpButton").addEventListener("click", function () {
     if (!helpDialog.open) helpDialog.showModal();
   });
@@ -1150,7 +1104,6 @@
     discountReceipt.close();
   });
   renderDiscountReceipt();
-  renderWorks();
   renderSubmissionMap();
   renderMySubmissions();
   loadRemote();

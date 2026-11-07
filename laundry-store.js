@@ -184,26 +184,28 @@
   }
 
   function dialogNumberHtml(entry) {
-    return '<p class="dialog-work-number"><span>' + escapeHtml(entry ? entry.number : activeWork && activeWork.number || "") + '</span>作品</p>';
+    return '<p class="dialog-work-number"><span>' + escapeHtml(entry ? entry.number : activeWork && activeWork.number || "") + '</span>' + (dialogLanguage === "en" ? 'Work' : '作品') + '</p>';
   }
 
   function dialogNavigationHtml(entry) {
+    var english = dialogLanguage === "en";
     var entries = dialogEntries();
     var index = entry ? entries.findIndex(function (item) { return item.key === entry.key; }) : -1;
     var previous = index >= 0 && entries.length ? entries[(index - 1 + entries.length) % entries.length] : null;
     var next = index >= 0 && entries.length ? entries[(index + 1) % entries.length] : null;
     function button(direction, item, label, arrow) {
-      return '<button type="button" data-work-navigation="' + direction + '"' + (item ? '' : ' disabled') + '><span>' + arrow + ' ' + label + '</span>' + (item ? '<small>' + escapeHtml(item.number + '　' + item.title) + '</small>' : '') + '</button>';
+      var itemTitle = item && item.work && english && item.work.titleEn ? item.work.titleEn : item && item.title;
+      return '<button type="button" data-work-navigation="' + direction + '"' + (item ? '' : ' disabled') + '><span>' + arrow + ' ' + label + '</span>' + (item ? '<small>' + escapeHtml(item.number + '　' + itemTitle) + '</small>' : '') + '</button>';
     }
-    return '<nav class="work-navigation" aria-label="作品を移動">' +
-      button(-1, previous, '前の作品', '←') + button(1, next, '次の作品', '→') + '</nav>';
+    return '<nav class="work-navigation" aria-label="' + (english ? 'Move between works' : '作品を移動') + '">' +
+      button(-1, previous, english ? 'Previous work' : '前の作品', '←') + button(1, next, english ? 'Next work' : '次の作品', '→') + '</nav>';
   }
 
-  function openDialogEntry(entry) {
+  function openDialogEntry(entry, language) {
     if (!entry) return;
     activeWork = entry.work;
     activeLocationId = entry.locationId;
-    dialogLanguage = "ja";
+    dialogLanguage = language || "ja";
     if (activeWork) renderDialog();
     else renderPlaceholderDialog(entry);
     if (!dialog.open) dialog.showModal();
@@ -218,7 +220,7 @@
         var current = activeDialogEntry();
         var index = current ? entries.findIndex(function (entry) { return entry.key === current.key; }) : -1;
         if (!entries.length || index < 0) return;
-        openDialogEntry(entries[(index + Number(button.dataset.workNavigation) + entries.length) % entries.length]);
+        openDialogEntry(entries[(index + Number(button.dataset.workNavigation) + entries.length) % entries.length], dialogLanguage);
       });
     });
   }
@@ -244,17 +246,20 @@
     var scriptText = english ? activeWork.scriptEn : activeWork.script;
     var images = activeWork.images && activeWork.images.length ? activeWork.images : [{ label: activeWork.imageLabel || "場所の写真 / 準備中" }];
     var gallery = images.map(function (item, index) {
-      var content = item.src ? '<img src="' + escapeHtml(item.src) + '" alt="' + escapeHtml(item.alt || item.label || activeWork.title + "の写真") + '" loading="lazy">' : '<div class="work-gallery-placeholder" role="img" aria-label="' + escapeHtml(item.label || "場所の写真 / 準備中") + '"><span>' + escapeHtml(item.label || "場所の写真 / 準備中") + '</span></div>';
-      return '<figure data-gallery-item="' + index + '">' + content + (item.caption ? '<figcaption>' + escapeHtml(item.caption) + '</figcaption>' : '') + '</figure>';
+      var photoAlt = english ? title + " photo " + (index + 1) : (item.alt || item.label || activeWork.title + "の写真");
+      var placeholder = english ? "Photo coming soon" : (item.label || "場所の写真 / 準備中");
+      var content = item.src ? '<img src="' + escapeHtml(item.src) + '" alt="' + escapeHtml(photoAlt) + '" loading="lazy">' : '<div class="work-gallery-placeholder" role="img" aria-label="' + escapeHtml(placeholder) + '"><span>' + escapeHtml(placeholder) + '</span></div>';
+      return '<figure data-gallery-item="' + index + '">' + content + (!english && item.caption ? '<figcaption>' + escapeHtml(item.caption) + '</figcaption>' : '') + '</figure>';
     }).join("");
     var notes = activeWork.areaMap && activeWork.areaMap.notes || [];
-    var areaMapImage = activeWork.areaMap && activeWork.areaMap.image ? '<img class="detailed-map-image" src="' + escapeHtml(activeWork.areaMap.image) + '" alt="' + escapeHtml(activeWork.areaMap.imageAlt || activeWork.title + "の場所周辺図") + '">' : '';
+    var areaMapImage = activeWork.areaMap && activeWork.areaMap.image ? '<img class="detailed-map-image" src="' + escapeHtml(activeWork.areaMap.image) + '" alt="' + escapeHtml(english ? "Area map around " + title : activeWork.areaMap.imageAlt || activeWork.title + "の場所周辺図") + '">' : '';
     var areaMap = areaMapImage + notes.map(function (note) { return '<span class="map-note" style="--x:' + Number(note.x || 50) + '%;--y:' + Number(note.y || 50) + '%">' + escapeHtml(note.text) + '</span>'; }).join("");
     var areaMapClass = 'detailed-map' + (areaMapImage ? ' has-image' : '');
-    var photoPanel = '<details class="photo-disclosure"><summary><span>写真を見る</span><small>' + images.length + '枚</small></summary><div class="photo-panel"><div id="workGallery" class="work-gallery">' + gallery + '</div><div class="gallery-toolbar"><span id="galleryCounter" class="gallery-counter">1 / ' + images.length + '</span><div><button id="galleryPrev" type="button" aria-label="前の写真">←</button><button id="galleryNext" type="button" aria-label="次の写真">→</button></div></div></div></details>';
-    var mapPanel = '<div class="area-map-panel"><div class="' + areaMapClass + '" role="group" aria-label="' + escapeHtml(title) + 'の場所周辺図">' + areaMap + '</div></div>';
+    var photoPanel = '<details class="photo-disclosure"><summary><span>' + (english ? 'View photos' : '写真を見る') + '</span><small>' + images.length + (english ? (images.length === 1 ? ' photo' : ' photos') : '枚') + '</small></summary><div class="photo-panel"><div id="workGallery" class="work-gallery">' + gallery + '</div><div class="gallery-toolbar"><span id="galleryCounter" class="gallery-counter">1 / ' + images.length + '</span><div><button id="galleryPrev" type="button" aria-label="' + (english ? 'Previous photo' : '前の写真') + '">←</button><button id="galleryNext" type="button" aria-label="' + (english ? 'Next photo' : '次の写真') + '">→</button></div></div></div></details>';
+    var mapPanel = '<div class="area-map-panel"><div class="' + areaMapClass + '" role="group" aria-label="' + escapeHtml(english ? "Area map around " + title : title + "の場所周辺図") + '">' + areaMap + '</div></div>';
     var audioPlayer = !english && activeWork.audioUrl ? '<audio class="work-recording" src="' + escapeHtml(activeWork.audioUrl) + '" controls preload="none" aria-label="' + escapeHtml(activeWork.title) + 'の朗読"></audio>' : '';
-    dialogContent.innerHTML = dialogNumberHtml(entry) + '<div class="work-language"><button id="workLanguageToggle" type="button" lang="' + (english ? 'ja' : 'en') + '">' + (english ? '日本語' : 'English') + '</button></div><p class="dialog-place">' + escapeHtml(place) + '</p>' + mapPanel + photoPanel + (summary ? '<p class="dialog-summary">' + escapeHtml(summary) + '</p>' : '') + audioPlayer + '<div class="script" lang="' + (english ? 'en' : 'ja') + '"><h2 id="dialogTitle" class="script-title">' + escapeHtml(title) + '</h2>' + scriptText.map(function (paragraph) { return '<p>' + escapeHtml(paragraph) + '</p>'; }).join("") + '</div><section class="reactions"><button id="likeButton" class="like-button' + (state.liked ? ' is-liked' : '') + '" type="button" aria-pressed="' + state.liked + '">♡ <strong>' + (state.liked ? 'いいね済み' : 'いいね') + '</strong><span>' + state.likeCount + '</span>' + (state.syncing ? '<small>保存中</small>' : '') + '</button><button id="openCommentForm" class="like-button" type="button">✎ <strong>コメントする</strong></button></section>' + dialogNavigationHtml(entry);
+    dialogContent.innerHTML = dialogNumberHtml(entry) + '<div class="work-language"><button id="workLanguageToggle" type="button" lang="' + (english ? 'ja' : 'en') + '">' + (english ? '日本語' : 'English') + '</button></div><p class="dialog-place">' + escapeHtml(place) + '</p>' + mapPanel + photoPanel + (summary ? '<p class="dialog-summary">' + escapeHtml(summary) + '</p>' : '') + audioPlayer + '<div class="script" lang="' + (english ? 'en' : 'ja') + '"><h2 id="dialogTitle" class="script-title">' + escapeHtml(title) + '</h2>' + scriptText.map(function (paragraph) { return '<p>' + escapeHtml(paragraph) + '</p>'; }).join("") + '</div><section class="reactions"><button id="likeButton" class="like-button' + (state.liked ? ' is-liked' : '') + '" type="button" aria-pressed="' + state.liked + '">♡ <strong>' + (state.liked ? (english ? 'Liked' : 'いいね済み') : (english ? 'Like' : 'いいね')) + '</strong><span>' + state.likeCount + '</span>' + (state.syncing ? '<small>' + (english ? 'Saving' : '保存中') + '</small>' : '') + '</button><button id="openCommentForm" class="like-button" type="button">✎ <strong>' + (english ? 'Comment' : 'コメントする') + '</strong></button></section>' + dialogNavigationHtml(entry);
+    document.getElementById("dialogClose").setAttribute("aria-label", english ? "Close work" : "作品を閉じる");
     document.getElementById("likeButton").addEventListener("click", toggleLike);
     document.getElementById("workLanguageToggle").addEventListener("click", function () {
       dialogLanguage = english ? "ja" : "en";
@@ -274,7 +279,8 @@
     var state = stateFor(activeWork.id);
     button.classList.toggle("is-liked", state.liked);
     button.setAttribute("aria-pressed", String(state.liked));
-    button.innerHTML = '♡ <strong>' + (state.liked ? 'いいね済み' : 'いいね') + '</strong><span>' + state.likeCount + '</span>' + (state.syncing ? '<small>保存中</small>' : '');
+    var english = dialogLanguage === "en";
+    button.innerHTML = '♡ <strong>' + (state.liked ? (english ? 'Liked' : 'いいね済み') : (english ? 'Like' : 'いいね')) + '</strong><span>' + state.likeCount + '</span>' + (state.syncing ? '<small>' + (english ? 'Saving' : '保存中') + '</small>' : '');
   }
 
   function moveGallery(direction) {
@@ -328,7 +334,18 @@
   }
 
   function openCommentForm() {
-    document.getElementById("commentWorkTitle").textContent = activeWork.title;
+    var english = dialogLanguage === "en";
+    document.getElementById("commentDialog").lang = english ? "en" : "ja";
+    document.getElementById("commentDialogClose").setAttribute("aria-label", english ? "Close comment form" : "コメント画面を閉じる");
+    document.getElementById("commentDialogKicker").textContent = english ? "Contribution to this work" : "作品への投稿";
+    document.getElementById("commentDialogTitle").textContent = english ? "Comment" : "コメントする";
+    document.getElementById("commentWorkTitle").textContent = english && activeWork.titleEn ? activeWork.titleEn : activeWork.title;
+    document.getElementById("commentBodyLabel").textContent = english ? "Comment" : "テキスト";
+    document.getElementById("commentPhotoLabel").textContent = english ? "Photos (optional)" : "写真（任意）";
+    document.getElementById("commentPhotoButton").textContent = english ? "Add photos" : "写真を追加";
+    document.getElementById("commentPhotoHelp").textContent = english ? "Up to 5 photos. Large images are resized when submitted." : "最大5枚。大きな写真は送信時に縮小されます。";
+    document.getElementById("commentConsentText").textContent = english ? "I agree that my contribution may be used in creating works or as material published on this website." : "投稿内容は、作品制作や本サイトへの掲載素材になる可能性があります。同意しますか？";
+    document.getElementById("commentSubmitButton").textContent = english ? "Submit" : "投稿する";
     document.getElementById("commentForm").reset();
     clearCommentPhotoPreview();
     document.getElementById("commentStatus").textContent = "";
@@ -547,6 +564,7 @@
     }
 
     function renderPreview() {
+      var englishPreview = preview.id === "commentPhotoPreview" && dialogLanguage === "en";
       objectUrls.forEach(function (url) { URL.revokeObjectURL(url); });
       objectUrls = [];
       if (!selectedFiles.length) {
@@ -557,7 +575,7 @@
       preview.innerHTML = selectedFiles.map(function (file, index) {
         var url = URL.createObjectURL(file);
         objectUrls.push(url);
-        return '<figure><img src="' + url + '" alt="' + escapeHtml(altText + " " + (index + 1)) + '"><figcaption>' + escapeHtml(file.name) + '</figcaption><button class="photo-remove" type="button" data-remove-photo="' + index + '" aria-label="' + escapeHtml(file.name + "を削除") + '">削除</button></figure>';
+        return '<figure><img src="' + url + '" alt="' + escapeHtml(englishPreview ? "Comment photo " + (index + 1) : altText + " " + (index + 1)) + '"><figcaption>' + escapeHtml(file.name) + '</figcaption><button class="photo-remove" type="button" data-remove-photo="' + index + '" aria-label="' + escapeHtml(englishPreview ? "Remove " + file.name : file.name + "を削除") + '">' + (englishPreview ? 'Remove' : '削除') + '</button></figure>';
       }).join("");
       preview.hidden = false;
     }
@@ -568,13 +586,13 @@
         return !selectedFiles.some(function (selected) { return selected.name === file.name && selected.size === file.size && selected.lastModified === file.lastModified; });
       }));
       if (files.length > 5) {
-        preview.innerHTML = '<p>写真は5枚まで選択できます。</p>';
+        preview.innerHTML = '<p>' + (preview.id === "commentPhotoPreview" && dialogLanguage === "en" ? 'You can select up to 5 photos.' : '写真は5枚まで選択できます。') + '</p>';
         preview.hidden = false;
         input.value = "";
         return;
       }
       if (files.some(function (file) { return !file.type.match(/^image\//); })) {
-        preview.innerHTML = '<p>写真ファイルを選んでください。</p>';
+        preview.innerHTML = '<p>' + (preview.id === "commentPhotoPreview" && dialogLanguage === "en" ? 'Please select image files.' : '写真ファイルを選んでください。') + '</p>';
         preview.hidden = false;
         return;
       }
@@ -964,14 +982,15 @@
     if (!event.currentTarget.reportValidity() || !activeWork) return;
     var values = new FormData(event.currentTarget);
     var status = document.getElementById("commentStatus");
-    status.textContent = "投稿しています…";
+    var english = dialogLanguage === "en";
+    status.textContent = english ? "Submitting…" : "投稿しています…";
     submitRecord({ id: makeId(), type: "comment", workId: activeWork.id, workTitle: activeWork.title, body: values.get("body"), files: values.getAll("photo") }).then(function () {
       event.target.reset();
       clearCommentPhotoPreview();
-      status.textContent = "投稿を受け付けました。";
+      status.textContent = english ? "Your comment was submitted." : "投稿を受け付けました。";
       setTimeout(loadRemote, 700);
       setTimeout(function () { commentDialog.close(); }, 650);
-    }).catch(function (error) { status.textContent = error.message; });
+    }).catch(function (error) { status.textContent = english ? "Unable to submit your comment. Please try again." : error.message; });
   });
 
   editForm.addEventListener("submit", function (event) {

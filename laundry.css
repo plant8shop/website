@@ -297,11 +297,7 @@ h1 span {
 .photo-disclosure[open] summary::after { content: "−"; }
 .photo-disclosure summary:focus-visible { outline: 2px solid var(--violet-dark); outline-offset: 3px; }
 .photo-panel { padding: 4px 0 18px; }
-.area-map-toggle { width: 100%; display: flex; justify-content: space-between; margin: 22px 0 0; padding: 13px 15px; border: 1px solid var(--line-strong); background: #fff; color: var(--violet-dark); cursor: pointer; }
-.area-map-toggle::after { content: "+"; }
-.area-map-toggle[aria-expanded="true"]::after { content: "−"; }
-.area-map-panel[hidden] { display: none; }
-.area-map-panel { margin-top: 10px; }
+.area-map-panel { margin-top: 22px; }
 .detailed-map { position: relative; min-height: 300px; overflow: hidden; border: 1px solid var(--line); background: linear-gradient(22deg, transparent 46%, rgba(77,71,127,.17) 47% 52%, transparent 53%), linear-gradient(103deg, #f6fbf8 0 34%, #e7f6ef 35% 64%, #f0edf8 65%); }
 .detailed-map::before, .detailed-map::after { content: ""; position: absolute; background: rgba(255,255,255,.85); border: 1px solid rgba(77,71,127,.16); }
 .detailed-map::before { width: 42%; height: 24%; left: 5%; top: 9%; }

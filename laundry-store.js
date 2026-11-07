@@ -269,7 +269,7 @@
     var areaMap = areaMapImage + notes.map(function (note) { return '<span class="map-note" style="--x:' + Number(note.x || 50) + '%;--y:' + Number(note.y || 50) + '%">' + escapeHtml(note.text) + '</span>'; }).join("");
     var areaMapClass = 'detailed-map' + (areaMapImage ? ' has-image' : '');
     var photoPanel = '<details class="photo-disclosure"><summary><span>写真を見る</span><small>' + images.length + '枚</small></summary><div class="photo-panel"><div id="workGallery" class="work-gallery">' + gallery + '</div><div class="gallery-toolbar"><span id="galleryCounter" class="gallery-counter">1 / ' + images.length + '</span><div><button id="galleryPrev" type="button" aria-label="前の写真">←</button><button id="galleryNext" type="button" aria-label="次の写真">→</button></div></div></div></details>';
-    var mapPanel = '<button id="areaMapToggle" class="area-map-toggle" type="button" aria-expanded="true" aria-controls="areaMapPanel">周辺図を閉じる</button><div id="areaMapPanel" class="area-map-panel"><div class="' + areaMapClass + '" role="group" aria-label="' + escapeHtml(title) + 'の場所周辺図">' + areaMap + '</div></div>';
+    var mapPanel = '<div class="area-map-panel"><div class="' + areaMapClass + '" role="group" aria-label="' + escapeHtml(title) + 'の場所周辺図">' + areaMap + '</div></div>';
     var audioPlayer = !english && activeWork.audioUrl ? '<audio class="work-recording" src="' + escapeHtml(activeWork.audioUrl) + '" controls preload="none" aria-label="' + escapeHtml(activeWork.title) + 'の朗読"></audio>' : '';
     dialogContent.innerHTML = dialogNumberHtml(entry) + '<div class="work-language"><button id="workLanguageToggle" type="button" lang="' + (english ? 'ja' : 'en') + '">' + (english ? '日本語' : 'English') + '</button></div><h2 id="dialogTitle">' + escapeHtml(title) + '</h2><p class="dialog-place">' + escapeHtml(place) + '</p>' + mapPanel + photoPanel + (summary ? '<p class="dialog-summary">' + escapeHtml(summary) + '</p>' : '') + audioPlayer + '<div class="script" lang="' + (english ? 'en' : 'ja') + '"><h3>' + (english ? 'Text' : 'テキスト') + '</h3>' + scriptText.map(function (paragraph) { return '<p>' + escapeHtml(paragraph) + '</p>'; }).join("") + '</div><section class="reactions"><button id="likeButton" class="like-button' + (state.liked ? ' is-liked' : '') + '" type="button" aria-pressed="' + state.liked + '">♡ <strong>' + (state.liked ? 'いいね済み' : 'いいね') + '</strong><span>' + state.likeCount + '</span>' + (state.syncing ? '<small>保存中</small>' : '') + '</button></section>' + renderComments(state) + dialogNavigationHtml(entry);
     document.getElementById("likeButton").addEventListener("click", toggleLike);
@@ -279,7 +279,6 @@
     });
     bindCommentButton();
     bindWorkNavigation();
-    document.getElementById("areaMapToggle").addEventListener("click", toggleAreaMap);
     document.getElementById("galleryPrev").addEventListener("click", function () { moveGallery(-1); });
     document.getElementById("galleryNext").addEventListener("click", function () { moveGallery(1); });
     document.getElementById("workGallery").addEventListener("scroll", updateGalleryCounter);
@@ -309,15 +308,6 @@
       return distance < best.distance ? { index: index, distance: distance } : best;
     }, { index: 0, distance: Infinity });
     document.getElementById("galleryCounter").textContent = (nearest.index + 1) + " / " + items.length;
-  }
-
-  function toggleAreaMap(event) {
-    var button = event.currentTarget;
-    var panel = document.getElementById("areaMapPanel");
-    var expanded = button.getAttribute("aria-expanded") === "true";
-    button.setAttribute("aria-expanded", String(!expanded));
-    button.textContent = expanded ? "周辺図を表示する" : "周辺図を閉じる";
-    panel.hidden = expanded;
   }
 
   function openWork(workId) {

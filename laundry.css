@@ -303,7 +303,6 @@ h1 span {
 .detailed-map.has-image::before, .detailed-map.has-image::after { display: none; }
 .detailed-map-image { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 .map-note { position: absolute; z-index: 2; left: var(--x); top: var(--y); max-width: 150px; padding: 5px 8px; transform: translate(-50%,-50%); border: 1px solid var(--line-strong); background: rgba(255,255,255,.94); color: var(--violet-dark); font-size: .68rem; line-height: 1.4; }
-.dialog-summary { margin: 28px 0; padding: 22px 0; border-top: 1px solid var(--violet-dark); border-bottom: 1px solid var(--violet-dark); color: var(--text-soft); }
 .work-audio-player { display: grid; grid-template-columns: clamp(92px, 18vw, 126px) 1fr; gap: clamp(20px, 4vw, 38px); align-items: center; margin: 30px 0 48px; padding: clamp(22px, 4vw, 34px); border: 1px solid var(--violet-dark); background: linear-gradient(135deg, rgba(235,232,255,.84), rgba(250,255,253,.96) 58%, rgba(89,231,183,.18)); }
 .work-audio-toggle { display: grid; place-items: center; width: clamp(92px, 18vw, 126px); aspect-ratio: 1; padding: 0; border: 1px solid var(--violet-dark); border-radius: 50%; background: var(--violet-dark); color: #fff; cursor: pointer; transition: transform .18s ease, background .18s ease, color .18s ease; }
 .work-audio-toggle:hover { transform: scale(1.035); }

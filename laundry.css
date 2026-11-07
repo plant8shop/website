@@ -292,6 +292,7 @@ h1 span {
 .gallery-toolbar div { display: flex; gap: 7px; }
 .gallery-toolbar button { width: 40px; height: 36px; border: 1px solid var(--line-strong); background: #fff; cursor: pointer; }
 .gallery-counter { color: var(--muted); font-size: .72rem; }
+.photo-panel { margin-top: 10px; }
 .area-map-toggle { width: 100%; display: flex; justify-content: space-between; margin: 22px 0 0; padding: 13px 15px; border: 1px solid var(--line-strong); background: #fff; color: var(--violet-dark); cursor: pointer; }
 .area-map-toggle::after { content: "+"; }
 .area-map-toggle[aria-expanded="true"]::after { content: "−"; }
@@ -301,7 +302,7 @@ h1 span {
 .detailed-map::before, .detailed-map::after { content: ""; position: absolute; background: rgba(255,255,255,.85); border: 1px solid rgba(77,71,127,.16); }
 .detailed-map::before { width: 42%; height: 24%; left: 5%; top: 9%; }
 .detailed-map::after { width: 30%; height: 30%; right: 7%; bottom: 8%; }
-.detailed-map.has-image { min-height: 0; aspect-ratio: 860 / 1167; background: #fff; }
+.detailed-map.has-image { min-height: 0; aspect-ratio: 15 / 17; background: #fff; }
 .detailed-map.has-image::before, .detailed-map.has-image::after { display: none; }
 .detailed-map-image { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 .map-note { position: absolute; z-index: 2; left: var(--x); top: var(--y); max-width: 150px; padding: 5px 8px; transform: translate(-50%,-50%); border: 1px solid var(--line-strong); background: rgba(255,255,255,.94); color: var(--violet-dark); font-size: .68rem; line-height: 1.4; }
@@ -315,6 +316,7 @@ h1 span {
 .audio-progress::-moz-progress-bar { background: var(--mint); }
 .audio-time { display: flex; justify-content: space-between; color: var(--muted); font-size: .68rem; }
 .audio-caption { grid-column: 1 / -1; margin: 0; color: var(--muted); font-size: .72rem; }
+.work-recording { width: 100%; margin: 24px 0 42px; }
 .script h3 { margin: 0 0 22px; color: var(--violet-dark); font-family: var(--font-ui); font-size: 1rem; }
 .script p { margin: 0 0 1.4em; line-height: 2.05; }
 

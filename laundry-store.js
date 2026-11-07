@@ -35,12 +35,6 @@
   var activeLocationId = null;
   var dialogLanguage = "ja";
   var activeSubmission = null;
-  var speech = null;
-  var speechTimer = null;
-  var speechStartedAt = 0;
-  var speechPausedAt = 0;
-  var speechPausedTotal = 0;
-  var speechDuration = 0;
   var mapNode = document.getElementById("mapCanvas");
   var listNode = document.getElementById("workList");
   var countNode = document.getElementById("workCount");
@@ -237,7 +231,6 @@
 
   function openDialogEntry(entry) {
     if (!entry) return;
-    stopSpeech();
     activeWork = entry.work;
     activeLocationId = entry.locationId;
     dialogLanguage = "ja";
@@ -302,37 +295,26 @@
     var scriptText = english ? activeWork.scriptEn : activeWork.script;
     var images = activeWork.images && activeWork.images.length ? activeWork.images : [{ label: activeWork.imageLabel || "場所の写真 / 準備中" }];
     var gallery = images.map(function (item, index) {
-      var content = item.src ? '<img src="' + escapeHtml(item.src) + '" alt="' + escapeHtml(item.alt || item.label || activeWork.title + "の写真") + '">' : '<div class="work-gallery-placeholder" role="img" aria-label="' + escapeHtml(item.label || "場所の写真 / 準備中") + '"><span>' + escapeHtml(item.label || "場所の写真 / 準備中") + '</span></div>';
+      var content = item.src ? '<img src="' + escapeHtml(item.src) + '" alt="' + escapeHtml(item.alt || item.label || activeWork.title + "の写真") + '" loading="lazy">' : '<div class="work-gallery-placeholder" role="img" aria-label="' + escapeHtml(item.label || "場所の写真 / 準備中") + '"><span>' + escapeHtml(item.label || "場所の写真 / 準備中") + '</span></div>';
       return '<figure data-gallery-item="' + index + '">' + content + (item.caption ? '<figcaption>' + escapeHtml(item.caption) + '</figcaption>' : '') + '</figure>';
     }).join("");
     var notes = activeWork.areaMap && activeWork.areaMap.notes || [];
     var areaMapImage = activeWork.areaMap && activeWork.areaMap.image ? '<img class="detailed-map-image" src="' + escapeHtml(activeWork.areaMap.image) + '" alt="' + escapeHtml(activeWork.areaMap.imageAlt || activeWork.title + "の場所周辺図") + '">' : '';
     var areaMap = areaMapImage + notes.map(function (note) { return '<span class="map-note" style="--x:' + Number(note.x || 50) + '%;--y:' + Number(note.y || 50) + '%">' + escapeHtml(note.text) + '</span>'; }).join("");
     var areaMapClass = 'detailed-map' + (areaMapImage ? ' has-image' : '');
-    dialogContent.innerHTML = dialogNumberHtml(entry) + '<div class="work-language"><button id="workLanguageToggle" type="button" lang="' + (english ? 'ja' : 'en') + '">' + (english ? '日本語' : 'English') + '</button></div><h2 id="dialogTitle">' + escapeHtml(title) + '</h2><p class="dialog-place">' + escapeHtml(place) + '</p><div id="workGallery" class="work-gallery">' + gallery + '</div><div class="gallery-toolbar"><span id="galleryCounter" class="gallery-counter">1 / ' + images.length + '</span><div><button id="galleryPrev" type="button" aria-label="前の写真">←</button><button id="galleryNext" type="button" aria-label="次の写真">→</button></div></div><button id="areaMapToggle" class="area-map-toggle" type="button" aria-expanded="false" aria-controls="areaMapPanel">周辺図を表示する</button><div id="areaMapPanel" class="area-map-panel" hidden><div class="' + areaMapClass + '" role="group" aria-label="' + escapeHtml(title) + 'の場所周辺図">' + areaMap + '</div></div>' + (summary ? '<p class="dialog-summary">' + escapeHtml(summary) + '</p>' : '') + '<div class="audio-player"><button id="listenButton" class="audio-play" type="button" aria-label="朗読を再生">▶</button><div class="audio-track"><progress id="audioProgress" class="audio-progress" max="100" value="0"></progress><div class="audio-time"><span id="audioCurrent">0:00</span><span id="audioDuration">' + formatTime(estimateSpeechDuration()) + '</span></div></div><p class="audio-caption">' + (english ? 'Play this text with your browser voice.' : 'ブラウザの音声でテキストを再生します') + '</p></div><div class="script" lang="' + (english ? 'en' : 'ja') + '"><h3>' + (english ? 'Text' : 'テキスト') + '</h3>' + scriptText.map(function (paragraph) { return '<p>' + escapeHtml(paragraph) + '</p>'; }).join("") + '</div><section class="reactions"><button id="likeButton" class="like-button' + (state.liked ? ' is-liked' : '') + '" type="button" aria-pressed="' + state.liked + '">♡ <strong>' + (state.liked ? 'いいね済み' : 'いいね') + '</strong><span>' + state.likeCount + '</span>' + (state.syncing ? '<small>保存中</small>' : '') + '</button></section>' + renderComments(state) + dialogNavigationHtml(entry);
-    var listenButton = document.getElementById("listenButton");
-    if (activeWork.audioUrl) {
-      var recording = document.createElement("audio");
-      recording.src = activeWork.audioUrl;
-      recording.controls = true;
-      recording.preload = "none";
-      recording.setAttribute("aria-label", activeWork.title + "の朗読");
-      listenButton.closest(".audio-player").replaceWith(recording);
-    } else if ("speechSynthesis" in window) {
-      listenButton.addEventListener("click", toggleSpeech);
-    } else {
-      listenButton.disabled = true;
-      dialogContent.querySelector(".audio-caption").textContent = "このブラウザは読み上げに対応していません。";
-    }
+    var photoPanel = '<button id="photoToggle" class="area-map-toggle photo-toggle" type="button" aria-expanded="false" aria-controls="photoPanel">写真を表示する</button><div id="photoPanel" class="photo-panel" hidden><div id="workGallery" class="work-gallery">' + gallery + '</div><div class="gallery-toolbar"><span id="galleryCounter" class="gallery-counter">1 / ' + images.length + '</span><div><button id="galleryPrev" type="button" aria-label="前の写真">←</button><button id="galleryNext" type="button" aria-label="次の写真">→</button></div></div></div>';
+    var mapPanel = '<button id="areaMapToggle" class="area-map-toggle" type="button" aria-expanded="true" aria-controls="areaMapPanel">周辺図を閉じる</button><div id="areaMapPanel" class="area-map-panel"><div class="' + areaMapClass + '" role="group" aria-label="' + escapeHtml(title) + 'の場所周辺図">' + areaMap + '</div></div>';
+    var audioPlayer = !english && activeWork.audioUrl ? '<audio class="work-recording" src="' + escapeHtml(activeWork.audioUrl) + '" controls preload="none" aria-label="' + escapeHtml(activeWork.title) + 'の朗読"></audio>' : '';
+    dialogContent.innerHTML = dialogNumberHtml(entry) + '<div class="work-language"><button id="workLanguageToggle" type="button" lang="' + (english ? 'ja' : 'en') + '">' + (english ? '日本語' : 'English') + '</button></div><h2 id="dialogTitle">' + escapeHtml(title) + '</h2><p class="dialog-place">' + escapeHtml(place) + '</p>' + mapPanel + photoPanel + (summary ? '<p class="dialog-summary">' + escapeHtml(summary) + '</p>' : '') + audioPlayer + '<div class="script" lang="' + (english ? 'en' : 'ja') + '"><h3>' + (english ? 'Text' : 'テキスト') + '</h3>' + scriptText.map(function (paragraph) { return '<p>' + escapeHtml(paragraph) + '</p>'; }).join("") + '</div><section class="reactions"><button id="likeButton" class="like-button' + (state.liked ? ' is-liked' : '') + '" type="button" aria-pressed="' + state.liked + '">♡ <strong>' + (state.liked ? 'いいね済み' : 'いいね') + '</strong><span>' + state.likeCount + '</span>' + (state.syncing ? '<small>保存中</small>' : '') + '</button></section>' + renderComments(state) + dialogNavigationHtml(entry);
     document.getElementById("likeButton").addEventListener("click", toggleLike);
     document.getElementById("workLanguageToggle").addEventListener("click", function () {
-      stopSpeech();
       dialogLanguage = english ? "ja" : "en";
       renderDialog();
     });
     bindInlineCommentForm();
     bindWorkNavigation();
     document.getElementById("areaMapToggle").addEventListener("click", toggleAreaMap);
+    document.getElementById("photoToggle").addEventListener("click", togglePhotoPanel);
     document.getElementById("galleryPrev").addEventListener("click", function () { moveGallery(-1); });
     document.getElementById("galleryNext").addEventListener("click", function () { moveGallery(1); });
     document.getElementById("workGallery").addEventListener("scroll", updateGalleryCounter);
@@ -373,86 +355,18 @@
     panel.hidden = expanded;
   }
 
+  function togglePhotoPanel(event) {
+    var button = event.currentTarget;
+    var panel = document.getElementById("photoPanel");
+    var expanded = button.getAttribute("aria-expanded") === "true";
+    button.setAttribute("aria-expanded", String(!expanded));
+    button.textContent = expanded ? "写真を表示する" : "写真を閉じる";
+    panel.hidden = expanded;
+  }
+
   function openWork(workId) {
     var entry = dialogEntries().find(function (item) { return item.work && item.work.id === workId; });
     openDialogEntry(entry);
-  }
-
-  function toggleSpeech(event) {
-    var button = event.currentTarget;
-    if (speechSynthesis.speaking && !speechSynthesis.paused) {
-      speechSynthesis.pause();
-      speechPausedAt = Date.now();
-      button.textContent = "▶";
-      button.setAttribute("aria-label", "朗読を再開");
-      return;
-    }
-    if (speechSynthesis.paused && speech) {
-      speechSynthesis.resume();
-      speechPausedTotal += Date.now() - speechPausedAt;
-      button.textContent = "❚❚";
-      button.setAttribute("aria-label", "朗読を一時停止");
-      return;
-    }
-    stopSpeech();
-    var english = dialogLanguage === "en" && activeWork.scriptEn && activeWork.scriptEn.length;
-    var scriptText = english ? activeWork.scriptEn : activeWork.script;
-    speech = new SpeechSynthesisUtterance(scriptText.join(english ? "\n" : "。\n"));
-    speech.lang = english ? "en-US" : "ja-JP";
-    speech.rate = english ? 0.96 : 0.92;
-    speechDuration = estimateSpeechDuration();
-    speechStartedAt = Date.now();
-    speechPausedTotal = 0;
-    speech.onend = function () { finishSpeechPlayer(); };
-    speech.onerror = function () { finishSpeechPlayer(); };
-    speechSynthesis.speak(speech);
-    button.textContent = "❚❚";
-    button.setAttribute("aria-label", "朗読を一時停止");
-    speechTimer = setInterval(updateSpeechPlayer, 250);
-  }
-
-  function estimateSpeechDuration() {
-    if (!activeWork) return 0;
-    var english = dialogLanguage === "en" && activeWork.scriptEn && activeWork.scriptEn.length;
-    var scriptText = english ? activeWork.scriptEn : activeWork.script;
-    return Math.max(1, Math.round(scriptText.join("").length / (english ? 13 : 5.5)));
-  }
-
-  function formatTime(seconds) {
-    seconds = Math.max(0, Math.round(Number(seconds) || 0));
-    return Math.floor(seconds / 60) + ":" + String(seconds % 60).padStart(2, "0");
-  }
-
-  function updateSpeechPlayer() {
-    var progress = document.getElementById("audioProgress");
-    var current = document.getElementById("audioCurrent");
-    if (!progress || !current || !speechStartedAt) return;
-    var pausedNow = speechSynthesis.paused && speechPausedAt ? Date.now() - speechPausedAt : 0;
-    var elapsed = Math.min(speechDuration, (Date.now() - speechStartedAt - speechPausedTotal - pausedNow) / 1000);
-    progress.value = speechDuration ? elapsed / speechDuration * 100 : 0;
-    current.textContent = formatTime(elapsed);
-  }
-
-  function finishSpeechPlayer() {
-    if (speechTimer) clearInterval(speechTimer);
-    speechTimer = null;
-    speech = null;
-    var button = document.getElementById("listenButton");
-    var progress = document.getElementById("audioProgress");
-    var current = document.getElementById("audioCurrent");
-    if (button) { button.textContent = "▶"; button.setAttribute("aria-label", "朗読を再生"); }
-    if (progress) progress.value = 0;
-    if (current) current.textContent = "0:00";
-  }
-
-  function stopSpeech() {
-    if ("speechSynthesis" in window) speechSynthesis.cancel();
-    if (speechTimer) clearInterval(speechTimer);
-    speechTimer = null;
-    speech = null;
-    speechStartedAt = 0;
-    speechPausedAt = 0;
-    speechPausedTotal = 0;
   }
 
   function post(values) {
@@ -1222,15 +1136,14 @@
     var trigger = event.target.closest("[data-submission-id]");
     if (trigger) openEditForm(trigger.dataset.submissionId);
   });
-  document.getElementById("dialogClose").addEventListener("click", function () { stopSpeech(); dialog.close(); });
+  document.getElementById("dialogClose").addEventListener("click", function () { dialog.close(); });
   document.querySelectorAll("[data-close-dialog]").forEach(function (button) {
     button.addEventListener("click", function () { document.getElementById(button.dataset.closeDialog).close(); });
   });
   [dialog, commentDialog, editDialog, helpDialog, discountReceipt].forEach(function (item) {
-    item.addEventListener("click", function (event) { if (event.target === item) { if (item === dialog) stopSpeech(); item.close(); } });
+    item.addEventListener("click", function (event) { if (event.target === item) item.close(); });
   });
   dialog.addEventListener("close", function () {
-    stopSpeech();
     var recording = dialogContent.querySelector("audio");
     if (recording) recording.pause();
   });

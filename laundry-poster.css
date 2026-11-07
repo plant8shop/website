@@ -210,8 +210,8 @@
   text-align: left;
   transition: border-color .16s ease, transform .16s ease;
 }
-.play-map-entry-image { align-self: stretch; min-height: 72px; overflow: hidden; background: #e8eeea; }
-.play-map-entry-image img { width: 100%; height: 100%; min-height: 72px; object-fit: cover; }
+.play-map-entry-image { width: 100%; aspect-ratio: 1; align-self: center; overflow: hidden; background: #e8eeea; }
+.play-map-entry-image img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: center; }
 .play-map-entry-title { color: #173f38; font-weight: 500; line-height: 1.55; }
 .play-map-empty { padding: 20px; border: 1px dashed #c7dbd2; color: var(--muted); background: #fff; }
 .play-map-pin {

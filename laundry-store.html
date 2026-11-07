@@ -6,7 +6,7 @@
   <meta name="description" content="このランドリーの周辺のまちにまつわる記憶をもとにつくった戯曲や朗読を、洗濯や乾燥を待ちながら楽しめます。">
   <title>店舗｜ランドリーシアター</title>
   <link rel="stylesheet" href="laundry.css?v=20261107-7">
-  <link rel="stylesheet" href="laundry-poster.css?v=20261107-11">
+  <link rel="stylesheet" href="laundry-poster.css?v=20261107-13">
 </head>
 <body class="store-page poster-store-page">
   <header class="site-header">
@@ -31,6 +31,7 @@
 
     <section id="works" class="section mode-panel works-section is-active" data-panel="works">
       <div class="section-inner section-inner-wide">
+        <div class="works-toolbar liked-filter-toolbar"><button id="likedFilter" class="button" type="button" aria-pressed="false">「いいね」した作品を表示</button></div>
         <section class="play-map-section store-play-map" aria-labelledby="playMapTitle">
           <h2 id="playMapTitle" class="visually-hidden" data-ja="戯曲の場所" data-en="Locations in the works">戯曲の場所</h2>
           <div id="laundryAreaMap"></div>
@@ -44,7 +45,7 @@
         <form id="submissionForm" class="submission-form"><input class="honeypot" type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
           <div class="submission-layout">
             <div>
-              <div class="map-card map-card-flat"><div class="map-label-row"><span data-ja="場所を選ぶ" data-en="Choose a location">場所を選ぶ</span><div class="map-label-actions"><button id="currentLocationButton" class="current-location-button" type="button" data-ja="現在位置を使う" data-en="Use current location">現在位置を使う</button><small data-ja="ピンチ・ホイールで拡大縮小" data-en="Pinch or scroll to zoom">ピンチ・ホイールで拡大縮小</small></div></div><div id="submissionMap" class="map-canvas submission-map" role="group" aria-label="地図上で投稿する場所を選ぶ"></div></div>
+              <div class="map-card map-card-flat"><div class="map-label-row"><span data-ja="場所を選ぶ" data-en="Choose a location">場所を選ぶ</span><div class="map-label-actions"><button id="currentLocationButton" class="current-location-button" type="button" data-ja="現在位置" data-en="Current location">現在位置</button><small data-ja="ピンチ・ホイールで拡大縮小" data-en="Pinch or scroll to zoom">ピンチ・ホイールで拡大縮小</small></div></div><div id="submissionMap" class="map-canvas submission-map" role="group" aria-label="地図上で投稿する場所を選ぶ"></div></div>
               <p id="selectedLocation" class="selected-location">場所はまだ選ばれていません。</p>
               <label class="unknown-row"><input id="locationUnknown" type="checkbox" name="locationUnknown"><span data-ja="地図では場所がわからない" data-en="I cannot identify the location on the map">地図では場所がわからない</span></label>
             </div>
@@ -140,7 +141,7 @@
   <script src="data/laundry-works.js?v=20261107-1"></script>
   <script src="data/laundry-waiting-room.js?v=20261107-13"></script>
   <script src="data/laundry-area-maps.js?v=20261107-8"></script>
-  <script src="laundry-area-maps.js?v=20261107-8"></script>
-  <script src="laundry-store.js?v=20261107-18"></script>
+  <script src="laundry-area-maps.js?v=20261107-10"></script>
+  <script src="laundry-store.js?v=20261107-19"></script>
 </body>
 </html>

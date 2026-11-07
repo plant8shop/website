@@ -26,6 +26,7 @@
   var likeOverrides = readLikeOverrides();
   var photoPreviewCache = {};
   var photoDbPromise = null;
+  var likedOnly = false;
   var selectedPoint = null;
   var editPoint = null;
   var submitMapView = { scale: 1, x: 0, y: 0 };
@@ -55,6 +56,14 @@
 
   function isEnglish() { return pageLanguage === "en"; }
 
+  function renderAreaMap() {
+    var visibleLocationIds = likedOnly ? store.works.filter(function (work) { return stateFor(work.id).liked; }).map(function (work) { return String(work.locationId); }) : null;
+    window.renderLaundryAreaMap(document.getElementById("laundryAreaMap"), store.id, pageLanguage, visibleLocationIds);
+    var filter = document.getElementById("likedFilter");
+    filter.setAttribute("aria-pressed", String(likedOnly));
+    filter.textContent = likedOnly ? (isEnglish() ? "Show all works" : "すべての作品を表示") : (isEnglish() ? "Show liked works" : "「いいね」した作品を表示");
+  }
+
   function applyPageLanguage() {
     var english = isEnglish();
     document.documentElement.lang = english ? "en" : "ja";
@@ -78,7 +87,7 @@
     discountReceipt.lang = english ? "en" : "ja";
     document.getElementById("editDialogClose").setAttribute("aria-label", english ? "Close contribution" : "投稿を閉じる");
     dialogLanguage = pageLanguage;
-    window.renderLaundryAreaMap(document.getElementById("laundryAreaMap"), store.id, pageLanguage);
+    renderAreaMap();
     renderSubmissionMap();
     renderMySubmissions();
     renderDiscountReceipt();
@@ -352,6 +361,7 @@
     likeOverrides[workId] = { liked: !state.liked, changedAt: Date.now() };
     saveLikeOverrides();
     updateDialogReactionState();
+    if (likedOnly) renderAreaMap();
     post({ action: "toggleLike", workId: workId }).then(function () {
       setTimeout(loadRemote, 1200);
       setTimeout(loadRemote, 3500);
@@ -360,6 +370,7 @@
       else delete likeOverrides[workId];
       saveLikeOverrides();
       updateDialogReactionState();
+      if (likedOnly) renderAreaMap();
     });
   }
 
@@ -771,11 +782,11 @@
         renderSubmissionMap();
       }
       currentLocationButton.disabled = false;
-      currentLocationButton.textContent = isEnglish() ? "Use current location" : "現在位置を使う";
+      currentLocationButton.textContent = isEnglish() ? "Current location" : "現在位置";
     }, function (error) {
       message.textContent = error && error.code === 1 ? (isEnglish() ? "Location access was not allowed." : "位置情報の利用が許可されていません。") : (isEnglish() ? "Could not get your current location." : "現在位置を取得できませんでした。");
       currentLocationButton.disabled = false;
-      currentLocationButton.textContent = isEnglish() ? "Use current location" : "現在位置を使う";
+      currentLocationButton.textContent = isEnglish() ? "Current location" : "現在位置";
     }, { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 });
   }
 
@@ -954,6 +965,7 @@
         remote.works = remote.works || {};
         remote.submissions = remote.submissions || remote.mine || [];
         reconcileLikeOverrides();
+        if (likedOnly) renderAreaMap();
         renderMySubmissions();
         if (dialog.open && activeWork) {
           updateDialogReactionState();
@@ -1078,6 +1090,10 @@
     localStorage.setItem(languageKey, pageLanguage);
     applyPageLanguage();
   });
+  document.getElementById("likedFilter").addEventListener("click", function () {
+    likedOnly = !likedOnly;
+    renderAreaMap();
+  });
   document.getElementById("works").addEventListener("click", function (event) {
     var location = event.target.closest("[data-play-location]");
     if (!location) return;
@@ -1107,7 +1123,6 @@
   document.getElementById("headerStoreName").textContent = store.name;
   document.getElementById("storeTitle").textContent = store.name;
   document.getElementById("storeStart").hidden = !store.description;
-  window.renderLaundryAreaMap(document.getElementById("laundryAreaMap"), store.id, pageLanguage);
   document.getElementById("storeDrinkOffer").hidden = !store.drinkOffer;
   if (store.mapReady === false) {
     unknown.defaultChecked = true;

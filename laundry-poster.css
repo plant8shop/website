@@ -318,7 +318,7 @@
 
 /* Store pages use a quiet folder-like workspace. Explanations live in Help. */
 .poster-store-page { min-height: 100svh; background: #f4f1ea; }
-.poster-store-page .site-header { background: transparent; border-bottom: 0; backdrop-filter: none; }
+.poster-store-page .site-header { position: relative; top: auto; z-index: auto; background: transparent; border-bottom: 0; backdrop-filter: none; }
 .store-workspace-head {
   padding: 10px var(--section-pad-x) 0;
   background: #f4f1ea;

@@ -20,7 +20,7 @@
   var deletedKey = "plantshop_laundry_theater_deleted_" + visitorId;
   var likeOverrideKey = "plantshop_laundry_theater_likes_" + visitorId;
   var discountKey = "plantshop_laundry_theater_drink_discount_" + store.id + "_" + visitorId;
-  var discountDuration = 24 * 60 * 60 * 1000;
+  var discountDuration = 3 * 24 * 60 * 60 * 1000;
   var remote = { works: {}, submissions: [] };
   var remoteLoaded = false;
   var likeOverrides = readLikeOverrides();
@@ -108,9 +108,18 @@
     if (!store.drinkOffer) return null;
     try {
       var receipt = JSON.parse(localStorage.getItem(discountKey) || "null");
-      if (!receipt || !Number.isFinite(receipt.submittedAt) || Date.now() >= receipt.expiresAt) {
+      if (!receipt || !Number.isFinite(receipt.submittedAt)) {
         localStorage.removeItem(discountKey);
         return null;
+      }
+      var expiresAt = receipt.submittedAt + discountDuration;
+      if (Date.now() >= expiresAt) {
+        localStorage.removeItem(discountKey);
+        return null;
+      }
+      if (receipt.expiresAt !== expiresAt) {
+        receipt.expiresAt = expiresAt;
+        localStorage.setItem(discountKey, JSON.stringify(receipt));
       }
       return receipt;
     } catch (error) {

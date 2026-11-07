@@ -257,26 +257,22 @@
       (comments.length ? comments.map(function (comment) {
         return '<p class="comment' + (comment.mine ? ' is-mine' : '') + '"><span>' + escapeHtml(comment.text || comment.comment || '') + '</span><small>' + (comment.mine ? 'あなたのコメント' : '匿名') + '</small></p>';
       }).join('') : '<p class="comment-empty">まだコメントはありません。</p>') +
-      '</div><form id="workCommentForm" class="comment-form"><label><span>コメントを残す</span><textarea name="comment" maxlength="500" rows="3" required></textarea></label><button class="button" type="submit">送信する</button><p id="workCommentStatus" class="form-status" role="status" aria-live="polite"></p></form></div>';
+      '</div><button id="openCommentForm" class="button comment-open-button" type="button">コメントを残す</button></div>';
   }
 
   function updateDialogComments() {
     if (!activeWork) return;
     var current = dialogContent.querySelector('.comments');
     if (!current) return;
-    var draft = dialogContent.querySelector('#workCommentForm textarea');
-    var value = draft ? draft.value : '';
     var wrapper = document.createElement('div');
     wrapper.innerHTML = renderComments(stateFor(activeWork.id));
     current.replaceWith(wrapper.firstElementChild);
-    var nextDraft = dialogContent.querySelector('#workCommentForm textarea');
-    if (nextDraft) nextDraft.value = value;
-    bindInlineCommentForm();
+    bindCommentButton();
   }
 
-  function bindInlineCommentForm() {
-    var commentForm = document.getElementById('workCommentForm');
-    if (commentForm) commentForm.addEventListener('submit', addWorkComment);
+  function bindCommentButton() {
+    var button = document.getElementById('openCommentForm');
+    if (button) button.addEventListener('click', openCommentForm);
   }
 
   function renderPlaceholderDialog(entry) {
@@ -302,7 +298,7 @@
     var areaMapImage = activeWork.areaMap && activeWork.areaMap.image ? '<img class="detailed-map-image" src="' + escapeHtml(activeWork.areaMap.image) + '" alt="' + escapeHtml(activeWork.areaMap.imageAlt || activeWork.title + "の場所周辺図") + '">' : '';
     var areaMap = areaMapImage + notes.map(function (note) { return '<span class="map-note" style="--x:' + Number(note.x || 50) + '%;--y:' + Number(note.y || 50) + '%">' + escapeHtml(note.text) + '</span>'; }).join("");
     var areaMapClass = 'detailed-map' + (areaMapImage ? ' has-image' : '');
-    var photoPanel = '<button id="photoToggle" class="area-map-toggle photo-toggle" type="button" aria-expanded="false" aria-controls="photoPanel">写真を表示する</button><div id="photoPanel" class="photo-panel" hidden><div id="workGallery" class="work-gallery">' + gallery + '</div><div class="gallery-toolbar"><span id="galleryCounter" class="gallery-counter">1 / ' + images.length + '</span><div><button id="galleryPrev" type="button" aria-label="前の写真">←</button><button id="galleryNext" type="button" aria-label="次の写真">→</button></div></div></div>';
+    var photoPanel = '<details class="photo-disclosure"><summary><span>写真を見る</span><small>' + images.length + '枚</small></summary><div class="photo-panel"><div id="workGallery" class="work-gallery">' + gallery + '</div><div class="gallery-toolbar"><span id="galleryCounter" class="gallery-counter">1 / ' + images.length + '</span><div><button id="galleryPrev" type="button" aria-label="前の写真">←</button><button id="galleryNext" type="button" aria-label="次の写真">→</button></div></div></div></details>';
     var mapPanel = '<button id="areaMapToggle" class="area-map-toggle" type="button" aria-expanded="true" aria-controls="areaMapPanel">周辺図を閉じる</button><div id="areaMapPanel" class="area-map-panel"><div class="' + areaMapClass + '" role="group" aria-label="' + escapeHtml(title) + 'の場所周辺図">' + areaMap + '</div></div>';
     var audioPlayer = !english && activeWork.audioUrl ? '<audio class="work-recording" src="' + escapeHtml(activeWork.audioUrl) + '" controls preload="none" aria-label="' + escapeHtml(activeWork.title) + 'の朗読"></audio>' : '';
     dialogContent.innerHTML = dialogNumberHtml(entry) + '<div class="work-language"><button id="workLanguageToggle" type="button" lang="' + (english ? 'ja' : 'en') + '">' + (english ? '日本語' : 'English') + '</button></div><h2 id="dialogTitle">' + escapeHtml(title) + '</h2><p class="dialog-place">' + escapeHtml(place) + '</p>' + mapPanel + photoPanel + (summary ? '<p class="dialog-summary">' + escapeHtml(summary) + '</p>' : '') + audioPlayer + '<div class="script" lang="' + (english ? 'en' : 'ja') + '"><h3>' + (english ? 'Text' : 'テキスト') + '</h3>' + scriptText.map(function (paragraph) { return '<p>' + escapeHtml(paragraph) + '</p>'; }).join("") + '</div><section class="reactions"><button id="likeButton" class="like-button' + (state.liked ? ' is-liked' : '') + '" type="button" aria-pressed="' + state.liked + '">♡ <strong>' + (state.liked ? 'いいね済み' : 'いいね') + '</strong><span>' + state.likeCount + '</span>' + (state.syncing ? '<small>保存中</small>' : '') + '</button></section>' + renderComments(state) + dialogNavigationHtml(entry);
@@ -311,10 +307,9 @@
       dialogLanguage = english ? "ja" : "en";
       renderDialog();
     });
-    bindInlineCommentForm();
+    bindCommentButton();
     bindWorkNavigation();
     document.getElementById("areaMapToggle").addEventListener("click", toggleAreaMap);
-    document.getElementById("photoToggle").addEventListener("click", togglePhotoPanel);
     document.getElementById("galleryPrev").addEventListener("click", function () { moveGallery(-1); });
     document.getElementById("galleryNext").addEventListener("click", function () { moveGallery(1); });
     document.getElementById("workGallery").addEventListener("scroll", updateGalleryCounter);
@@ -355,15 +350,6 @@
     panel.hidden = expanded;
   }
 
-  function togglePhotoPanel(event) {
-    var button = event.currentTarget;
-    var panel = document.getElementById("photoPanel");
-    var expanded = button.getAttribute("aria-expanded") === "true";
-    button.setAttribute("aria-expanded", String(!expanded));
-    button.textContent = expanded ? "写真を表示する" : "写真を閉じる";
-    panel.hidden = expanded;
-  }
-
   function openWork(workId) {
     var entry = dialogEntries().find(function (item) { return item.work && item.work.id === workId; });
     openDialogEntry(entry);
@@ -397,30 +383,6 @@
       saveLikeOverrides();
       updateDialogReactionState();
       renderWorks();
-    });
-  }
-
-  function addWorkComment(event) {
-    event.preventDefault();
-    if (!activeWork) return;
-    var text = String(new FormData(event.currentTarget).get("comment") || "").trim();
-    if (!text) return;
-    var workId = activeWork.id;
-    if (!remote.works[workId]) remote.works[workId] = { likeCount: 0, liked: false, comments: [] };
-    if (!Array.isArray(remote.works[workId].comments)) remote.works[workId].comments = [];
-    var pendingComment = { text: text, mine: true };
-    remote.works[workId].comments.push(pendingComment);
-    updateDialogComments();
-    var status = document.getElementById("workCommentStatus");
-    if (status) status.textContent = "コメントを送信しました。";
-    post({ action: "addComment", workId: workId, comment: text }).then(function () {
-      setTimeout(loadRemote, 700);
-      setTimeout(loadRemote, 2400);
-    }).catch(function (error) {
-      remote.works[workId].comments = remote.works[workId].comments.filter(function (comment) { return comment !== pendingComment; });
-      updateDialogComments();
-      var failedStatus = document.getElementById("workCommentStatus");
-      if (failedStatus) failedStatus.textContent = error.message;
     });
   }
 

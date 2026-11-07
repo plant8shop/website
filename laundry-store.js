@@ -441,7 +441,6 @@
     document.getElementById("commentBodyLabel").textContent = english ? "Comment" : "テキスト";
     document.getElementById("commentPhotoLabel").textContent = english ? "Photos (optional)" : "写真（任意）";
     document.getElementById("commentPhotoButton").textContent = english ? "Add photos" : "写真を追加";
-    document.getElementById("commentPhotoHelp").textContent = english ? "Up to 5 photos. Large images are resized when submitted." : "最大5枚。大きな写真は送信時に縮小されます。";
     document.getElementById("commentConsentText").textContent = english ? "I agree that my contribution may be used in creating works or as material published on this website." : "投稿内容は、作品制作や本サイトへの掲載素材になる可能性があります。同意しますか？";
     document.getElementById("commentSubmitButton").textContent = english ? "Submit" : "投稿する";
     document.getElementById("commentForm").reset();

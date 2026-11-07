@@ -18,15 +18,11 @@
   var api = data.apiUrl || "";
   var localKey = "plantshop_laundry_theater_submissions_" + visitorId;
   var deletedKey = "plantshop_laundry_theater_deleted_" + visitorId;
-  var likeOverrideKey = "plantshop_laundry_theater_likes_" + visitorId;
   var discountKey = "plantshop_laundry_theater_drink_discount_" + store.id + "_" + visitorId;
   var discountDuration = 3 * 24 * 60 * 60 * 1000;
-  var remote = { works: {}, submissions: [] };
-  var remoteLoaded = false;
-  var likeOverrides = readLikeOverrides();
+  var remote = { submissions: [] };
   var photoPreviewCache = {};
   var photoDbPromise = null;
-  var likedOnly = false;
   var selectedPoint = null;
   var editPoint = null;
   var submitMapView = { scale: 1, x: 0, y: 0 };
@@ -57,11 +53,7 @@
   function isEnglish() { return pageLanguage === "en"; }
 
   function renderAreaMap() {
-    var visibleLocationIds = likedOnly ? store.works.filter(function (work) { return stateFor(work.id).liked; }).map(function (work) { return String(work.locationId); }) : null;
-    window.renderLaundryAreaMap(document.getElementById("laundryAreaMap"), store.id, pageLanguage, visibleLocationIds);
-    var filter = document.getElementById("likedFilter");
-    filter.setAttribute("aria-pressed", String(likedOnly));
-    filter.textContent = likedOnly ? (isEnglish() ? "Show all works" : "すべての作品を表示") : (isEnglish() ? "Show liked works" : "「いいね」した作品を表示");
+    window.renderLaundryAreaMap(document.getElementById("laundryAreaMap"), store.id, pageLanguage);
   }
 
   function applyPageLanguage() {
@@ -164,37 +156,6 @@
     }));
     renderDiscountReceipt();
     if (!discountReceipt.open) discountReceipt.showModal();
-  }
-
-  function stateFor(workId) {
-    var base = remote.works[workId] || { likeCount: 0, liked: false, comments: [] };
-    if (!Array.isArray(base.comments)) base.comments = [];
-    var override = likeOverrides[workId];
-    if (!override) return base;
-    var count = Number(base.likeCount) || 0;
-    if (Boolean(base.liked) !== override.liked) count += override.liked ? 1 : -1;
-    return Object.assign({}, base, { likeCount: Math.max(0, count), liked: override.liked, syncing: true });
-  }
-
-  function readLikeOverrides() {
-    try { return JSON.parse(localStorage.getItem(likeOverrideKey) || "{}"); } catch (error) { return {}; }
-  }
-
-  function saveLikeOverrides() {
-    try { localStorage.setItem(likeOverrideKey, JSON.stringify(likeOverrides)); } catch (error) {}
-  }
-
-  function reconcileLikeOverrides() {
-    if (!remoteLoaded) return;
-    var changed = false;
-    Object.keys(likeOverrides).forEach(function (workId) {
-      var serverState = remote.works[workId];
-      if (serverState && Boolean(serverState.liked) === likeOverrides[workId].liked) {
-        delete likeOverrides[workId];
-        changed = true;
-      }
-    });
-    if (changed) saveLikeOverrides();
   }
 
   function mapScenery() {
@@ -343,7 +304,6 @@
 
   function renderDialog() {
     if (!activeWork) return;
-    var state = stateFor(activeWork.id);
     var entry = activeDialogEntry();
     var english = dialogLanguage === "en" && activeWork.scriptEn && activeWork.scriptEn.length;
     var title = english ? activeWork.titleEn : activeWork.title;
@@ -364,26 +324,14 @@
     var audioPlayer = !english && activeWork.audioUrl ? '<section class="work-audio-player" data-audio-player aria-label="朗読音声"><button class="work-audio-toggle" type="button" data-audio-toggle aria-label="朗読を再生" aria-pressed="false"><span class="work-audio-icon" aria-hidden="true"></span></button><div class="work-audio-body"><p class="work-audio-label">朗読を聴く</p><input class="work-audio-seek" data-audio-seek type="range" min="0" max="1000" value="0" step="1" aria-label="再生位置"><div class="work-audio-time" aria-live="off"><span data-audio-current>0:00</span><span data-audio-duration>0:00</span></div></div><audio src="' + escapeHtml(activeWork.audioUrl) + '" preload="metadata" aria-label="' + escapeHtml(activeWork.title) + 'の朗読"></audio></section>' : '';
     var credit = activeWork.credit;
     var creditHtml = credit && credit.names && credit.names.length ? '<div class="work-credit"><span class="work-credit-role">' + (english ? 'Written and read by' : '作・朗読') + '</span><details><summary>' + escapeHtml(english ? credit.labelEn : credit.label) + '</summary><ul>' + credit.names.map(function (name) { return '<li>' + escapeHtml(name) + '</li>'; }).join('') + '</ul></details></div>' : '';
-    dialogContent.innerHTML = dialogHeadingHtml(entry, title) + mapPanel + photoPanel + audioPlayer + '<div class="script" lang="' + (english ? 'en' : 'ja') + '">' + scriptText.map(function (paragraph) { return '<p>' + escapeHtml(paragraph) + '</p>'; }).join("") + '</div><section class="reactions">' + creditHtml + '<button id="likeButton" class="like-button' + (state.liked ? ' is-liked' : '') + '" type="button" aria-pressed="' + state.liked + '">♡ <strong>' + (state.liked ? (english ? 'Liked' : 'いいね済み') : (english ? 'Like' : 'いいね')) + '</strong><span>' + state.likeCount + '</span>' + (state.syncing ? '<small>' + (english ? 'Saving' : '保存中') + '</small>' : '') + '</button><button id="openCommentForm" class="like-button" type="button">✎ <strong>' + (english ? 'Comment' : 'コメントする') + '</strong></button></section>' + dialogNavigationHtml(entry);
+    dialogContent.innerHTML = dialogHeadingHtml(entry, title) + mapPanel + photoPanel + audioPlayer + '<div class="script" lang="' + (english ? 'en' : 'ja') + '">' + scriptText.map(function (paragraph) { return '<p>' + escapeHtml(paragraph) + '</p>'; }).join("") + '</div><section class="reactions">' + creditHtml + '<button id="openCommentForm" class="comment-button" type="button">✎ <strong>' + (english ? 'Comment' : 'コメントする') + '</strong></button></section>' + dialogNavigationHtml(entry);
     document.getElementById("dialogClose").setAttribute("aria-label", english ? "Close work" : "作品を閉じる");
-    document.getElementById("likeButton").addEventListener("click", toggleLike);
     bindCommentButton();
     bindWorkNavigation();
     bindAudioPlayer();
     document.getElementById("galleryPrev").addEventListener("click", function () { moveGallery(-1); });
     document.getElementById("galleryNext").addEventListener("click", function () { moveGallery(1); });
     document.getElementById("workGallery").addEventListener("scroll", updateGalleryCounter);
-  }
-
-  function updateDialogReactionState() {
-    if (!activeWork) return;
-    var button = document.getElementById("likeButton");
-    if (!button) return;
-    var state = stateFor(activeWork.id);
-    button.classList.toggle("is-liked", state.liked);
-    button.setAttribute("aria-pressed", String(state.liked));
-    var english = dialogLanguage === "en";
-    button.innerHTML = '♡ <strong>' + (state.liked ? (english ? 'Liked' : 'いいね済み') : (english ? 'Like' : 'いいね')) + '</strong><span>' + state.likeCount + '</span>' + (state.syncing ? '<small>' + (english ? 'Saving' : '保存中') + '</small>' : '');
   }
 
   function moveGallery(direction) {
@@ -415,26 +363,6 @@
       mode: "no-cors",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body: new URLSearchParams(values)
-    });
-  }
-
-  function toggleLike() {
-    var workId = activeWork.id;
-    var state = stateFor(activeWork.id);
-    var previousOverride = likeOverrides[workId];
-    likeOverrides[workId] = { liked: !state.liked, changedAt: Date.now() };
-    saveLikeOverrides();
-    updateDialogReactionState();
-    if (likedOnly) renderAreaMap();
-    post({ action: "toggleLike", workId: workId }).then(function () {
-      setTimeout(loadRemote, 1200);
-      setTimeout(loadRemote, 3500);
-    }).catch(function () {
-      if (previousOverride) likeOverrides[workId] = previousOverride;
-      else delete likeOverrides[workId];
-      saveLikeOverrides();
-      updateDialogReactionState();
-      if (likedOnly) renderAreaMap();
     });
   }
 
@@ -812,13 +740,12 @@
 
   function renderInteractiveMap(mapElement, point, view) {
     var pin = point ? '<span class="submission-pin" style="--x:' + (point.x * 100) + '%;--y:' + (point.y * 100) + '%">＋</span>' : '';
-    mapElement.innerHTML = '<div class="submission-map-layer" style="' + mapLayerStyle(view) + '">' + mapScenery() + pin + '</div>' +
-      '<span class="map-help">' + (isEnglish() ? 'Tap the map to choose a location' : '地図を押して場所を選択') + '</span>';
+    mapElement.innerHTML = '<div class="submission-map-layer" style="' + mapLayerStyle(view) + '">' + mapScenery() + pin + '</div>';
   }
 
   function renderSubmissionMap() {
     renderInteractiveMap(submitMap, selectedPoint && !unknown.checked ? selectedPoint : null, submitMapView);
-    document.getElementById("selectedLocation").textContent = unknown.checked ? (isEnglish() ? "Enter the location name." : "場所の名前を入力してください。") : (selectedPoint ? (selectedPoint.isCurrentLocation ? (isEnglish() ? "Current location selected." : "現在位置を選びました。") : (isEnglish() ? "Location selected on the map." : "地図上の場所を選びました。")) : (isEnglish() ? "No location selected yet." : "場所はまだ選ばれていません。"));
+    document.getElementById("selectedLocation").textContent = unknown.checked ? (isEnglish() ? "Enter the location name." : "場所の名前を入力してください。") : (selectedPoint ? (selectedPoint.isCurrentLocation ? (isEnglish() ? "Current location selected." : "現在位置を選びました。") : (isEnglish() ? "Location selected on the map." : "地図上の場所を選びました。")) : "");
   }
 
   function useCurrentLocation() {
@@ -855,7 +782,7 @@
 
   function renderEditMap() {
     renderInteractiveMap(editMap, editPoint && !editUnknown.checked ? editPoint : null, editMapView);
-    document.getElementById("editSelectedLocation").textContent = editUnknown.checked ? (isEnglish() ? "Recorded by location name." : "場所の名前で記録されています。") : (editPoint ? (isEnglish() ? "This is the current location. Tap the map to change it." : "現在の投稿場所です。地図を押すと変更できます。") : (isEnglish() ? "No location selected yet." : "場所はまだ選ばれていません。"));
+    document.getElementById("editSelectedLocation").textContent = editUnknown.checked ? (isEnglish() ? "Recorded by location name." : "場所の名前で記録されています。") : (editPoint ? (isEnglish() ? "This is the current location. Tap the map to change it." : "現在の投稿場所です。地図を押すと変更できます。") : "");
   }
 
   function bindInteractiveMap(mapElement, view, onSelect) {
@@ -1024,15 +951,8 @@
     window[callback] = function (payload) {
       if (payload && payload.ok) {
         remote = payload;
-        remoteLoaded = true;
-        remote.works = remote.works || {};
         remote.submissions = remote.submissions || remote.mine || [];
-        reconcileLikeOverrides();
-        if (likedOnly) renderAreaMap();
         renderMySubmissions();
-        if (dialog.open && activeWork) {
-          updateDialogReactionState();
-        }
       }
       delete window[callback];
       script.remove();
@@ -1152,10 +1072,6 @@
     pageLanguage = isEnglish() ? "ja" : "en";
     localStorage.setItem(languageKey, pageLanguage);
     applyPageLanguage();
-  });
-  document.getElementById("likedFilter").addEventListener("click", function () {
-    likedOnly = !likedOnly;
-    renderAreaMap();
   });
   document.getElementById("works").addEventListener("click", function (event) {
     var location = event.target.closest("[data-play-location]");

@@ -240,7 +240,6 @@
   will-change: transform;
 }
 .submission-map-layer .map-base-image { pointer-events: none; }
-.submission-map .map-help { pointer-events: none; }
 .map-label-row small {
   color: var(--muted);
   font-size: .68rem;
@@ -316,6 +315,10 @@
   .drink-discount-receipt dl div + div { border-top: 1px solid rgba(114,81,181,.35); border-left: 0; }
 }
 
+@media (hover: none) and (pointer: coarse) {
+  .submission-map { touch-action: pan-y; overscroll-behavior-y: auto; }
+}
+
 /* Store pages use a quiet folder-like workspace. Explanations live in Help. */
 .poster-store-page { min-height: 100svh; background: #f4f1ea; }
 .poster-store-page .site-header { position: relative; top: auto; z-index: auto; background: transparent; border-bottom: 0; backdrop-filter: none; }
@@ -367,7 +370,6 @@
   background: #fff;
 }
 .poster-store-page .store-play-map { margin-top: 0; }
-.poster-store-page .liked-filter-toolbar { margin: 0 0 18px; }
 .visually-hidden {
   position: absolute !important;
   width: 1px !important;

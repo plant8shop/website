@@ -19,7 +19,7 @@
     return button;
   }
 
-  window.renderLaundryAreaMap = function (root, key, language, visibleLocationIds) {
+  window.renderLaundryAreaMap = function (root, key, language) {
     var map = data.maps[key];
     if (!root || !map) return false;
     var english = language === "en";
@@ -41,7 +41,6 @@
     var legend = element("ol", "play-map-legend");
     legend.setAttribute("aria-label", english ? "Locations in the works at this laundry" : "この店舗の戯曲の場所");
     map.locations.forEach(function (point, index) {
-      if (Array.isArray(visibleLocationIds) && !visibleLocationIds.includes(String(point.id))) return;
       var number = index + 1;
       var work = storeData && storeData.works.find(function (item) { return String(item.locationId) === String(point.id); });
       var title = work ? (english && work.titleEn ? work.titleEn : work.title) : (english && data.locationsEn ? data.locationsEn[point.id] : data.locations[point.id]);
@@ -65,10 +64,6 @@
       item.append(entry);
       legend.append(item);
     });
-    if (Array.isArray(visibleLocationIds) && !visibleLocationIds.length) {
-      legend.append(element("li", "play-map-empty", english ? "No liked works yet." : "「いいね」した作品はまだありません。"));
-    }
-
     layout.append(figure, legend);
     root.replaceChildren(layout);
     return true;

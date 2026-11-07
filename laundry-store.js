@@ -278,6 +278,60 @@
     bindWorkNavigation();
   }
 
+  function formatAudioTime(seconds) {
+    if (!Number.isFinite(seconds) || seconds < 0) return "0:00";
+    var minutes = Math.floor(seconds / 60);
+    var remainder = Math.floor(seconds % 60);
+    return minutes + ":" + String(remainder).padStart(2, "0");
+  }
+
+  function bindAudioPlayer() {
+    var player = dialogContent.querySelector("[data-audio-player]");
+    if (!player) return;
+    var audio = player.querySelector("audio");
+    var button = player.querySelector("[data-audio-toggle]");
+    var seek = player.querySelector("[data-audio-seek]");
+    var current = player.querySelector("[data-audio-current]");
+    var duration = player.querySelector("[data-audio-duration]");
+
+    function updateProgress() {
+      var total = Number.isFinite(audio.duration) ? audio.duration : 0;
+      var progress = total > 0 ? audio.currentTime / total : 0;
+      seek.value = String(Math.round(progress * 1000));
+      seek.style.setProperty("--audio-progress", (progress * 100) + "%");
+      current.textContent = formatAudioTime(audio.currentTime);
+      duration.textContent = formatAudioTime(total);
+    }
+
+    function updatePlaybackState() {
+      var playing = !audio.paused && !audio.ended;
+      player.classList.toggle("is-playing", playing);
+      button.setAttribute("aria-label", playing ? "朗読を一時停止" : "朗読を再生");
+      button.setAttribute("aria-pressed", String(playing));
+    }
+
+    button.addEventListener("click", function () {
+      if (audio.paused || audio.ended) {
+        audio.play().catch(function () { updatePlaybackState(); });
+      } else {
+        audio.pause();
+      }
+    });
+    seek.addEventListener("input", function () {
+      if (!Number.isFinite(audio.duration) || audio.duration <= 0) return;
+      audio.currentTime = (Number(seek.value) / 1000) * audio.duration;
+      updateProgress();
+    });
+    ["loadedmetadata", "durationchange", "timeupdate"].forEach(function (eventName) {
+      audio.addEventListener(eventName, updateProgress);
+    });
+    ["play", "pause", "ended"].forEach(function (eventName) {
+      audio.addEventListener(eventName, updatePlaybackState);
+    });
+    updateProgress();
+    updatePlaybackState();
+  }
+
   function renderDialog() {
     if (!activeWork) return;
     var state = stateFor(activeWork.id);
@@ -300,12 +354,13 @@
     var areaMapClass = 'detailed-map' + (areaMapImage ? ' has-image' : '');
     var photoPanel = '<details class="photo-disclosure"><summary><span>' + (english ? 'View photos' : '写真を見る') + '</span><small>' + images.length + (english ? (images.length === 1 ? ' photo' : ' photos') : '枚') + '</small></summary><div class="photo-panel"><div id="workGallery" class="work-gallery">' + gallery + '</div><div class="gallery-toolbar"><span id="galleryCounter" class="gallery-counter">1 / ' + images.length + '</span><div><button id="galleryPrev" type="button" aria-label="' + (english ? 'Previous photo' : '前の写真') + '">←</button><button id="galleryNext" type="button" aria-label="' + (english ? 'Next photo' : '次の写真') + '">→</button></div></div></div></details>';
     var mapPanel = '<div class="area-map-panel"><div class="' + areaMapClass + '" role="group" aria-label="' + escapeHtml(english ? "Area map around " + title : title + "の場所周辺図") + '">' + areaMap + '</div></div>';
-    var audioPlayer = !english && activeWork.audioUrl ? '<audio class="work-recording" src="' + escapeHtml(activeWork.audioUrl) + '" controls preload="none" aria-label="' + escapeHtml(activeWork.title) + 'の朗読"></audio>' : '';
+    var audioPlayer = !english && activeWork.audioUrl ? '<section class="work-audio-player" data-audio-player aria-label="朗読音声"><button class="work-audio-toggle" type="button" data-audio-toggle aria-label="朗読を再生" aria-pressed="false"><span class="work-audio-icon" aria-hidden="true"></span></button><div class="work-audio-body"><p class="work-audio-label">朗読を聴く</p><input class="work-audio-seek" data-audio-seek type="range" min="0" max="1000" value="0" step="1" aria-label="再生位置"><div class="work-audio-time" aria-live="off"><span data-audio-current>0:00</span><span data-audio-duration>0:00</span></div></div><audio src="' + escapeHtml(activeWork.audioUrl) + '" preload="metadata" aria-label="' + escapeHtml(activeWork.title) + 'の朗読"></audio></section>' : '';
     dialogContent.innerHTML = dialogNumberHtml(entry) + '<p class="dialog-place">' + escapeHtml(place) + '</p>' + mapPanel + photoPanel + (summary ? '<p class="dialog-summary">' + escapeHtml(summary) + '</p>' : '') + audioPlayer + '<div class="script" lang="' + (english ? 'en' : 'ja') + '"><h2 id="dialogTitle" class="script-title">' + escapeHtml(title) + '</h2>' + scriptText.map(function (paragraph) { return '<p>' + escapeHtml(paragraph) + '</p>'; }).join("") + '</div><section class="reactions"><button id="likeButton" class="like-button' + (state.liked ? ' is-liked' : '') + '" type="button" aria-pressed="' + state.liked + '">♡ <strong>' + (state.liked ? (english ? 'Liked' : 'いいね済み') : (english ? 'Like' : 'いいね')) + '</strong><span>' + state.likeCount + '</span>' + (state.syncing ? '<small>' + (english ? 'Saving' : '保存中') + '</small>' : '') + '</button><button id="openCommentForm" class="like-button" type="button">✎ <strong>' + (english ? 'Comment' : 'コメントする') + '</strong></button></section>' + dialogNavigationHtml(entry);
     document.getElementById("dialogClose").setAttribute("aria-label", english ? "Close work" : "作品を閉じる");
     document.getElementById("likeButton").addEventListener("click", toggleLike);
     bindCommentButton();
     bindWorkNavigation();
+    bindAudioPlayer();
     document.getElementById("galleryPrev").addEventListener("click", function () { moveGallery(-1); });
     document.getElementById("galleryNext").addEventListener("click", function () { moveGallery(1); });
     document.getElementById("workGallery").addEventListener("scroll", updateGalleryCounter);

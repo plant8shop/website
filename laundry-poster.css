@@ -454,8 +454,9 @@
 .poster-store-page .my-submission-card { min-height: 0; padding: 18px 54px 18px 20px; }
 .poster-store-page .my-submission-card strong { margin: 8px 0 4px; }
 .poster-store-page .my-submission-card small { padding-top: 10px; }
-.dialog-work-number { display: flex; align-items: center; gap: 9px; margin: 0 0 14px; color: var(--muted); font-size: .72rem; letter-spacing: .08em; }
-.dialog-work-number span { display: grid; width: 34px; height: 34px; place-items: center; border-radius: 50%; color: #fff; background: #236958; font: 700 .9rem/1 Arial, sans-serif; letter-spacing: 0; }
+.dialog-work-heading { display: grid; grid-template-columns: 34px minmax(0, 1fr); align-items: center; gap: 12px; margin: 0 0 28px; }
+.dialog-work-heading > span { display: grid; width: 34px; height: 34px; place-items: center; border-radius: 50%; color: #fff; background: #236958; font: 700 .9rem/1 Arial, sans-serif; }
+.work-dialog .dialog-work-heading h2 { font-size: clamp(1.4rem, 4vw, 2.2rem); overflow-wrap: anywhere; }
 .dialog-preparing { margin: 24px 0 48px; color: var(--muted); }
 .work-navigation { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 40px; padding-top: 22px; border-top: 1px solid var(--line); }
 .work-navigation button { min-height: 74px; display: grid; align-content: center; gap: 5px; padding: 12px 14px; border: 1px solid var(--line-strong); color: var(--violet-dark); background: #fff; text-align: left; cursor: pointer; }

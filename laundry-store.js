@@ -235,8 +235,8 @@
     }) || null;
   }
 
-  function dialogNumberHtml(entry) {
-    return '<p class="dialog-work-number"><span>' + escapeHtml(entry ? entry.number : activeWork && activeWork.number || "") + '</span>' + (dialogLanguage === "en" ? 'Work' : '作品') + '</p>';
+  function dialogHeadingHtml(entry, title) {
+    return '<div class="dialog-work-heading"><span>' + escapeHtml(entry ? entry.number : activeWork && activeWork.number || "") + '</span><h2 id="dialogTitle">' + escapeHtml(title) + '</h2></div>';
   }
 
   function dialogNavigationHtml(entry) {
@@ -283,7 +283,7 @@
   }
 
   function renderPlaceholderDialog(entry) {
-    dialogContent.innerHTML = dialogNumberHtml(entry) + '<h2 id="dialogTitle">' + escapeHtml(entry.title) + '</h2><p class="dialog-preparing">戯曲の本文と朗読は準備中です。</p>' + dialogNavigationHtml(entry);
+    dialogContent.innerHTML = dialogHeadingHtml(entry, entry.title) + '<p class="dialog-preparing">戯曲の本文と朗読は準備中です。</p>' + dialogNavigationHtml(entry);
     bindWorkNavigation();
   }
 
@@ -347,7 +347,6 @@
     var entry = activeDialogEntry();
     var english = dialogLanguage === "en" && activeWork.scriptEn && activeWork.scriptEn.length;
     var title = english ? activeWork.titleEn : activeWork.title;
-    var place = english ? activeWork.placeEn : activeWork.place;
     var summary = english ? activeWork.summaryEn : activeWork.summary;
     var scriptText = english ? activeWork.scriptEn : activeWork.script;
     var images = activeWork.images && activeWork.images.length ? activeWork.images : [{ label: activeWork.imageLabel || "場所の写真 / 準備中" }];
@@ -366,7 +365,7 @@
     var audioPlayer = !english && activeWork.audioUrl ? '<section class="work-audio-player" data-audio-player aria-label="朗読音声"><button class="work-audio-toggle" type="button" data-audio-toggle aria-label="朗読を再生" aria-pressed="false"><span class="work-audio-icon" aria-hidden="true"></span></button><div class="work-audio-body"><p class="work-audio-label">朗読を聴く</p><input class="work-audio-seek" data-audio-seek type="range" min="0" max="1000" value="0" step="1" aria-label="再生位置"><div class="work-audio-time" aria-live="off"><span data-audio-current>0:00</span><span data-audio-duration>0:00</span></div></div><audio src="' + escapeHtml(activeWork.audioUrl) + '" preload="metadata" aria-label="' + escapeHtml(activeWork.title) + 'の朗読"></audio></section>' : '';
     var credit = activeWork.credit;
     var creditHtml = credit && credit.names && credit.names.length ? '<div class="work-credit"><span class="work-credit-role">' + (english ? 'Written and read by' : '作・朗読') + '</span><details><summary>' + escapeHtml(english ? credit.labelEn : credit.label) + '</summary><ul>' + credit.names.map(function (name) { return '<li>' + escapeHtml(name) + '</li>'; }).join('') + '</ul></details></div>' : '';
-    dialogContent.innerHTML = dialogNumberHtml(entry) + '<p class="dialog-place">' + escapeHtml(place) + '</p>' + mapPanel + photoPanel + (summary ? '<p class="dialog-summary">' + escapeHtml(summary) + '</p>' : '') + audioPlayer + '<div class="script" lang="' + (english ? 'en' : 'ja') + '"><h2 id="dialogTitle" class="script-title">' + escapeHtml(title) + '</h2>' + scriptText.map(function (paragraph) { return '<p>' + escapeHtml(paragraph) + '</p>'; }).join("") + '</div><section class="reactions">' + creditHtml + '<button id="likeButton" class="like-button' + (state.liked ? ' is-liked' : '') + '" type="button" aria-pressed="' + state.liked + '">♡ <strong>' + (state.liked ? (english ? 'Liked' : 'いいね済み') : (english ? 'Like' : 'いいね')) + '</strong><span>' + state.likeCount + '</span>' + (state.syncing ? '<small>' + (english ? 'Saving' : '保存中') + '</small>' : '') + '</button><button id="openCommentForm" class="like-button" type="button">✎ <strong>' + (english ? 'Comment' : 'コメントする') + '</strong></button></section>' + dialogNavigationHtml(entry);
+    dialogContent.innerHTML = dialogHeadingHtml(entry, title) + mapPanel + photoPanel + (summary ? '<p class="dialog-summary">' + escapeHtml(summary) + '</p>' : '') + audioPlayer + '<div class="script" lang="' + (english ? 'en' : 'ja') + '">' + scriptText.map(function (paragraph) { return '<p>' + escapeHtml(paragraph) + '</p>'; }).join("") + '</div><section class="reactions">' + creditHtml + '<button id="likeButton" class="like-button' + (state.liked ? ' is-liked' : '') + '" type="button" aria-pressed="' + state.liked + '">♡ <strong>' + (state.liked ? (english ? 'Liked' : 'いいね済み') : (english ? 'Like' : 'いいね')) + '</strong><span>' + state.likeCount + '</span>' + (state.syncing ? '<small>' + (english ? 'Saving' : '保存中') + '</small>' : '') + '</button><button id="openCommentForm" class="like-button" type="button">✎ <strong>' + (english ? 'Comment' : 'コメントする') + '</strong></button></section>' + dialogNavigationHtml(entry);
     document.getElementById("dialogClose").setAttribute("aria-label", english ? "Close work" : "作品を閉じる");
     document.getElementById("likeButton").addEventListener("click", toggleLike);
     bindCommentButton();

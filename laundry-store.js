@@ -221,25 +221,6 @@
     });
   }
 
-  function renderComments(state) {
-    var comments = state.comments || [];
-    return '<div class="comments"><h3>コメント</h3><div id="workCommentList" class="comment-list">' +
-      (comments.length ? comments.map(function (comment) {
-        return '<p class="comment' + (comment.mine ? ' is-mine' : '') + '"><span>' + escapeHtml(comment.text || comment.comment || '') + '</span><small>' + (comment.mine ? 'あなたのコメント' : '匿名') + '</small></p>';
-      }).join('') : '<p class="comment-empty">まだコメントはありません。</p>') +
-      '</div><button id="openCommentForm" class="button comment-open-button" type="button">コメントを残す</button></div>';
-  }
-
-  function updateDialogComments() {
-    if (!activeWork) return;
-    var current = dialogContent.querySelector('.comments');
-    if (!current) return;
-    var wrapper = document.createElement('div');
-    wrapper.innerHTML = renderComments(stateFor(activeWork.id));
-    current.replaceWith(wrapper.firstElementChild);
-    bindCommentButton();
-  }
-
   function bindCommentButton() {
     var button = document.getElementById('openCommentForm');
     if (button) button.addEventListener('click', openCommentForm);
@@ -271,7 +252,7 @@
     var photoPanel = '<details class="photo-disclosure"><summary><span>写真を見る</span><small>' + images.length + '枚</small></summary><div class="photo-panel"><div id="workGallery" class="work-gallery">' + gallery + '</div><div class="gallery-toolbar"><span id="galleryCounter" class="gallery-counter">1 / ' + images.length + '</span><div><button id="galleryPrev" type="button" aria-label="前の写真">←</button><button id="galleryNext" type="button" aria-label="次の写真">→</button></div></div></div></details>';
     var mapPanel = '<div class="area-map-panel"><div class="' + areaMapClass + '" role="group" aria-label="' + escapeHtml(title) + 'の場所周辺図">' + areaMap + '</div></div>';
     var audioPlayer = !english && activeWork.audioUrl ? '<audio class="work-recording" src="' + escapeHtml(activeWork.audioUrl) + '" controls preload="none" aria-label="' + escapeHtml(activeWork.title) + 'の朗読"></audio>' : '';
-    dialogContent.innerHTML = dialogNumberHtml(entry) + '<div class="work-language"><button id="workLanguageToggle" type="button" lang="' + (english ? 'ja' : 'en') + '">' + (english ? '日本語' : 'English') + '</button></div><p class="dialog-place">' + escapeHtml(place) + '</p>' + mapPanel + photoPanel + (summary ? '<p class="dialog-summary">' + escapeHtml(summary) + '</p>' : '') + audioPlayer + '<div class="script" lang="' + (english ? 'en' : 'ja') + '"><h2 id="dialogTitle" class="script-title">' + escapeHtml(title) + '</h2>' + scriptText.map(function (paragraph) { return '<p>' + escapeHtml(paragraph) + '</p>'; }).join("") + '</div><section class="reactions"><button id="likeButton" class="like-button' + (state.liked ? ' is-liked' : '') + '" type="button" aria-pressed="' + state.liked + '">♡ <strong>' + (state.liked ? 'いいね済み' : 'いいね') + '</strong><span>' + state.likeCount + '</span>' + (state.syncing ? '<small>保存中</small>' : '') + '</button></section>' + renderComments(state) + dialogNavigationHtml(entry);
+    dialogContent.innerHTML = dialogNumberHtml(entry) + '<div class="work-language"><button id="workLanguageToggle" type="button" lang="' + (english ? 'ja' : 'en') + '">' + (english ? '日本語' : 'English') + '</button></div><p class="dialog-place">' + escapeHtml(place) + '</p>' + mapPanel + photoPanel + (summary ? '<p class="dialog-summary">' + escapeHtml(summary) + '</p>' : '') + audioPlayer + '<div class="script" lang="' + (english ? 'en' : 'ja') + '"><h2 id="dialogTitle" class="script-title">' + escapeHtml(title) + '</h2>' + scriptText.map(function (paragraph) { return '<p>' + escapeHtml(paragraph) + '</p>'; }).join("") + '</div><section class="reactions"><button id="likeButton" class="like-button' + (state.liked ? ' is-liked' : '') + '" type="button" aria-pressed="' + state.liked + '">♡ <strong>' + (state.liked ? 'いいね済み' : 'いいね') + '</strong><span>' + state.likeCount + '</span>' + (state.syncing ? '<small>保存中</small>' : '') + '</button><button id="openCommentForm" class="like-button" type="button">✎ <strong>コメントする</strong></button></section>' + dialogNavigationHtml(entry);
     document.getElementById("likeButton").addEventListener("click", toggleLike);
     document.getElementById("workLanguageToggle").addEventListener("click", function () {
       dialogLanguage = english ? "ja" : "en";
@@ -926,7 +907,6 @@
         renderMySubmissions();
         if (dialog.open && activeWork) {
           updateDialogReactionState();
-          updateDialogComments();
         }
       }
       delete window[callback];

@@ -334,7 +334,8 @@
   margin: 0;
   overflow-x: auto;
   scrollbar-width: none;
-  border-bottom: 1px solid #b8a9ce;
+  border-bottom: 0;
+  background: linear-gradient(#b8a9ce, #b8a9ce) left bottom / 100% 1px no-repeat;
 }
 .poster-store-page .folder-tabs::-webkit-scrollbar { display: none; }
 .poster-store-page .folder-tabs .mode-button {

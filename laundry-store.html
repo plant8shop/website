@@ -6,7 +6,7 @@
   <meta name="description" content="このランドリーの周辺のまちにまつわる記憶をもとにつくった戯曲や朗読を、洗濯や乾燥を待ちながら楽しめます。">
   <title>店舗｜ランドリーシアター</title>
   <link rel="stylesheet" href="laundry.css?v=20261101-1">
-  <link rel="stylesheet" href="laundry-poster.css?v=20261107-2">
+  <link rel="stylesheet" href="laundry-poster.css?v=20261107-3">
 </head>
 <body class="store-page poster-store-page">
   <header class="site-header">
@@ -49,6 +49,15 @@
     <section id="submit" class="section mode-panel submit-section" data-panel="submit" hidden>
       <div class="section-inner section-inner-wide">
         <div class="section-heading"><span class="section-index">02</span><div><h2>投稿する</h2><p>まちの写真・印象・記憶を投稿する。</p></div></div>
+        <section id="drinkDiscountReceipt" class="drink-discount-receipt" aria-labelledby="discountTitle" hidden>
+          <p class="discount-kicker">投稿特典</p>
+          <h3 id="discountTitle">投稿しました<br><strong>ドリンク50円引き</strong></h3>
+          <p>この画面をKYOTO LAUNDRY CAFEの店員に見せてください。</p>
+          <dl><div><dt>投稿日時</dt><dd id="discountSubmittedAt"></dd></div><div><dt>有効期限</dt><dd id="discountExpiresAt"></dd></div></dl>
+          <p class="discount-now"><span>現在時刻</span><time id="discountCurrentTime"></time></p>
+          <p class="discount-note">投稿完了から24時間有効です。</p>
+          <button id="showSubmissionForm" class="button" type="button">続けて投稿する</button>
+        </section>
         <form id="submissionForm" class="submission-form"><input class="honeypot" type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
           <div class="submission-layout">
             <div>
@@ -120,8 +129,8 @@
   </dialog>
 
   <script src="data/laundry-waiting-room.js?v=20261107-1"></script>
-  <script src="data/laundry-area-maps.js?v=20261107-2"></script>
-  <script src="laundry-area-maps.js?v=20261107-2"></script>
-  <script src="laundry-store.js?v=20261107-2"></script>
+  <script src="data/laundry-area-maps.js?v=20261107-3"></script>
+  <script src="laundry-area-maps.js?v=20261107-3"></script>
+  <script src="laundry-store.js?v=20261107-3"></script>
 </body>
 </html>

@@ -19,6 +19,8 @@
   var localKey = "plantshop_laundry_theater_submissions_" + visitorId;
   var deletedKey = "plantshop_laundry_theater_deleted_" + visitorId;
   var likeOverrideKey = "plantshop_laundry_theater_likes_" + visitorId;
+  var discountKey = "plantshop_laundry_theater_drink_discount_" + store.id + "_" + visitorId;
+  var discountDuration = 24 * 60 * 60 * 1000;
   var remote = { works: {}, submissions: [] };
   var remoteLoaded = false;
   var likeOverrides = readLikeOverrides();
@@ -49,6 +51,8 @@
   var form = document.getElementById("submissionForm");
   var editForm = document.getElementById("editForm");
   var formStatus = document.getElementById("formStatus");
+  var discountReceipt = document.getElementById("drinkDiscountReceipt");
+  var discountTimer = null;
 
   function escapeHtml(value) {
     return String(value || "").replace(/[&<>'"]/g, function (character) {
@@ -58,6 +62,59 @@
 
   function makeId() {
     return "p_" + (crypto.randomUUID ? crypto.randomUUID() : Date.now() + "_" + Math.random().toString(36).slice(2));
+  }
+
+  function readDiscountReceipt() {
+    if (!store.drinkOffer) return null;
+    try {
+      var receipt = JSON.parse(localStorage.getItem(discountKey) || "null");
+      if (!receipt || !Number.isFinite(receipt.submittedAt) || Date.now() >= receipt.expiresAt) {
+        localStorage.removeItem(discountKey);
+        return null;
+      }
+      return receipt;
+    } catch (error) {
+      localStorage.removeItem(discountKey);
+      return null;
+    }
+  }
+
+  function formatReceiptTime(timestamp, includeSeconds) {
+    return new Date(timestamp).toLocaleString("ja-JP", {
+      year: "numeric", month: "numeric", day: "numeric",
+      hour: "2-digit", minute: "2-digit", second: includeSeconds ? "2-digit" : undefined
+    });
+  }
+
+  function renderDiscountReceipt(hideForm) {
+    var receipt = readDiscountReceipt();
+    discountReceipt.hidden = !receipt;
+    if (!receipt) {
+      if (discountTimer) clearInterval(discountTimer);
+      discountTimer = null;
+      return false;
+    }
+    document.getElementById("discountSubmittedAt").textContent = formatReceiptTime(receipt.submittedAt, false);
+    document.getElementById("discountExpiresAt").textContent = formatReceiptTime(receipt.expiresAt, false);
+    document.getElementById("discountCurrentTime").textContent = formatReceiptTime(Date.now(), true);
+    if (hideForm) form.hidden = true;
+    if (!discountTimer) {
+      discountTimer = setInterval(function () {
+        if (!renderDiscountReceipt(false)) form.hidden = false;
+      }, 1000);
+    }
+    return true;
+  }
+
+  function createDiscountReceipt() {
+    if (!store.drinkOffer) return;
+    var submittedAt = Date.now();
+    localStorage.setItem(discountKey, JSON.stringify({
+      submittedAt: submittedAt,
+      expiresAt: submittedAt + discountDuration
+    }));
+    renderDiscountReceipt(true);
+    discountReceipt.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
   function stateFor(workId) {
@@ -802,6 +859,7 @@
       selectedPoint = null;
       renderSubmissionMap();
       formStatus.textContent = "投稿を受け付けました。";
+      createDiscountReceipt();
       setTimeout(loadRemote, 700);
     }).catch(function (error) { formStatus.textContent = error.message; });
   });
@@ -938,6 +996,12 @@
     document.querySelector("#works .section-heading p").hidden = true;
   }
   document.getElementById("likedFilter").hidden = !store.works.length;
+  document.getElementById("showSubmissionForm").addEventListener("click", function () {
+    form.hidden = false;
+    form.scrollIntoView({ behavior: "smooth", block: "start" });
+  });
+  var hasValidDiscount = renderDiscountReceipt(store.drinkOffer);
+  if (hasValidDiscount) setMode("submit");
   renderWorks();
   renderSubmissionMap();
   renderMySubmissions();

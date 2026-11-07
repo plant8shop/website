@@ -208,7 +208,46 @@
   color: white;
   font: 700 .8rem/1 Arial, sans-serif;
 }
+
+.drink-discount-receipt {
+  position: relative;
+  max-width: 680px;
+  margin: 30px auto 42px;
+  padding: clamp(30px, 7vw, 64px);
+  overflow: hidden;
+  border: 2px solid var(--violet);
+  background: linear-gradient(145deg, #fff 0%, #f4efff 100%);
+  box-shadow: 0 18px 55px rgba(76, 56, 122, .16);
+  text-align: center;
+}
+.drink-discount-receipt::before {
+  content: "";
+  position: absolute;
+  width: 170px;
+  height: 170px;
+  right: -68px;
+  top: -78px;
+  border: 24px solid rgba(114, 81, 181, .1);
+  border-radius: 50%;
+}
+.discount-kicker { margin: 0 0 10px; color: var(--violet); font-size: .78rem; letter-spacing: .16em; }
+.drink-discount-receipt h3 { margin: 0 0 18px; color: var(--text); font-size: clamp(1.8rem, 7vw, 3.4rem); font-weight: 500; line-height: 1.35; }
+.drink-discount-receipt h3 strong { color: var(--violet); font-size: 1.18em; }
+.drink-discount-receipt > p { margin: 0 auto 20px; }
+.drink-discount-receipt dl { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); margin: 28px 0; border: 1px solid rgba(114,81,181,.35); }
+.drink-discount-receipt dl div { padding: 15px; }
+.drink-discount-receipt dl div + div { border-left: 1px solid rgba(114,81,181,.35); }
+.drink-discount-receipt dt { color: var(--muted); font-size: .72rem; }
+.drink-discount-receipt dd { margin: 3px 0 0; font-weight: 600; }
+.discount-now { display: flex; justify-content: center; gap: 12px; align-items: baseline; }
+.discount-now span { color: var(--muted); font-size: .72rem; }
+.discount-now time { color: var(--violet); font-size: 1.15rem; font-weight: 600; font-variant-numeric: tabular-nums; }
+.drink-discount-receipt .discount-note { color: var(--muted); font-size: .72rem; }
+.drink-discount-receipt .button { margin-top: 6px; }
+.drink-discount-receipt[hidden] { display: none; }
 @media (max-width: 700px) {
   .store-play-map { margin-top: 20px; }
   .play-map-layout { grid-template-columns: minmax(0, 1fr); }
+  .drink-discount-receipt dl { grid-template-columns: 1fr; }
+  .drink-discount-receipt dl div + div { border-top: 1px solid rgba(114,81,181,.35); border-left: 0; }
 }

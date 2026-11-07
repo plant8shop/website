@@ -50,7 +50,7 @@
   var editForm = document.getElementById("editForm");
   var formStatus = document.getElementById("formStatus");
   var discountReceipt = document.getElementById("drinkDiscountReceipt");
-  var discountTrigger = document.getElementById("showDiscountReceipt");
+  var discountTriggers = Array.from(document.querySelectorAll("[data-discount-trigger]"));
   var helpDialog = document.getElementById("storeHelpDialog");
   var discountTimer = null;
 
@@ -128,7 +128,7 @@
 
   function renderDiscountReceipt() {
     var receipt = readDiscountReceipt();
-    discountTrigger.hidden = !receipt;
+    discountTriggers.forEach(function (trigger) { trigger.hidden = !receipt; });
     if (!receipt) {
       if (discountTimer) clearInterval(discountTimer);
       discountTimer = null;
@@ -1194,8 +1194,10 @@
   document.getElementById("storeHelpButton").addEventListener("click", function () {
     if (!helpDialog.open) helpDialog.showModal();
   });
-  discountTrigger.addEventListener("click", function () {
-    if (renderDiscountReceipt() && !discountReceipt.open) discountReceipt.showModal();
+  discountTriggers.forEach(function (trigger) {
+    trigger.addEventListener("click", function () {
+      if (renderDiscountReceipt() && !discountReceipt.open) discountReceipt.showModal();
+    });
   });
   document.getElementById("discountCloseButton").addEventListener("click", function () {
     discountReceipt.close();

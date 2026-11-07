@@ -292,7 +292,7 @@ h1 span {
 .photo-disclosure summary:focus-visible { outline: 2px solid var(--violet-dark); outline-offset: 3px; }
 .photo-panel { padding: 4px 0 18px; }
 .area-map-panel { margin-top: 22px; }
-.detailed-map { position: relative; min-height: 300px; overflow: hidden; border: 1px solid var(--line); background: linear-gradient(22deg, transparent 46%, rgba(77,71,127,.17) 47% 52%, transparent 53%), linear-gradient(103deg, #f6fbf8 0 34%, #e7f6ef 35% 64%, #f0edf8 65%); }
+.detailed-map { position: relative; min-height: 300px; overflow: hidden; border: 0; background: linear-gradient(22deg, transparent 46%, rgba(77,71,127,.17) 47% 52%, transparent 53%), linear-gradient(103deg, #f6fbf8 0 34%, #e7f6ef 35% 64%, #f0edf8 65%); }
 .detailed-map::before, .detailed-map::after { content: ""; position: absolute; background: rgba(255,255,255,.85); border: 1px solid rgba(77,71,127,.16); }
 .detailed-map::before { width: 42%; height: 24%; left: 5%; top: 9%; }
 .detailed-map::after { width: 30%; height: 30%; right: 7%; bottom: 8%; }

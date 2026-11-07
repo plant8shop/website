@@ -45,3 +45,28 @@ window.LAUNDRY_WAITING_ROOM_DATA = {
     }
   ]
 };
+
+(function () {
+  var assignments = {
+    "kyoto-laundry-cafe": [3, 4, 5],
+    "laundromat-nishikyogoku": [6, 7, 8],
+    "laundromat-mibu": [1, 2, 3]
+  };
+  window.LAUNDRY_WAITING_ROOM_DATA.stores.forEach(function (store) {
+    store.works = (assignments[store.id] || []).map(function (locationId, index) {
+      var source = window.LAUNDRY_WORKS && window.LAUNDRY_WORKS[locationId];
+      if (!source) return null;
+      var photoCount = locationId === 4 ? 4 : 3;
+      return Object.assign({}, source, {
+        id: store.id + "-" + locationId,
+        number: String(index + 1),
+        images: Array.from({ length: photoCount }, function (_, photoIndex) {
+          return {
+            src: "assets/laundry/works/location-" + locationId + "-" + (photoIndex + 1) + ".webp",
+            alt: source.place + "の写真 " + (photoIndex + 1)
+          };
+        })
+      });
+    }).filter(Boolean);
+  });
+}());

@@ -421,6 +421,9 @@
 .poster-store-page .my-submission-card small { padding-top: 10px; }
 .dialog-work-number { display: flex; align-items: center; gap: 9px; margin: 0 0 14px; color: var(--muted); font-size: .72rem; letter-spacing: .08em; }
 .dialog-work-number span { display: grid; width: 34px; height: 34px; place-items: center; border-radius: 50%; color: #fff; background: #236958; font: 700 .9rem/1 Arial, sans-serif; letter-spacing: 0; }
+.work-language { display: flex; justify-content: flex-end; margin: -48px 48px 18px 0; }
+.work-language button { min-height: 36px; padding: 7px 13px; border: 1px solid #7251b5; border-radius: 999px; color: #5b3d9d; background: #fff; font: 600 12px/1 Arial, sans-serif; cursor: pointer; }
+.work-language button:hover, .work-language button:focus-visible { color: #fff; background: #7251b5; outline: 0; }
 .dialog-preparing { margin: 24px 0 48px; color: var(--muted); }
 .work-navigation { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 40px; padding-top: 22px; border-top: 1px solid var(--line); }
 .work-navigation button { min-height: 74px; display: grid; align-content: center; gap: 5px; padding: 12px 14px; border: 1px solid var(--line-strong); color: var(--violet-dark); background: #fff; text-align: left; cursor: pointer; }

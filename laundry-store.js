@@ -33,6 +33,7 @@
   var editMapView = { scale: 1, x: 0, y: 0 };
   var activeWork = null;
   var activeLocationId = null;
+  var dialogLanguage = "ja";
   var activeSubmission = null;
   var speech = null;
   var speechTimer = null;
@@ -239,6 +240,7 @@
     stopSpeech();
     activeWork = entry.work;
     activeLocationId = entry.locationId;
+    dialogLanguage = "ja";
     if (activeWork) renderDialog();
     else renderPlaceholderDialog(entry);
     if (!dialog.open) dialog.showModal();
@@ -293,6 +295,11 @@
     if (!activeWork) return;
     var state = stateFor(activeWork.id);
     var entry = activeDialogEntry();
+    var english = dialogLanguage === "en" && activeWork.scriptEn && activeWork.scriptEn.length;
+    var title = english ? activeWork.titleEn : activeWork.title;
+    var place = english ? activeWork.placeEn : activeWork.place;
+    var summary = english ? activeWork.summaryEn : activeWork.summary;
+    var scriptText = english ? activeWork.scriptEn : activeWork.script;
     var images = activeWork.images && activeWork.images.length ? activeWork.images : [{ label: activeWork.imageLabel || "場所の写真 / 準備中" }];
     var gallery = images.map(function (item, index) {
       var content = item.src ? '<img src="' + escapeHtml(item.src) + '" alt="' + escapeHtml(item.alt || item.label || activeWork.title + "の写真") + '">' : '<div class="work-gallery-placeholder" role="img" aria-label="' + escapeHtml(item.label || "場所の写真 / 準備中") + '"><span>' + escapeHtml(item.label || "場所の写真 / 準備中") + '</span></div>';
@@ -302,7 +309,7 @@
     var areaMapImage = activeWork.areaMap && activeWork.areaMap.image ? '<img class="detailed-map-image" src="' + escapeHtml(activeWork.areaMap.image) + '" alt="' + escapeHtml(activeWork.areaMap.imageAlt || activeWork.title + "の場所周辺図") + '">' : '';
     var areaMap = areaMapImage + notes.map(function (note) { return '<span class="map-note" style="--x:' + Number(note.x || 50) + '%;--y:' + Number(note.y || 50) + '%">' + escapeHtml(note.text) + '</span>'; }).join("");
     var areaMapClass = 'detailed-map' + (areaMapImage ? ' has-image' : '');
-    dialogContent.innerHTML = dialogNumberHtml(entry) + '<h2 id="dialogTitle">' + escapeHtml(activeWork.title) + '</h2><p class="dialog-place">' + escapeHtml(activeWork.place) + '</p><div id="workGallery" class="work-gallery">' + gallery + '</div><div class="gallery-toolbar"><span id="galleryCounter" class="gallery-counter">1 / ' + images.length + '</span><div><button id="galleryPrev" type="button" aria-label="前の写真">←</button><button id="galleryNext" type="button" aria-label="次の写真">→</button></div></div><button id="areaMapToggle" class="area-map-toggle" type="button" aria-expanded="false" aria-controls="areaMapPanel">周辺図を表示する</button><div id="areaMapPanel" class="area-map-panel" hidden><div class="' + areaMapClass + '" role="group" aria-label="' + escapeHtml(activeWork.title) + 'の場所周辺図">' + areaMap + '</div></div><p class="dialog-summary">' + escapeHtml(activeWork.summary) + '</p><div class="audio-player"><button id="listenButton" class="audio-play" type="button" aria-label="朗読を再生">▶</button><div class="audio-track"><progress id="audioProgress" class="audio-progress" max="100" value="0"></progress><div class="audio-time"><span id="audioCurrent">0:00</span><span id="audioDuration">' + formatTime(estimateSpeechDuration()) + '</span></div></div><p class="audio-caption">ブラウザの音声でテキストを再生します</p></div><div class="script"><h3>テキスト</h3>' + activeWork.script.map(function (paragraph) { return '<p>' + escapeHtml(paragraph) + '</p>'; }).join("") + '</div><section class="reactions"><button id="likeButton" class="like-button' + (state.liked ? ' is-liked' : '') + '" type="button" aria-pressed="' + state.liked + '">♡ <strong>' + (state.liked ? 'いいね済み' : 'いいね') + '</strong><span>' + state.likeCount + '</span>' + (state.syncing ? '<small>保存中</small>' : '') + '</button></section>' + renderComments(state) + dialogNavigationHtml(entry);
+    dialogContent.innerHTML = dialogNumberHtml(entry) + '<div class="work-language"><button id="workLanguageToggle" type="button" lang="' + (english ? 'ja' : 'en') + '">' + (english ? '日本語' : 'English') + '</button></div><h2 id="dialogTitle">' + escapeHtml(title) + '</h2><p class="dialog-place">' + escapeHtml(place) + '</p><div id="workGallery" class="work-gallery">' + gallery + '</div><div class="gallery-toolbar"><span id="galleryCounter" class="gallery-counter">1 / ' + images.length + '</span><div><button id="galleryPrev" type="button" aria-label="前の写真">←</button><button id="galleryNext" type="button" aria-label="次の写真">→</button></div></div><button id="areaMapToggle" class="area-map-toggle" type="button" aria-expanded="false" aria-controls="areaMapPanel">周辺図を表示する</button><div id="areaMapPanel" class="area-map-panel" hidden><div class="' + areaMapClass + '" role="group" aria-label="' + escapeHtml(title) + 'の場所周辺図">' + areaMap + '</div></div>' + (summary ? '<p class="dialog-summary">' + escapeHtml(summary) + '</p>' : '') + '<div class="audio-player"><button id="listenButton" class="audio-play" type="button" aria-label="朗読を再生">▶</button><div class="audio-track"><progress id="audioProgress" class="audio-progress" max="100" value="0"></progress><div class="audio-time"><span id="audioCurrent">0:00</span><span id="audioDuration">' + formatTime(estimateSpeechDuration()) + '</span></div></div><p class="audio-caption">' + (english ? 'Play this text with your browser voice.' : 'ブラウザの音声でテキストを再生します') + '</p></div><div class="script" lang="' + (english ? 'en' : 'ja') + '"><h3>' + (english ? 'Text' : 'テキスト') + '</h3>' + scriptText.map(function (paragraph) { return '<p>' + escapeHtml(paragraph) + '</p>'; }).join("") + '</div><section class="reactions"><button id="likeButton" class="like-button' + (state.liked ? ' is-liked' : '') + '" type="button" aria-pressed="' + state.liked + '">♡ <strong>' + (state.liked ? 'いいね済み' : 'いいね') + '</strong><span>' + state.likeCount + '</span>' + (state.syncing ? '<small>保存中</small>' : '') + '</button></section>' + renderComments(state) + dialogNavigationHtml(entry);
     var listenButton = document.getElementById("listenButton");
     if (activeWork.audioUrl) {
       var recording = document.createElement("audio");
@@ -318,6 +325,11 @@
       dialogContent.querySelector(".audio-caption").textContent = "このブラウザは読み上げに対応していません。";
     }
     document.getElementById("likeButton").addEventListener("click", toggleLike);
+    document.getElementById("workLanguageToggle").addEventListener("click", function () {
+      stopSpeech();
+      dialogLanguage = english ? "ja" : "en";
+      renderDialog();
+    });
     bindInlineCommentForm();
     bindWorkNavigation();
     document.getElementById("areaMapToggle").addEventListener("click", toggleAreaMap);
@@ -383,9 +395,11 @@
       return;
     }
     stopSpeech();
-    speech = new SpeechSynthesisUtterance(activeWork.script.join("。\n"));
-    speech.lang = "ja-JP";
-    speech.rate = 0.92;
+    var english = dialogLanguage === "en" && activeWork.scriptEn && activeWork.scriptEn.length;
+    var scriptText = english ? activeWork.scriptEn : activeWork.script;
+    speech = new SpeechSynthesisUtterance(scriptText.join(english ? "\n" : "。\n"));
+    speech.lang = english ? "en-US" : "ja-JP";
+    speech.rate = english ? 0.96 : 0.92;
     speechDuration = estimateSpeechDuration();
     speechStartedAt = Date.now();
     speechPausedTotal = 0;
@@ -399,7 +413,9 @@
 
   function estimateSpeechDuration() {
     if (!activeWork) return 0;
-    return Math.max(1, Math.round(activeWork.script.join("").length / 5.5));
+    var english = dialogLanguage === "en" && activeWork.scriptEn && activeWork.scriptEn.length;
+    var scriptText = english ? activeWork.scriptEn : activeWork.script;
+    return Math.max(1, Math.round(scriptText.join("").length / (english ? 13 : 5.5)));
   }
 
   function formatTime(seconds) {

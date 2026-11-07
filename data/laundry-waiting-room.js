@@ -22,6 +22,17 @@ window.LAUNDRY_WAITING_ROOM_DATA = {
       "center": null,
       "works": [],
       "drinkOffer": false
+    },
+    {
+      "id": "laundromat-mibu",
+      "index": "03",
+      "name": "laundromat MIBU",
+      "area": "",
+      "description": "",
+      "mapReady": false,
+      "center": null,
+      "works": [],
+      "drinkOffer": false
     }
   ]
 };

@@ -886,6 +886,8 @@
   [mapNode, submitMap, editMap].forEach(function (node) { node.classList.toggle("has-map-image", Boolean(store.mapImage)); });
   document.getElementById("headerStoreName").textContent = store.name;
   document.getElementById("storeTitle").textContent = store.name;
+  document.getElementById("storeStart").hidden = !store.description;
+  window.renderLaundryAreaMap(document.getElementById("laundryAreaMap"), store.id);
   document.getElementById("storeDrinkOffer").hidden = !store.drinkOffer;
   if (store.mapReady === false) {
     unknown.defaultChecked = true;

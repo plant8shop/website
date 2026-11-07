@@ -7,12 +7,12 @@
   <title>ランドリーシアター｜プラントショップ</title>
   <link rel="canonical" href="https://www.plantshop.work/laundry.html">
   <link rel="stylesheet" href="laundry.css?v=20261101-1">
-  <link rel="stylesheet" href="laundry-poster.css?v=20261101-1">
+  <link rel="stylesheet" href="laundry-poster.css?v=20261107-1">
 </head>
 <body class="poster-page">
   <header class="poster-header">
     <a href="laundry.html" aria-label="ランドリーシアター"><img src="assets/laundry/logo.svg" alt="ランドリーシアター" width="228" height="72"></a>
-    <nav aria-label="ランドリーシアター"><a href="#theater">シアター</a><a href="#workshop">ワークショップ</a></nav>
+    <nav aria-label="ランドリーシアター"><a href="#theater">シアター</a><a href="#play-map">戯曲の場所</a><a href="#workshop">ワークショップ</a></nav>
   </header>
   <main class="poster-main">
     <section class="poster-hero" aria-labelledby="projectTitle">
@@ -51,9 +51,16 @@
         <div class="poster-note"><p>完成作品と朗読音声は、作品サイトで共有します。</p><p class="translation" lang="en">The completed works and audio readings will be shared on the Theater website.</p></div>
       </section>
     </div>
+    <section id="play-map" class="play-map-section" aria-labelledby="playMapTitle">
+      <h2 id="playMapTitle">戯曲の場所</h2>
+      <p>緑の番号は戯曲の舞台となる8地点。黒い点は開催店舗で、円は各店舗から半径500mの範囲です。</p>
+      <div id="laundryAreaMap"></div>
+    </section>
   </main>
   <footer class="poster-footer"><a class="project-site-link" href="laundry.html#stores"><span>プロジェクトサイト</span><small>ランドリーシアターの開催店舗はこちら</small><small lang="en">Project website / Theater locations</small></a><a class="organizer-credit" href="index.html"><span>企画・運営</span><img src="assets/laundry/plantshop-logo.png" alt="プラントショップ" width="120" height="39" loading="lazy"></a><a href="https://www.openstreetmap.org/copyright" class="map-credit" lang="en">© OpenStreetMap contributors</a></footer>
-  <script src="data/laundry-waiting-room.js?v=20261101-1"></script>
-  <script src="laundry.js?v=20261101-1"></script>
+  <script src="data/laundry-waiting-room.js?v=20261107-1"></script>
+  <script src="data/laundry-area-maps.js?v=20261107-1"></script>
+  <script src="laundry-area-maps.js?v=20261107-1"></script>
+  <script src="laundry.js?v=20261107-1"></script>
 </body>
 </html>

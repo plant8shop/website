@@ -259,6 +259,15 @@
 }
 .current-location-button:hover, .current-location-button:focus-visible { background: #eee9f5; }
 .current-location-button:disabled { cursor: wait; opacity: .58; }
+.current-location-status {
+  margin: 10px 0 0;
+  padding: 10px 12px;
+  border-left: 3px solid #7251b5;
+  background: #f2eef8;
+  color: #413658;
+  font-size: .8rem;
+  line-height: 1.65;
+}
 .play-map-entry:hover { border-color: #7251b5; transform: translateY(-1px); }
 .play-map-number {
   display: grid;
@@ -472,10 +481,27 @@
 @media (max-width: 600px) {
   .store-workspace-head { padding: 8px 12px 0; }
   .poster-store-page .folder-tabs { margin-right: -12px; }
-  .poster-store-page .folder-tabs .mode-button { min-height: 40px; padding: 8px 12px; font-size: .68rem; }
+  .poster-store-page .folder-tabs .mode-button { min-height: 44px; padding: 9px 13px; font-size: .78rem; }
   .poster-store-page .mode-panel { padding-inline: 20px; }
-  .map-label-row { align-items: flex-start; gap: 10px; }
+  .poster-store-page .header-store-name { font-size: .78rem; }
+  .map-label-row { align-items: flex-start; gap: 10px; font-size: .82rem; }
+  .map-label-row small,
+  .current-location-button { font-size: .78rem; }
   .map-label-actions { flex-direction: column; align-items: flex-end; gap: 5px; }
+  .poster-store-page .submission-form label > span,
+  .poster-store-page .submission-form legend,
+  .poster-store-page .dialog-form label > span,
+  .poster-store-page #commentDialog #commentPhotoLabel { font-size: .88rem; }
+  .poster-store-page .submission-form small,
+  .poster-store-page .dialog-form small,
+  .poster-store-page .selected-location,
+  .poster-store-page .form-status,
+  .poster-store-page .play-map-caption,
+  .poster-store-page .work-credit,
+  .poster-store-page .work-navigation small,
+  .poster-store-page .my-submission-card .submission-type,
+  .poster-store-page .my-submission-card small { font-size: .8rem; }
+  .poster-store-page .consent-row span { font-size: .88rem !important; }
   .store-help-button { width: 48px; height: 48px; }
   .work-navigation { grid-template-columns: minmax(0, 1fr); }
   .work-navigation button:last-child { text-align: left; }

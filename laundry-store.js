@@ -39,6 +39,8 @@
   var editDialog = document.getElementById("editDialog");
   var submitMap = document.getElementById("submissionMap");
   var currentLocationButton = document.getElementById("currentLocationButton");
+  var currentLocationStatus = document.getElementById("currentLocationStatus");
+  var currentLocationStatusKind = "";
   var editMap = document.getElementById("editSubmissionMap");
   var unknown = document.getElementById("locationUnknown");
   var editUnknown = document.getElementById("editLocationUnknown");
@@ -54,6 +56,24 @@
 
   function renderAreaMap() {
     window.renderLaundryAreaMap(document.getElementById("laundryAreaMap"), store.id, pageLanguage);
+  }
+
+  function renderCurrentLocationStatus() {
+    var messages = {
+      unsupported: ["この端末では現在位置を取得できません。", "This device cannot provide its current location."],
+      loading: ["現在位置を取得しています…", "Getting your current location…"],
+      outside: ["現在位置はこの地図の表示範囲外です。地図上で場所を選んでください。", "Your current location is outside this map. Choose a location on the map."],
+      denied: ["位置情報の利用が許可されていません。", "Location access was not allowed."],
+      error: ["現在位置を取得できませんでした。", "Could not get your current location."]
+    };
+    var copy = messages[currentLocationStatusKind];
+    currentLocationStatus.hidden = !copy;
+    currentLocationStatus.textContent = copy ? copy[isEnglish() ? 1 : 0] : "";
+  }
+
+  function setCurrentLocationStatus(kind) {
+    currentLocationStatusKind = kind || "";
+    renderCurrentLocationStatus();
   }
 
   function applyPageLanguage() {
@@ -81,6 +101,7 @@
     dialogLanguage = pageLanguage;
     renderAreaMap();
     renderSubmissionMap();
+    renderCurrentLocationStatus();
     renderMySubmissions();
     renderDiscountReceipt();
     if (dialog.open && activeWork) renderDialog();
@@ -752,11 +773,13 @@
     var message = document.getElementById("selectedLocation");
     if (!navigator.geolocation) {
       message.textContent = isEnglish() ? "This device cannot provide its current location." : "この端末では現在位置を取得できません。";
+      setCurrentLocationStatus("unsupported");
       return;
     }
     currentLocationButton.disabled = true;
     currentLocationButton.textContent = isEnglish() ? "Locating…" : "取得中…";
     message.textContent = isEnglish() ? "Getting your current location…" : "現在位置を取得しています…";
+    setCurrentLocationStatus("loading");
     navigator.geolocation.getCurrentPosition(function (position) {
       var lat = position.coords.latitude;
       var lng = position.coords.longitude;
@@ -765,16 +788,19 @@
       var y = 0.5 - (lat - store.center.lat) * 111320 / span;
       if (x < 0 || x > 1 || y < 0 || y > 1) {
         message.textContent = isEnglish() ? "Your current location is outside this map. Tap the map to choose a location." : "現在位置はこの地図の範囲外です。地図を押して場所を選んでください。";
+        setCurrentLocationStatus("outside");
       } else {
         unknown.checked = false;
         selectedPoint = { x: x, y: y, latitude: lat, longitude: lng, isCurrentLocation: true };
         submitMapView = { scale: 1, x: 0, y: 0 };
         renderSubmissionMap();
+        setCurrentLocationStatus("");
       }
       currentLocationButton.disabled = false;
       currentLocationButton.textContent = isEnglish() ? "Current location" : "現在位置";
     }, function (error) {
       message.textContent = error && error.code === 1 ? (isEnglish() ? "Location access was not allowed." : "位置情報の利用が許可されていません。") : (isEnglish() ? "Could not get your current location." : "現在位置を取得できませんでした。");
+      setCurrentLocationStatus(error && error.code === 1 ? "denied" : "error");
       currentLocationButton.disabled = false;
       currentLocationButton.textContent = isEnglish() ? "Current location" : "現在位置";
     }, { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 });
@@ -818,28 +844,56 @@
       zoomTo(view.scale * (event.deltaY < 0 ? 1.2 : 1 / 1.2), event.clientX, event.clientY);
     }, { passive: false });
     mapElement.addEventListener("pointerdown", function (event) {
-      pointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
-      drag = { startX: event.clientX, startY: event.clientY, baseX: view.x, baseY: view.y, moved: false };
-      mapElement.setPointerCapture(event.pointerId);
-      if (pointers.size === 2) {
-        var pair = Array.from(pointers.values());
+      pointers.set(event.pointerId, { x: event.clientX, y: event.clientY, type: event.pointerType });
+      if (event.pointerType !== "touch") {
+        drag = { startX: event.clientX, startY: event.clientY, baseX: view.x, baseY: view.y, moved: false };
+        mapElement.setPointerCapture(event.pointerId);
+      }
+      var touchPointers = Array.from(pointers.entries()).filter(function (entry) { return entry[1].type === "touch"; });
+      if (touchPointers.length === 2) {
+        event.preventDefault();
+        touchPointers.forEach(function (entry) {
+          try { mapElement.setPointerCapture(entry[0]); } catch (error) {}
+        });
+        var pair = touchPointers.map(function (entry) { return entry[1]; });
         pinch = {
           distance: Math.hypot(pair[1].x - pair[0].x, pair[1].y - pair[0].y),
           scale: view.scale,
           centerX: (pair[0].x + pair[1].x) / 2,
-          centerY: (pair[0].y + pair[1].y) / 2
+          centerY: (pair[0].y + pair[1].y) / 2,
+          baseX: view.x,
+          baseY: view.y
         };
+        drag = null;
         ignoreClick = true;
       }
     });
     mapElement.addEventListener("pointermove", function (event) {
-      if (pointers.has(event.pointerId)) pointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
-      if (pinch && pointers.size >= 2) {
-        var pair = Array.from(pointers.values()).slice(0, 2);
+      if (pointers.has(event.pointerId)) {
+        var tracked = pointers.get(event.pointerId);
+        pointers.set(event.pointerId, { x: event.clientX, y: event.clientY, type: tracked.type });
+      }
+      var touchPointers = Array.from(pointers.values()).filter(function (pointer) { return pointer.type === "touch"; });
+      if (pinch && touchPointers.length >= 2) {
+        event.preventDefault();
+        var pair = touchPointers.slice(0, 2);
         var distance = Math.hypot(pair[1].x - pair[0].x, pair[1].y - pair[0].y);
-        zoomTo(pinch.scale * distance / Math.max(1, pinch.distance), pinch.centerX, pinch.centerY);
+        var nextScale = Math.max(1, Math.min(4, pinch.scale * distance / Math.max(1, pinch.distance)));
+        var rect = mapElement.getBoundingClientRect();
+        var startFocusX = pinch.centerX - rect.left - rect.width / 2;
+        var startFocusY = pinch.centerY - rect.top - rect.height / 2;
+        var currentCenterX = (pair[0].x + pair[1].x) / 2;
+        var currentCenterY = (pair[0].y + pair[1].y) / 2;
+        var currentFocusX = currentCenterX - rect.left - rect.width / 2;
+        var currentFocusY = currentCenterY - rect.top - rect.height / 2;
+        var ratio = nextScale / pinch.scale;
+        view.scale = nextScale;
+        view.x = currentFocusX - (startFocusX - pinch.baseX) * ratio;
+        view.y = currentFocusY - (startFocusY - pinch.baseY) * ratio;
+        updateLayer();
         return;
       }
+      if (event.pointerType === "touch") return;
       if (!drag || view.scale === 1) return;
       var dx = event.clientX - drag.startX;
       var dy = event.clientY - drag.startY;
@@ -967,9 +1021,13 @@
   bindInteractiveMap(submitMap, submitMapView, function (point) {
     if (unknown.checked) return;
     selectedPoint = point;
+    setCurrentLocationStatus("");
     renderSubmissionMap();
   });
-  unknown.addEventListener("change", renderSubmissionMap);
+  unknown.addEventListener("change", function () {
+    if (unknown.checked) setCurrentLocationStatus("");
+    renderSubmissionMap();
+  });
   currentLocationButton.addEventListener("click", useCurrentLocation);
   bindInteractiveMap(editMap, editMapView, function (point) {
     if (editUnknown.checked) return;

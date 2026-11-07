@@ -50,6 +50,7 @@
 .poster-workshop .poster-section-title { color: #7251b5; border-color: #7251b5; }
 .poster-stores { margin: 32px 0 36px; }
 .poster-stores h3 { font-size: 15px; font-weight: 500; color: #176b60; margin: 0 0 10px; }
+.project-stores-map { display: block; width: 100%; height: auto; margin: 18px 0 12px; border: 1px solid #c7dbd2; background: #fafaf7; }
 .poster-stores .store-list { gap: 0; }
 .poster-stores .store-link-card { border: 0; border-top: 1px solid #c7dbd2; padding: 20px 4px; grid-template-columns: 35px minmax(0,1fr) 24px; gap: 15px; background: transparent; }
 .poster-stores .store-link-card:last-child { border-bottom: 1px solid #c7dbd2; }
@@ -289,7 +290,7 @@
 
 /* Store pages use a quiet folder-like workspace. Explanations live in Help. */
 .poster-store-page { min-height: 100svh; background: #f4f1ea; }
-.poster-store-page .site-header { background: transparent; border-bottom: 1px solid #d8d3c9; }
+.poster-store-page .site-header { background: transparent; border-bottom: 0; backdrop-filter: none; }
 .store-workspace-head {
   padding: clamp(20px, 3.5vw, 36px) var(--section-pad-x) 0;
   background: #f4f1ea;

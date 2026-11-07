@@ -225,8 +225,8 @@
   function dialogNavigationHtml(entry) {
     var entries = dialogEntries();
     var index = entry ? entries.findIndex(function (item) { return item.key === entry.key; }) : -1;
-    var previous = index > 0 ? entries[index - 1] : null;
-    var next = index >= 0 && index < entries.length - 1 ? entries[index + 1] : null;
+    var previous = index >= 0 && entries.length ? entries[(index - 1 + entries.length) % entries.length] : null;
+    var next = index >= 0 && entries.length ? entries[(index + 1) % entries.length] : null;
     function button(direction, item, label, arrow) {
       return '<button type="button" data-work-navigation="' + direction + '"' + (item ? '' : ' disabled') + '><span>' + arrow + ' ' + label + '</span>' + (item ? '<small>' + escapeHtml(item.number + '　' + item.title) + '</small>' : '') + '</button>';
     }
@@ -250,7 +250,8 @@
         var entries = dialogEntries();
         var current = activeDialogEntry();
         var index = current ? entries.findIndex(function (entry) { return entry.key === current.key; }) : -1;
-        openDialogEntry(entries[index + Number(button.dataset.workNavigation)]);
+        if (!entries.length || index < 0) return;
+        openDialogEntry(entries[(index + Number(button.dataset.workNavigation) + entries.length) % entries.length]);
       });
     });
   }

@@ -34,7 +34,7 @@ window.LAUNDRY_WAITING_ROOM_DATA = {
       "index": "03",
       "name": "laundromat MIBU",
       "area": "",
-      "description": "",
+      "description": "11/7（土）〜",
       "mapReady": true,
       "center": { "lat": 35.0037354, "lng": 135.7389614 },
       "mapSpanMeters": 1050,

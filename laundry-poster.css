@@ -50,7 +50,18 @@
 .poster-workshop .poster-section-title { color: #7251b5; border-color: #7251b5; }
 .poster-stores { margin: 32px 0 36px; }
 .poster-stores h3 { font-size: 15px; font-weight: 500; color: #176b60; margin: 0 0 10px; }
-.project-stores-map { display: block; width: 100%; height: auto; margin: 18px 0 12px; border: 1px solid #c7dbd2; background: #fafaf7; }
+.project-stores-map-frame { position: relative; margin: 18px 0 12px; }
+.project-stores-map { display: block; width: 100%; height: auto; border: 1px solid #c7dbd2; background: #fafaf7; }
+.project-store-marker { position: absolute; left: var(--x); top: var(--y); width: 42px; height: 42px; transform: translate(-50%, -50%); z-index: 2; }
+.project-store-marker::before { content: ""; position: absolute; inset: 11px; border: 3px solid #fff; border-radius: 50%; background: #7251b5; box-shadow: 0 1px 5px rgba(39,36,61,.28); }
+.project-store-marker span { position: absolute; left: 37px; top: 50%; min-width: max-content; padding: 6px 9px; transform: translateY(-50%); border: 1px solid #7251b5; border-radius: 3px; background: rgba(255,255,255,.94); color: #5b3d9d; font-size: 11px; font-weight: 600; line-height: 1.3; box-shadow: 0 3px 12px rgba(39,36,61,.16); }
+.project-store-marker.is-left span { left: auto; right: 37px; }
+.project-store-marker.is-below span { left: 50%; top: 37px; transform: translateX(-50%); }
+.project-store-marker.is-above span { left: 50%; top: auto; bottom: 37px; transform: translateX(-50%); }
+.project-store-marker:hover span, .project-store-marker:focus-visible span { background: #7251b5; color: #fff; }
+.project-store-marker:focus-visible { outline: 2px solid #7251b5; outline-offset: 3px; border-radius: 50%; }
+.project-map-hint { margin: 0 0 18px; color: #64716b; font-size: 11px; line-height: 1.65; }
+.project-map-hint span { display: block; font-family: Arial, sans-serif; }
 .poster-stores .store-list { gap: 0; }
 .poster-stores .store-link-card { border: 0; border-top: 1px solid #c7dbd2; padding: 20px 4px; grid-template-columns: 35px minmax(0,1fr) 24px; gap: 15px; background: transparent; }
 .poster-stores .store-link-card:last-child { border-bottom: 1px solid #c7dbd2; }
@@ -374,7 +385,7 @@
 }
 .store-help-button:hover,
 .store-help-button:focus-visible { background: #176b60; outline: 3px solid #fff; }
-.store-help-content { display: grid; gap: 16px; padding: clamp(36px, 7vw, 64px); }
+.store-help-content { display: grid; gap: 22px; padding: clamp(36px, 7vw, 64px); }
 .store-help-content h2 { margin: 0; color: #176b60; font-size: clamp(24px, 5vw, 36px); font-weight: 500; }
 .store-help-content h2 small { display: block; margin-top: 6px; color: var(--muted); font: 400 12px/1.4 Arial, sans-serif; }
 .store-help-content p { margin: 0; }
@@ -382,6 +393,12 @@
 .store-help-content .drink-offer p + p,
 .store-help-content .store-audio-note p + p { margin-top: 6px; }
 .store-help-content .store-audio-note { padding: 14px 16px; border-left: 2px solid #7251b5; background: #f2eef7; }
+.store-help-section { display: grid; gap: 7px; }
+.store-help-section h3 { margin: 0 0 3px; color: #176b60; font-size: 15px; font-weight: 600; }
+.store-help-section h3 small { display: block; margin-top: 2px; color: var(--muted); font: 11px/1.4 Arial, sans-serif; }
+.store-help-section .translation { margin: 0; color: var(--muted); font: 12px/1.65 Arial, sans-serif; }
+.store-map-source { padding-top: 18px; border-top: 1px solid #c7dbd2; font-size: 12px; }
+.store-map-source a { color: #7251b5; text-decoration: underline; text-underline-offset: 3px; }
 .store-help-links { display: grid; margin-top: 8px; border-top: 1px solid #c7dbd2; }
 .store-help-links a { display: grid; gap: 3px; padding: 14px 0; border-bottom: 1px solid #c7dbd2; color: #176b60; }
 .store-help-links small { color: var(--muted); font: 11px/1.4 Arial, sans-serif; }

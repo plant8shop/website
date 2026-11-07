@@ -259,6 +259,13 @@ h1 span {
 .store-fixed strong { margin-left: 8px; color: var(--violet-dark); }
 .honeypot { position: absolute !important; left: -9999px !important; width: 1px !important; height: 1px !important; }
 .reactions { margin-top: 50px; padding-top: 28px; border-top: 1px solid var(--violet-dark); }
+.work-credit { flex: 0 0 100%; display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 14px; margin: 0 0 10px; color: var(--text-soft); font-size: .78rem; }
+.work-credit-role { color: var(--muted); }
+.work-credit details { position: relative; }
+.work-credit summary { color: var(--violet-dark); cursor: pointer; text-decoration: underline; text-underline-offset: 4px; }
+.work-credit summary:focus-visible { outline: 2px solid var(--mint); outline-offset: 4px; }
+.work-credit ul { display: flex; flex-wrap: wrap; gap: 6px 14px; margin: 12px 0 4px; padding: 0; list-style: none; color: var(--text); }
+.work-credit li:not(:last-child)::after { content: "、"; }
 .like-button { display: inline-flex; align-items: center; gap: 10px; padding: 11px 16px; border: 1px solid var(--line-strong); background: #fff; color: var(--violet-dark); cursor: pointer; }
 .like-button.is-liked { background: var(--mint-soft); }
 .like-button span { padding-left: 10px; border-left: 1px solid var(--line); }

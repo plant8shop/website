@@ -6,7 +6,23 @@
   }
 
   function work(id, title, titleEn, place, placeEn, summary, summaryEn, japanese, english) {
-    return { id: String(id), locationId: id, title: title, titleEn: titleEn, place: place, placeEn: placeEn, summary: summary, summaryEn: summaryEn, script: lines(japanese), scriptEn: lines(english) };
+    return {
+      id: String(id),
+      locationId: id,
+      title: title,
+      titleEn: titleEn,
+      place: place,
+      placeEn: placeEn,
+      summary: summary,
+      summaryEn: summaryEn,
+      script: lines(japanese),
+      scriptEn: lines(english),
+      credit: {
+        label: "グループA",
+        labelEn: "Group A",
+        names: ["青木志央理", "AOMOU", "浅井", "O", "ユキバタン", "らんまる"]
+      }
+    };
   }
 
   window.LAUNDRY_WORKS = {

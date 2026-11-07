@@ -32,6 +32,7 @@
   var submitMapView = { scale: 1, x: 0, y: 0 };
   var editMapView = { scale: 1, x: 0, y: 0 };
   var activeWork = null;
+  var activeLocationId = null;
   var activeSubmission = null;
   var speech = null;
   var speechTimer = null;
@@ -47,6 +48,7 @@
   var commentDialog = document.getElementById("commentDialog");
   var editDialog = document.getElementById("editDialog");
   var submitMap = document.getElementById("submissionMap");
+  var currentLocationButton = document.getElementById("currentLocationButton");
   var editMap = document.getElementById("editSubmissionMap");
   var unknown = document.getElementById("locationUnknown");
   var editUnknown = document.getElementById("editLocationUnknown");
@@ -122,12 +124,13 @@
   }
 
   function stateFor(workId) {
-    var base = remote.works[workId] || { likeCount: 0, liked: false };
+    var base = remote.works[workId] || { likeCount: 0, liked: false, comments: [] };
+    if (!Array.isArray(base.comments)) base.comments = [];
     var override = likeOverrides[workId];
     if (!override) return base;
     var count = Number(base.likeCount) || 0;
     if (Boolean(base.liked) !== override.liked) count += override.liked ? 1 : -1;
-    return { likeCount: Math.max(0, count), liked: override.liked, syncing: true };
+    return Object.assign({}, base, { likeCount: Math.max(0, count), liked: override.liked, syncing: true });
   }
 
   function readLikeOverrides() {
@@ -183,9 +186,112 @@
     renderMap();
   }
 
+  function dialogEntries() {
+    var areaMap = window.LAUNDRY_AREA_MAPS && window.LAUNDRY_AREA_MAPS.maps[store.id];
+    var entries = areaMap ? areaMap.locations.map(function (point, index) {
+      var work = store.works.find(function (item) { return String(item.locationId) === String(point.id); });
+      return {
+        key: work ? "work:" + work.id : "location:" + point.id,
+        number: String(index + 1),
+        title: work ? work.title : window.LAUNDRY_AREA_MAPS.locations[point.id],
+        locationId: String(point.id),
+        work: work || null
+      };
+    }) : [];
+    store.works.forEach(function (work, index) {
+      if (entries.some(function (entry) { return entry.work && entry.work.id === work.id; })) return;
+      entries.push({
+        key: "work:" + work.id,
+        number: String(work.number || entries.length + 1),
+        title: work.title,
+        locationId: work.locationId == null ? "" : String(work.locationId),
+        work: work
+      });
+    });
+    return entries;
+  }
+
+  function activeDialogEntry() {
+    return dialogEntries().find(function (entry) {
+      if (activeWork) return entry.work && entry.work.id === activeWork.id;
+      return !entry.work && entry.locationId === String(activeLocationId);
+    }) || null;
+  }
+
+  function dialogNumberHtml(entry) {
+    return '<p class="dialog-work-number"><span>' + escapeHtml(entry ? entry.number : activeWork && activeWork.number || "") + '</span>作品</p>';
+  }
+
+  function dialogNavigationHtml(entry) {
+    var entries = dialogEntries();
+    var index = entry ? entries.findIndex(function (item) { return item.key === entry.key; }) : -1;
+    var previous = index > 0 ? entries[index - 1] : null;
+    var next = index >= 0 && index < entries.length - 1 ? entries[index + 1] : null;
+    function button(direction, item, label, arrow) {
+      return '<button type="button" data-work-navigation="' + direction + '"' + (item ? '' : ' disabled') + '><span>' + arrow + ' ' + label + '</span>' + (item ? '<small>' + escapeHtml(item.number + '　' + item.title) + '</small>' : '') + '</button>';
+    }
+    return '<nav class="work-navigation" aria-label="作品を移動">' +
+      button(-1, previous, '前の作品', '←') + button(1, next, '次の作品', '→') + '</nav>';
+  }
+
+  function openDialogEntry(entry) {
+    if (!entry) return;
+    stopSpeech();
+    activeWork = entry.work;
+    activeLocationId = entry.locationId;
+    if (activeWork) renderDialog();
+    else renderPlaceholderDialog(entry);
+    if (!dialog.open) dialog.showModal();
+  }
+
+  function bindWorkNavigation() {
+    dialogContent.querySelectorAll('[data-work-navigation]').forEach(function (button) {
+      button.addEventListener('click', function () {
+        var entries = dialogEntries();
+        var current = activeDialogEntry();
+        var index = current ? entries.findIndex(function (entry) { return entry.key === current.key; }) : -1;
+        openDialogEntry(entries[index + Number(button.dataset.workNavigation)]);
+      });
+    });
+  }
+
+  function renderComments(state) {
+    var comments = state.comments || [];
+    return '<div class="comments"><h3>コメント</h3><div id="workCommentList" class="comment-list">' +
+      (comments.length ? comments.map(function (comment) {
+        return '<p class="comment' + (comment.mine ? ' is-mine' : '') + '"><span>' + escapeHtml(comment.text || comment.comment || '') + '</span><small>' + (comment.mine ? 'あなたのコメント' : '匿名') + '</small></p>';
+      }).join('') : '<p class="comment-empty">まだコメントはありません。</p>') +
+      '</div><form id="workCommentForm" class="comment-form"><label><span>コメントを残す</span><textarea name="comment" maxlength="500" rows="3" required></textarea></label><button class="button" type="submit">送信する</button><p id="workCommentStatus" class="form-status" role="status" aria-live="polite"></p></form></div>';
+  }
+
+  function updateDialogComments() {
+    if (!activeWork) return;
+    var current = dialogContent.querySelector('.comments');
+    if (!current) return;
+    var draft = dialogContent.querySelector('#workCommentForm textarea');
+    var value = draft ? draft.value : '';
+    var wrapper = document.createElement('div');
+    wrapper.innerHTML = renderComments(stateFor(activeWork.id));
+    current.replaceWith(wrapper.firstElementChild);
+    var nextDraft = dialogContent.querySelector('#workCommentForm textarea');
+    if (nextDraft) nextDraft.value = value;
+    bindInlineCommentForm();
+  }
+
+  function bindInlineCommentForm() {
+    var commentForm = document.getElementById('workCommentForm');
+    if (commentForm) commentForm.addEventListener('submit', addWorkComment);
+  }
+
+  function renderPlaceholderDialog(entry) {
+    dialogContent.innerHTML = dialogNumberHtml(entry) + '<h2 id="dialogTitle">' + escapeHtml(entry.title) + '</h2><p class="dialog-preparing">戯曲の本文と朗読は準備中です。</p>' + dialogNavigationHtml(entry);
+    bindWorkNavigation();
+  }
+
   function renderDialog() {
     if (!activeWork) return;
     var state = stateFor(activeWork.id);
+    var entry = activeDialogEntry();
     var images = activeWork.images && activeWork.images.length ? activeWork.images : [{ label: activeWork.imageLabel || "場所の写真 / 準備中" }];
     var gallery = images.map(function (item, index) {
       var content = item.src ? '<img src="' + escapeHtml(item.src) + '" alt="' + escapeHtml(item.alt || item.label || activeWork.title + "の写真") + '">' : '<div class="work-gallery-placeholder" role="img" aria-label="' + escapeHtml(item.label || "場所の写真 / 準備中") + '"><span>' + escapeHtml(item.label || "場所の写真 / 準備中") + '</span></div>';
@@ -195,7 +301,7 @@
     var areaMapImage = activeWork.areaMap && activeWork.areaMap.image ? '<img class="detailed-map-image" src="' + escapeHtml(activeWork.areaMap.image) + '" alt="' + escapeHtml(activeWork.areaMap.imageAlt || activeWork.title + "の場所周辺図") + '">' : '';
     var areaMap = areaMapImage + notes.map(function (note) { return '<span class="map-note" style="--x:' + Number(note.x || 50) + '%;--y:' + Number(note.y || 50) + '%">' + escapeHtml(note.text) + '</span>'; }).join("");
     var areaMapClass = 'detailed-map' + (areaMapImage ? ' has-image' : '');
-    dialogContent.innerHTML = '<h2 id="dialogTitle">' + escapeHtml(activeWork.title) + '</h2><p class="dialog-place">' + escapeHtml(activeWork.place) + '</p><div id="workGallery" class="work-gallery">' + gallery + '</div><div class="gallery-toolbar"><span id="galleryCounter" class="gallery-counter">1 / ' + images.length + '</span><div><button id="galleryPrev" type="button" aria-label="前の写真">←</button><button id="galleryNext" type="button" aria-label="次の写真">→</button></div></div><button id="areaMapToggle" class="area-map-toggle" type="button" aria-expanded="false" aria-controls="areaMapPanel">周辺図を表示する</button><div id="areaMapPanel" class="area-map-panel" hidden><div class="' + areaMapClass + '" role="group" aria-label="' + escapeHtml(activeWork.title) + 'の場所周辺図">' + areaMap + '</div></div><p class="dialog-summary">' + escapeHtml(activeWork.summary) + '</p><div class="audio-player"><button id="listenButton" class="audio-play" type="button" aria-label="朗読を再生">▶</button><div class="audio-track"><progress id="audioProgress" class="audio-progress" max="100" value="0"></progress><div class="audio-time"><span id="audioCurrent">0:00</span><span id="audioDuration">' + formatTime(estimateSpeechDuration()) + '</span></div></div><p class="audio-caption">ブラウザの音声でテキストを再生します</p></div><div class="script"><h3>テキスト</h3>' + activeWork.script.map(function (paragraph) { return '<p>' + escapeHtml(paragraph) + '</p>'; }).join("") + '</div><section class="reactions"><button id="likeButton" class="like-button' + (state.liked ? ' is-liked' : '') + '" type="button" aria-pressed="' + state.liked + '">♡ <strong>' + (state.liked ? 'いいね済み' : 'いいね') + '</strong><span>' + state.likeCount + '</span>' + (state.syncing ? '<small>保存中</small>' : '') + '</button><button id="commentButton" class="button" type="button">コメントする</button></section>';
+    dialogContent.innerHTML = dialogNumberHtml(entry) + '<h2 id="dialogTitle">' + escapeHtml(activeWork.title) + '</h2><p class="dialog-place">' + escapeHtml(activeWork.place) + '</p><div id="workGallery" class="work-gallery">' + gallery + '</div><div class="gallery-toolbar"><span id="galleryCounter" class="gallery-counter">1 / ' + images.length + '</span><div><button id="galleryPrev" type="button" aria-label="前の写真">←</button><button id="galleryNext" type="button" aria-label="次の写真">→</button></div></div><button id="areaMapToggle" class="area-map-toggle" type="button" aria-expanded="false" aria-controls="areaMapPanel">周辺図を表示する</button><div id="areaMapPanel" class="area-map-panel" hidden><div class="' + areaMapClass + '" role="group" aria-label="' + escapeHtml(activeWork.title) + 'の場所周辺図">' + areaMap + '</div></div><p class="dialog-summary">' + escapeHtml(activeWork.summary) + '</p><div class="audio-player"><button id="listenButton" class="audio-play" type="button" aria-label="朗読を再生">▶</button><div class="audio-track"><progress id="audioProgress" class="audio-progress" max="100" value="0"></progress><div class="audio-time"><span id="audioCurrent">0:00</span><span id="audioDuration">' + formatTime(estimateSpeechDuration()) + '</span></div></div><p class="audio-caption">ブラウザの音声でテキストを再生します</p></div><div class="script"><h3>テキスト</h3>' + activeWork.script.map(function (paragraph) { return '<p>' + escapeHtml(paragraph) + '</p>'; }).join("") + '</div><section class="reactions"><button id="likeButton" class="like-button' + (state.liked ? ' is-liked' : '') + '" type="button" aria-pressed="' + state.liked + '">♡ <strong>' + (state.liked ? 'いいね済み' : 'いいね') + '</strong><span>' + state.likeCount + '</span>' + (state.syncing ? '<small>保存中</small>' : '') + '</button></section>' + renderComments(state) + dialogNavigationHtml(entry);
     var listenButton = document.getElementById("listenButton");
     if (activeWork.audioUrl) {
       var recording = document.createElement("audio");
@@ -211,7 +317,8 @@
       dialogContent.querySelector(".audio-caption").textContent = "このブラウザは読み上げに対応していません。";
     }
     document.getElementById("likeButton").addEventListener("click", toggleLike);
-    document.getElementById("commentButton").addEventListener("click", openCommentForm);
+    bindInlineCommentForm();
+    bindWorkNavigation();
     document.getElementById("areaMapToggle").addEventListener("click", toggleAreaMap);
     document.getElementById("galleryPrev").addEventListener("click", function () { moveGallery(-1); });
     document.getElementById("galleryNext").addEventListener("click", function () { moveGallery(1); });
@@ -254,11 +361,8 @@
   }
 
   function openWork(workId) {
-    activeWork = store.works.find(function (work) { return work.id === workId; });
-    if (!activeWork) return;
-    stopSpeech();
-    renderDialog();
-    dialog.showModal();
+    var entry = dialogEntries().find(function (item) { return item.work && item.work.id === workId; });
+    openDialogEntry(entry);
   }
 
   function toggleSpeech(event) {
@@ -362,6 +466,30 @@
       saveLikeOverrides();
       updateDialogReactionState();
       renderWorks();
+    });
+  }
+
+  function addWorkComment(event) {
+    event.preventDefault();
+    if (!activeWork) return;
+    var text = String(new FormData(event.currentTarget).get("comment") || "").trim();
+    if (!text) return;
+    var workId = activeWork.id;
+    if (!remote.works[workId]) remote.works[workId] = { likeCount: 0, liked: false, comments: [] };
+    if (!Array.isArray(remote.works[workId].comments)) remote.works[workId].comments = [];
+    var pendingComment = { text: text, mine: true };
+    remote.works[workId].comments.push(pendingComment);
+    updateDialogComments();
+    var status = document.getElementById("workCommentStatus");
+    if (status) status.textContent = "コメントを送信しました。";
+    post({ action: "addComment", workId: workId, comment: text }).then(function () {
+      setTimeout(loadRemote, 700);
+      setTimeout(loadRemote, 2400);
+    }).catch(function (error) {
+      remote.works[workId].comments = remote.works[workId].comments.filter(function (comment) { return comment !== pendingComment; });
+      updateDialogComments();
+      var failedStatus = document.getElementById("workCommentStatus");
+      if (failedStatus) failedStatus.textContent = error.message;
     });
   }
 
@@ -734,7 +862,39 @@
 
   function renderSubmissionMap() {
     renderInteractiveMap(submitMap, selectedPoint && !unknown.checked ? selectedPoint : null, submitMapView);
-    document.getElementById("selectedLocation").textContent = unknown.checked ? "場所の名前を入力してください。" : (selectedPoint ? "地図上の場所を選びました。" : "場所はまだ選ばれていません。");
+    document.getElementById("selectedLocation").textContent = unknown.checked ? "場所の名前を入力してください。" : (selectedPoint ? (selectedPoint.isCurrentLocation ? "現在位置を選びました。" : "地図上の場所を選びました。") : "場所はまだ選ばれていません。");
+  }
+
+  function useCurrentLocation() {
+    var message = document.getElementById("selectedLocation");
+    if (!navigator.geolocation) {
+      message.textContent = "この端末では現在位置を取得できません。";
+      return;
+    }
+    currentLocationButton.disabled = true;
+    currentLocationButton.textContent = "取得中…";
+    message.textContent = "現在位置を取得しています…";
+    navigator.geolocation.getCurrentPosition(function (position) {
+      var lat = position.coords.latitude;
+      var lng = position.coords.longitude;
+      var span = Number(store.mapSpanMeters) || 1050;
+      var x = 0.5 + (lng - store.center.lng) * 111320 * Math.cos(store.center.lat * Math.PI / 180) / span;
+      var y = 0.5 - (lat - store.center.lat) * 111320 / span;
+      if (x < 0 || x > 1 || y < 0 || y > 1) {
+        message.textContent = "現在位置はこの地図の範囲外です。地図を押して場所を選んでください。";
+      } else {
+        unknown.checked = false;
+        selectedPoint = { x: x, y: y, latitude: lat, longitude: lng, isCurrentLocation: true };
+        submitMapView = { scale: 1, x: 0, y: 0 };
+        renderSubmissionMap();
+      }
+      currentLocationButton.disabled = false;
+      currentLocationButton.textContent = "現在位置を使う";
+    }, function (error) {
+      message.textContent = error && error.code === 1 ? "位置情報の利用が許可されていません。" : "現在位置を取得できませんでした。";
+      currentLocationButton.disabled = false;
+      currentLocationButton.textContent = "現在位置を使う";
+    }, { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 });
   }
 
   function renderEditMap() {
@@ -914,7 +1074,10 @@
         reconcileLikeOverrides();
         renderWorks();
         renderMySubmissions();
-        if (dialog.open) updateDialogReactionState();
+        if (dialog.open && activeWork) {
+          updateDialogReactionState();
+          updateDialogComments();
+        }
       }
       delete window[callback];
       script.remove();
@@ -932,6 +1095,7 @@
     renderSubmissionMap();
   });
   unknown.addEventListener("change", renderSubmissionMap);
+  currentLocationButton.addEventListener("click", useCurrentLocation);
   bindInteractiveMap(editMap, editMapView, function (point) {
     if (editUnknown.checked) return;
     editPoint = point;
@@ -1033,20 +1197,9 @@
     if (trigger) openWork(trigger.dataset.workId);
     var location = event.target.closest("[data-play-location]");
     if (!location) return;
-
     var locationId = location.dataset.playLocation;
-    var work = store.works.find(function (item) { return String(item.locationId) === locationId; });
-    if (work) {
-      openWork(work.id);
-      return;
-    }
-
-    activeWork = null;
-    stopSpeech();
-    dialogContent.innerHTML = '<h2 id="dialogTitle">' +
-      escapeHtml(window.LAUNDRY_AREA_MAPS.locations[locationId]) +
-      '</h2><p>戯曲の本文と朗読は準備中です。</p>';
-    dialog.showModal();
+    var entry = dialogEntries().find(function (item) { return item.locationId === locationId; });
+    openDialogEntry(entry);
   });
   document.getElementById("mySubmissionList").addEventListener("click", function (event) {
     var trigger = event.target.closest("[data-submission-id]");
@@ -1087,6 +1240,7 @@
     unknown.defaultChecked = true;
     unknown.checked = true;
     unknown.disabled = true;
+    currentLocationButton.disabled = true;
     editUnknown.disabled = true;
     submitMap.disabled = true;
     editMap.disabled = true;

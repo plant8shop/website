@@ -6,7 +6,7 @@
   <meta name="description" content="このランドリーの周辺のまちにまつわる記憶をもとにつくった戯曲や朗読を、洗濯や乾燥を待ちながら楽しめます。">
   <title>店舗｜ランドリーシアター</title>
   <link rel="stylesheet" href="laundry.css?v=20261101-1">
-  <link rel="stylesheet" href="laundry-poster.css?v=20261107-6">
+  <link rel="stylesheet" href="laundry-poster.css?v=20261107-7">
 </head>
 <body class="store-page poster-store-page">
   <header class="site-header">
@@ -48,7 +48,7 @@
         <form id="submissionForm" class="submission-form"><input class="honeypot" type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
           <div class="submission-layout">
             <div>
-              <div class="map-card map-card-flat"><div class="map-label-row"><span>場所を選ぶ</span><small>ピンチ・ホイールで拡大縮小</small></div><div id="submissionMap" class="map-canvas submission-map" role="group" aria-label="地図上で投稿する場所を選ぶ"></div></div>
+              <div class="map-card map-card-flat"><div class="map-label-row"><span>場所を選ぶ</span><div class="map-label-actions"><button id="currentLocationButton" class="current-location-button" type="button">現在位置を使う</button><small>ピンチ・ホイールで拡大縮小</small></div></div><div id="submissionMap" class="map-canvas submission-map" role="group" aria-label="地図上で投稿する場所を選ぶ"></div></div>
               <p id="selectedLocation" class="selected-location">場所はまだ選ばれていません。</p>
               <label class="unknown-row"><input id="locationUnknown" type="checkbox" name="locationUnknown"><span>地図では場所がわからない</span></label>
             </div>
@@ -78,16 +78,21 @@
   <dialog id="storeHelpDialog" class="form-dialog store-help-dialog" aria-labelledby="storeHelpTitle">
     <button class="dialog-close" type="button" data-close-dialog="storeHelpDialog" aria-label="説明を閉じる">×</button>
     <div class="store-help-content">
-      <h2 id="storeHelpTitle">ランドリーシアターについて</h2>
+      <h2 id="storeHelpTitle">ランドリーシアターについて<small lang="en">About Laundry Theater</small></h2>
       <div id="storeStart"><p class="store-start-date">11/7（土）〜</p><p class="translation" lang="en">From Nov 7 (Sat), 2026</p></div>
       <p>このランドリーの周辺のまちにまつわる記憶をもとにつくった戯曲や朗読を、洗濯や乾燥を待ちながら楽しめます。</p>
-      <p>店の外からも投稿できます。投稿された情報を手がかりに、ワークショップで戯曲をつくり、再びサイトに反映します。</p>
-      <p id="storeDrinkOffer" class="drink-offer" hidden>投稿後に表示される画面をカフェの店員に見せると、24時間以内はドリンクが50円引きになります。</p>
-      <p class="store-audio-note">音声はイヤホン、または周囲の方の迷惑にならない音量でお楽しみください。</p>
+      <p class="translation" lang="en">Enjoy plays and audio readings based on memories of the neighborhood while you wait for washing or drying.</p>
+      <p>店の外からも投稿できます。</p>
+      <p class="translation" lang="en">You can post from anywhere.</p>
+      <p>投稿された情報を手がかりに、ワークショップで戯曲をつくり、再びサイトに反映します。</p>
+      <p class="translation" lang="en">We use submitted material to create plays in workshops and share the completed works on this site.</p>
+      <div id="storeDrinkOffer" class="drink-offer" hidden><p>投稿後に表示される画面をカフェの店員に見せると、24時間以内はドリンクが50円引きになります。</p><p class="translation" lang="en">Show the screen displayed after posting to café staff to receive ¥50 off a drink within 24 hours.</p></div>
+      <div class="store-audio-note"><p>音声はイヤホン、または周囲の方の迷惑にならない音量でお楽しみください。</p><p class="translation" lang="en">Please use headphones or keep the volume low enough not to disturb others.</p></div>
       <nav class="store-help-links" aria-label="関連リンク">
-        <a href="laundry.html#stores">開催店舗一覧</a>
-        <a href="laundry.html#workshop">戯曲をつくるワークショップ</a>
-        <a href="index.html">企画・運営　プラントショップ</a>
+        <a href="laundry.html#stores"><span>開催店舗一覧</span><small lang="en">Theater locations</small></a>
+        <a href="laundry.html#workshop"><span>戯曲をつくるワークショップ</span><small lang="en">Playwriting workshop</small></a>
+        <a href="index.html"><span>企画・運営　プラントショップ</span><small lang="en">Organized by Plantshop</small></a>
+        <a href="https://maps.gsi.go.jp/help/use.html" target="_blank" rel="noopener"><span>地図データ　国土地理院</span><small lang="en">Map data: Geospatial Information Authority of Japan</small></a>
       </nav>
     </div>
   </dialog>
@@ -138,9 +143,9 @@
     </form>
   </dialog>
 
-  <script src="data/laundry-waiting-room.js?v=20261107-6"></script>
-  <script src="data/laundry-area-maps.js?v=20261107-6"></script>
-  <script src="laundry-area-maps.js?v=20261107-6"></script>
-  <script src="laundry-store.js?v=20261107-6"></script>
+  <script src="data/laundry-waiting-room.js?v=20261107-7"></script>
+  <script src="data/laundry-area-maps.js?v=20261107-7"></script>
+  <script src="laundry-area-maps.js?v=20261107-7"></script>
+  <script src="laundry-store.js?v=20261107-7"></script>
 </body>
 </html>

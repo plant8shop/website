@@ -2,7 +2,6 @@
   "use strict";
 
   var data = window.LAUNDRY_AREA_MAPS;
-  var creditUrl = "https://maps.gsi.go.jp/help/use.html";
 
   function element(tag, className, content) {
     var node = document.createElement(tag);
@@ -35,11 +34,7 @@
     image.loading = "lazy";
     surface.append(image);
 
-    var caption = element("figcaption", "play-map-caption");
-    var credit = element("a", null, "国土地理院の地理院タイルを加工して作成");
-    credit.href = creditUrl;
-    caption.append(credit);
-    figure.append(surface, caption);
+    figure.append(surface);
 
     var legend = element("ol", "play-map-legend");
     legend.setAttribute("aria-label", "この店舗の戯曲の場所");

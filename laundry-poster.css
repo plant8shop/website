@@ -219,6 +219,19 @@
   font-weight: 400;
   letter-spacing: .02em;
 }
+.map-label-actions { display: flex; align-items: center; justify-content: flex-end; gap: 12px; }
+.current-location-button {
+  padding: 5px 9px;
+  border: 1px solid #7251b5;
+  border-radius: 999px;
+  background: transparent;
+  color: #7251b5;
+  font: 500 11px/1.4 var(--font-sans);
+  letter-spacing: 0;
+  cursor: pointer;
+}
+.current-location-button:hover, .current-location-button:focus-visible { background: #eee9f5; }
+.current-location-button:disabled { cursor: wait; opacity: .58; }
 .play-map-entry:hover { text-decoration: underline; }
 .play-map-number {
   display: grid;
@@ -276,47 +289,52 @@
 
 /* Store pages use a quiet folder-like workspace. Explanations live in Help. */
 .poster-store-page { min-height: 100svh; background: #f4f1ea; }
-.poster-store-page .site-header { border-bottom: 1px solid #d8d3c9; }
+.poster-store-page .site-header { background: transparent; border-bottom: 1px solid #d8d3c9; }
 .store-workspace-head {
-  padding: clamp(24px, 5vw, 48px) var(--section-pad-x) 0;
+  padding: clamp(20px, 3.5vw, 36px) var(--section-pad-x) 0;
   background: #f4f1ea;
 }
 .store-workspace-head h1 {
-  margin: 0 0 22px;
+  margin: 0 0 18px;
   color: #176b60;
   font-size: clamp(22px, 4vw, 36px);
   font-weight: 500;
   overflow-wrap: anywhere;
 }
 .poster-store-page .folder-tabs {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.75fr);
-  gap: 5px;
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
   max-width: none;
   margin: 0;
-  border-bottom: 1px solid #7251b5;
+  overflow-x: auto;
+  scrollbar-width: none;
+  border-bottom: 1px solid #b8a9ce;
 }
+.poster-store-page .folder-tabs::-webkit-scrollbar { display: none; }
 .poster-store-page .folder-tabs .mode-button {
-  min-height: 56px;
+  flex: 0 0 auto;
+  min-height: 42px;
   justify-content: center;
-  padding: 10px 12px;
-  border: 1px solid #cfc6df;
+  padding: 9px clamp(14px, 2vw, 24px);
+  border: 1px solid transparent;
   border-bottom: 0;
-  border-radius: 12px 12px 0 0;
-  background: #e8e2dc;
-  color: #4f4a52;
-  font-size: .78rem;
+  border-radius: 7px 7px 0 0;
+  background: transparent;
+  color: #5e5961;
+  font-size: .76rem;
   line-height: 1.35;
   text-align: center;
+  white-space: nowrap;
 }
 .poster-store-page .folder-tabs .mode-button:hover,
-.poster-store-page .folder-tabs .mode-button:focus-visible { background: #f2eef7; }
+.poster-store-page .folder-tabs .mode-button:focus-visible { background: #ebe6f1; }
 .poster-store-page .folder-tabs .mode-button.is-active {
   position: relative;
   z-index: 2;
   margin-bottom: -1px;
-  border-color: #7251b5;
-  background: #fff;
+  border-color: #b8a9ce;
+  background: #f9fcf9;
   color: #176b60;
   outline: 0;
 }
@@ -357,10 +375,15 @@
 .store-help-button:focus-visible { background: #176b60; outline: 3px solid #fff; }
 .store-help-content { display: grid; gap: 16px; padding: clamp(36px, 7vw, 64px); }
 .store-help-content h2 { margin: 0; color: #176b60; font-size: clamp(24px, 5vw, 36px); font-weight: 500; }
+.store-help-content h2 small { display: block; margin-top: 6px; color: var(--muted); font: 400 12px/1.4 Arial, sans-serif; }
 .store-help-content p { margin: 0; }
+.store-help-content > .translation { margin-top: -12px; color: var(--muted); font: 12px/1.65 Arial, sans-serif; }
+.store-help-content .drink-offer p + p,
+.store-help-content .store-audio-note p + p { margin-top: 6px; }
 .store-help-content .store-audio-note { padding: 14px 16px; border-left: 2px solid #7251b5; background: #f2eef7; }
 .store-help-links { display: grid; margin-top: 8px; border-top: 1px solid #c7dbd2; }
-.store-help-links a { padding: 14px 0; border-bottom: 1px solid #c7dbd2; color: #176b60; }
+.store-help-links a { display: grid; gap: 3px; padding: 14px 0; border-bottom: 1px solid #c7dbd2; color: #176b60; }
+.store-help-links small { color: var(--muted); font: 11px/1.4 Arial, sans-serif; }
 .drink-discount-dialog {
   width: min(680px, calc(100% - 28px));
   max-height: calc(100svh - 28px);
@@ -378,12 +401,26 @@
 .poster-store-page .my-submission-card { min-height: 0; padding: 18px 54px 18px 20px; }
 .poster-store-page .my-submission-card strong { margin: 8px 0 4px; }
 .poster-store-page .my-submission-card small { padding-top: 10px; }
+.dialog-work-number { display: flex; align-items: center; gap: 9px; margin: 0 0 14px; color: var(--muted); font-size: .72rem; letter-spacing: .08em; }
+.dialog-work-number span { display: grid; width: 34px; height: 34px; place-items: center; border-radius: 50%; color: #fff; background: #236958; font: 700 .9rem/1 Arial, sans-serif; letter-spacing: 0; }
+.dialog-preparing { margin: 24px 0 48px; color: var(--muted); }
+.work-navigation { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 40px; padding-top: 22px; border-top: 1px solid var(--line); }
+.work-navigation button { min-height: 74px; display: grid; align-content: center; gap: 5px; padding: 12px 14px; border: 1px solid var(--line-strong); color: var(--violet-dark); background: #fff; text-align: left; cursor: pointer; }
+.work-navigation button:last-child { text-align: right; }
+.work-navigation button:hover:not(:disabled),
+.work-navigation button:focus-visible:not(:disabled) { background: var(--mint-soft); }
+.work-navigation button:disabled { color: #aaa6a0; background: #f5f3ef; cursor: default; }
+.work-navigation small { overflow: hidden; color: var(--muted); font-size: .68rem; text-overflow: ellipsis; white-space: nowrap; }
 
 @media (max-width: 600px) {
   .store-workspace-head { padding-inline: 12px; }
   .store-workspace-head h1 { margin-inline: 8px; }
-  .poster-store-page .folder-tabs { grid-template-columns: .85fr .85fr 1.45fr; }
-  .poster-store-page .folder-tabs .mode-button { min-height: 62px; padding: 8px 5px; font-size: .68rem; }
+  .poster-store-page .folder-tabs { margin-right: -12px; }
+  .poster-store-page .folder-tabs .mode-button { min-height: 40px; padding: 8px 12px; font-size: .68rem; }
   .poster-store-page .mode-panel { padding-inline: 20px; }
+  .map-label-row { align-items: flex-start; gap: 10px; }
+  .map-label-actions { flex-direction: column; align-items: flex-end; gap: 5px; }
   .store-help-button { width: 48px; height: 48px; }
+  .work-navigation { grid-template-columns: minmax(0, 1fr); }
+  .work-navigation button:last-child { text-align: left; }
 }

@@ -60,6 +60,7 @@ window.LAUNDRY_WAITING_ROOM_DATA = {
       return Object.assign({}, source, {
         id: store.id + "-" + locationId,
         number: String(index + 1),
+        audioUrl: "assets/laundry/works/audio/location-" + locationId + ".mp3?v=20261107-1",
         areaMap: {
           image: "assets/laundry/works/maps/location-" + locationId + ".webp?v=20261107-2",
           imageAlt: source.place + "を中心とした周囲50mの地図"

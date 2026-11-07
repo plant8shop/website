@@ -207,6 +207,8 @@
     if (activeWork) renderDialog();
     else renderPlaceholderDialog(entry);
     if (!dialog.open) dialog.showModal();
+    dialog.scrollTop = 0;
+    requestAnimationFrame(function () { dialog.scrollTop = 0; });
   }
 
   function bindWorkNavigation() {

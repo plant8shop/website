@@ -229,38 +229,38 @@ SE 鳥のさえずり
 After passing countless signs, I finally reached the bar.
 SFX: Rattle, rattle.
 Owner: "Welcome. Are you... here about the letter?"
-Ryomaru: "Yes."
+"Yes, that's right."
 Owner: "Please take that seat."
 Two men and two women sat there with solemn expressions.
-Otsuki: "It seems everyone is here. Let us introduce ourselves. I am Aoi Mitarai."
-Aoki: "I am Aoi Mitarai."
-Asada: "I am Aoi Mitarai."
-Kibata: "I am Aoi Mitarai."
-Ryomaru: "Um... I am Aoi Mitarai."
-Otsuki: "Five people named Aoi Mitarai live in this tiny neighborhood. The paperwork has become so confusing that the city staff are exhausted. City hall has therefore ordered us to reduce the number of Aoi Mitarais here to one."
+Otsuki / Mitarai 1: "It seems everyone is here. Let us introduce ourselves. I am Aoi Mitarai."
+Aoki / Mitarai 2: "I am Aoi Mitarai."
+Asada / Mitarai 3: "I am Aoi Mitarai."
+Kibata / Mitarai 4: "I am Aoi Mitarai."
+Me: "Um... I am Aoi Mitarai."
+Mitarai 1: "Five people named Aoi Mitarai live in this tiny neighborhood. The paperwork has become so confusing that the city staff are exhausted. City hall has therefore ordered us to reduce the number of Aoi Mitarais here to one."
 The group erupts in alarm.
-Asada: "But... my child has only just started elementary school."
-Aoki: "You cannot be serious. This is terrible."
-Kibata: "I have lived here all my life! You cannot make me leave now!"
-Otsuki: "Please calm down. It has not yet been decided that you cannot stay."
+Mitarai 3: "But... my child has only just started elementary school."
+Mitarai 2: "You cannot be serious. This is terrible."
+Mitarai 4: "I have lived here all my life! You cannot make me leave now!"
+Mitarai 1: "Please calm down. It has not yet been decided that you cannot stay."
 The owner approaches and hands each person one yakitori skewer.
-Otsuki: "Everyone, eat your yakitori."
+Mitarai 1: "Everyone, eat your yakitori."
 Once the chicken was eaten, each skewer turned into a sharp sword.
-Aoki: "You mean... we fight to decide?"
-Otsuki: "Exactly. Whoever survives will be this neighborhood's Aoi Mitarai."
+Mitarai 2: "You mean... we fight to decide?"
+Mitarai 1: "Exactly. Whoever survives will be this neighborhood's Aoi Mitarai."
 SFX: Fighting and running.
-Kibata: "S-stop!"
-Asada: "I am sorry! My child just started school. I cannot move away!"
-Kibata: "I finally became area manager at the rental-cycle shop! I cannot move—"
+Mitarai 4: "S-stop!"
+Mitarai 3: "I am sorry! My child just started school. I cannot move away!"
+Mitarai 4: "I finally became area manager at the rental-cycle shop! I cannot move—"
 SFX: Stab.
-Kibata: "Aaargh!"
+Mitarai 4: "Aaargh!"
 He collapses. He is promptly carried outside and collected by a garbage truck.
 SFX: Fighting.
 SFX: Rattle, rattle.
 Running. Gasping for breath.
-Ryomaru: "Hah... hah... I made it home. Thank goodness there was a rental bicycle nearby. I will just sleep for now."
+Me: "Hah... hah... I made it home. Thank goodness there was a rental bicycle nearby. I will just sleep for now."
 SFX: Birds singing.
-When he wakes, a letter is waiting in the postbox.
+When I wake up, a letter is waiting in the postbox.
 "Because you fled during the battle, you are deemed to have withdrawn. You may no longer live in this neighborhood as Aoi Mitarai. Move away immediately."`),
 
     6: work(6, "交換", "Exchange", "スタジアムと並木のあいだ", "Between the stadium and the trees", "", "",

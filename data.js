@@ -182,14 +182,74 @@ const SITE_DATA = {
       title: "プラントショ⌇ップ",
       period: "2026.08-",
       status: "進行中",
-      thumbnail: "",
-      summary: "植物が生えている路上のコンクリートやアスファルトのひび割れを型取りし、植木鉢として複製します。あわせて、そこに生える植物から見た街のパノラマ風景をもとにグラフィック作品を制作し、松ヶ崎祭で展示・販売します。",
+      thumbnail: "assets/plantshop/view-01.webp",
+      visualPage: true,
+      summary: "松ヶ崎・一乗寺周辺の7地点で、植物が生える路上のひび割れと、その高さから見える街の風景を記録しました。ひび割れの形を型取りした「植木鉢」と、風景を組み替えた「反実仮草」を制作しています。",
       detailHtml: `
-      <section>
-        <p>普段は見過ごされる路上の小さな風景を、手に取れる作品へ置き換える試みです。ひび割れの形や植物の視点を通して、街の表面を捉え直します。</p>
-        <p>第56回松ヶ崎祭では、11月14日10:00–20:30、15日10:00–16:00に「5の4」で販売します。</p>
-        <p><a href="https://www.matsufes.info/booth/083">松ヶ崎祭公式サイトの「プラントショ⌇ップ」出展ページ</a></p>
-      </section>
+<article class="plant-project">
+  <header class="plant-project-header">
+    <h1><span>植木鉢</span><span>反実仮草</span></h1>
+    <div class="plant-views"><a class="plant-image-link" href="assets/plantshop/view-01-full.webp" data-plant-image data-plant-group="views" aria-label="植木鉢と反実仮草の展示イメージ1を拡大"><img src="assets/plantshop/view-01.webp" alt="植木鉢と反実仮草の展示イメージ1" width="1000" height="667" loading="eager" decoding="async" fetchpriority="high"></a><a class="plant-image-link" href="assets/plantshop/view-02-full.webp" data-plant-image data-plant-group="views" aria-label="植木鉢と反実仮草の展示イメージ2を拡大"><img src="assets/plantshop/view-02.webp" alt="植木鉢と反実仮草の展示イメージ2" width="1000" height="667" loading="lazy" decoding="async"></a><a class="plant-image-link" href="assets/plantshop/view-03-full.webp" data-plant-image data-plant-group="views" aria-label="植木鉢と反実仮草の展示イメージ3を拡大"><img src="assets/plantshop/view-03.webp" alt="植木鉢と反実仮草の展示イメージ3" width="1000" height="667" loading="lazy" decoding="async"></a></div>
+    <p class="plant-intro">松ヶ崎・一乗寺周辺の7地点で、植物が生える路上のひび割れと、その高さから見える街の風景を記録しました。ひび割れの形を型取りした「植木鉢」と、風景を組み替えた「反実仮草」を制作しています。</p>
+  </header>
+  <section class="plant-work-section" aria-labelledby="pots-title">
+    <h2 id="pots-title">植木鉢</h2>
+    <p>植物が生えている路上のコンクリートやアスファルトのひび割れを型取りし、植木鉢として複製しました。周辺の地図と写真を手がかりに、もとになった場所をたどることができます。</p>
+    <div class="plant-pots"><a class="plant-image-link" href="assets/plantshop/pot-01-full.webp" data-plant-image data-plant-group="pots" aria-label="植木鉢の作品写真1を拡大"><img src="assets/plantshop/pot-01.webp" alt="植木鉢の作品写真1" width="675" height="900" loading="lazy" decoding="async"></a><a class="plant-image-link" href="assets/plantshop/pot-02-full.webp" data-plant-image data-plant-group="pots" aria-label="植木鉢の作品写真2を拡大"><img src="assets/plantshop/pot-02.webp" alt="植木鉢の作品写真2" width="675" height="900" loading="lazy" decoding="async"></a><a class="plant-image-link" href="assets/plantshop/pot-03-full.webp" data-plant-image data-plant-group="pots" aria-label="植木鉢の作品写真3を拡大"><img src="assets/plantshop/pot-03.webp" alt="植木鉢の作品写真3" width="675" height="900" loading="lazy" decoding="async"></a><a class="plant-image-link" href="assets/plantshop/pot-04-full.webp" data-plant-image data-plant-group="pots" aria-label="植木鉢の作品写真4を拡大"><img src="assets/plantshop/pot-04.webp" alt="植木鉢の作品写真4" width="675" height="900" loading="lazy" decoding="async"></a><a class="plant-image-link" href="assets/plantshop/pot-05-full.webp" data-plant-image data-plant-group="pots" aria-label="植木鉢の作品写真5を拡大"><img src="assets/plantshop/pot-05.webp" alt="植木鉢の作品写真5" width="675" height="900" loading="lazy" decoding="async"></a><a class="plant-image-link" href="assets/plantshop/pot-06-full.webp" data-plant-image data-plant-group="pots" aria-label="植木鉢の作品写真6を拡大"><img src="assets/plantshop/pot-06.webp" alt="植木鉢の作品写真6" width="675" height="900" loading="lazy" decoding="async"></a><a class="plant-image-link" href="assets/plantshop/pot-07-full.webp" data-plant-image data-plant-group="pots" aria-label="植木鉢の作品写真7を拡大"><img src="assets/plantshop/pot-07.webp" alt="植木鉢の作品写真7" width="675" height="900" loading="lazy" decoding="async"></a></div>
+  </section>
+  <section class="plant-work-section" aria-labelledby="graphics-title">
+    <h2 id="graphics-title">反実仮草</h2>
+    <p>7地点で、植物の高さから周囲のパノラマを撮影しました。そこに写る建物、塀、樹木などを取り出し、配置を組み替えてひとつの風景に再構成しています。</p>
+    <div class="plant-graphics"><a class="plant-image-link" href="assets/plantshop/graphic-01-full.webp" data-plant-image data-plant-group="graphics" aria-label="反実仮草の作品1を拡大"><img src="assets/plantshop/graphic-01.webp" alt="反実仮草の作品1" width="1800" height="378" loading="lazy" decoding="async"></a><a class="plant-image-link" href="assets/plantshop/graphic-02-full.webp" data-plant-image data-plant-group="graphics" aria-label="反実仮草の作品2を拡大"><img src="assets/plantshop/graphic-02.webp" alt="反実仮草の作品2" width="1800" height="378" loading="lazy" decoding="async"></a><a class="plant-image-link" href="assets/plantshop/graphic-03-full.webp" data-plant-image data-plant-group="graphics" aria-label="反実仮草の作品3を拡大"><img src="assets/plantshop/graphic-03.webp" alt="反実仮草の作品3" width="1800" height="378" loading="lazy" decoding="async"></a><a class="plant-image-link" href="assets/plantshop/graphic-04-full.webp" data-plant-image data-plant-group="graphics" aria-label="反実仮草の作品4を拡大"><img src="assets/plantshop/graphic-04.webp" alt="反実仮草の作品4" width="1800" height="378" loading="lazy" decoding="async"></a><a class="plant-image-link" href="assets/plantshop/graphic-05-full.webp" data-plant-image data-plant-group="graphics" aria-label="反実仮草の作品5を拡大"><img src="assets/plantshop/graphic-05.webp" alt="反実仮草の作品5" width="1800" height="378" loading="lazy" decoding="async"></a><a class="plant-image-link" href="assets/plantshop/graphic-06-full.webp" data-plant-image data-plant-group="graphics" aria-label="反実仮草の作品6を拡大"><img src="assets/plantshop/graphic-06.webp" alt="反実仮草の作品6" width="1800" height="378" loading="lazy" decoding="async"></a></div>
+  </section>
+  <section class="plant-locations" aria-label="制作のもとになった7地点">
+    <p class="plant-location-description">松ヶ崎・一乗寺周辺。番号は京都工芸繊維大学の中央門からの徒歩距離の目安順です。</p>
+    <div class="plant-locations-layout">
+      <div class="plant-map-panel">
+        <div class="plant-map"><img src="assets/plantshop/map.webp" alt="京都・松ヶ崎と一乗寺周辺の地図" width="1457" height="1507" loading="lazy" decoding="async"><a class="plant-map-pin" href="#site-01" style="left:34.1733%;top:40.5383%" aria-label="01地点の写真とパノラマを見る">01</a><a class="plant-map-pin" href="#site-02" style="left:25.1982%;top:49.9359%" aria-label="02地点の写真とパノラマを見る">02</a><a class="plant-map-pin" href="#site-03" style="left:25.9636%;top:64.1987%" aria-label="03地点の写真とパノラマを見る">03</a><a class="plant-map-pin" href="#site-04" style="left:41.0255%;top:20.2028%" aria-label="04地点の写真とパノラマを見る">04</a><a class="plant-map-pin" href="#site-05" style="left:16.7509%;top:75.1409%" aria-label="05地点の写真とパノラマを見る">05</a><a class="plant-map-pin" href="#site-06" style="left:71.5497%;top:50.9871%" aria-label="06地点の写真とパノラマを見る">06</a><a class="plant-map-pin" href="#site-07" style="left:86.1430%;top:35.0622%" aria-label="07地点の写真とパノラマを見る">07</a></div>
+        <p class="plant-map-credit">© OpenStreetMap contributors · ODbL<br><a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">openstreetmap.org/copyright</a></p>
+      </div>
+      <div class="plant-sites"><article class="plant-site" id="site-01">
+      <div class="plant-site-heading"><h3>01</h3><a class="plant-map-out" href="https://www.google.com/maps/search/?api=1&amp;query=35.049728,135.78433859999998" target="_blank" rel="noopener noreferrer">地図で開く<span class="sr-only">（新しいタブ）</span></a></div>
+      <div class="plant-site-images"><a class="plant-image-link" href="assets/plantshop/site-01-full.webp" data-plant-image data-plant-group="sites" aria-label="01地点の路面とひび割れを拡大"><img src="assets/plantshop/site-01.webp" alt="01地点の路面とひび割れ" width="675" height="900" loading="lazy" decoding="async"></a></div>
+      <div class="plant-site-panorama"><a class="plant-image-link" href="assets/plantshop/panorama-01-full.webp" data-plant-image data-plant-group="panoramas" aria-label="01地点の植物の高さから見たパノラマを拡大"><img src="assets/plantshop/panorama-01.webp" alt="01地点の植物の高さから見たパノラマ" width="1800" height="378" loading="lazy" decoding="async"></a></div>
+    </article><article class="plant-site" id="site-02">
+      <div class="plant-site-heading"><h3>02</h3><a class="plant-map-out" href="https://www.google.com/maps/search/?api=1&amp;query=35.0484157,135.7828577" target="_blank" rel="noopener noreferrer">地図で開く<span class="sr-only">（新しいタブ）</span></a></div>
+      <div class="plant-site-images"><a class="plant-image-link" href="assets/plantshop/site-02-full.webp" data-plant-image data-plant-group="sites" aria-label="02地点の路面とひび割れを拡大"><img src="assets/plantshop/site-02.webp" alt="02地点の路面とひび割れ" width="900" height="900" loading="lazy" decoding="async"></a></div>
+      <div class="plant-site-panorama"><a class="plant-image-link" href="assets/plantshop/panorama-02-full.webp" data-plant-image data-plant-group="panoramas" aria-label="02地点の植物の高さから見たパノラマを拡大"><img src="assets/plantshop/panorama-02.webp" alt="02地点の植物の高さから見たパノラマ" width="1800" height="378" loading="lazy" decoding="async"></a></div>
+    </article><article class="plant-site" id="site-03">
+      <div class="plant-site-heading"><h3>03</h3><a class="plant-map-out" href="https://www.google.com/maps/search/?api=1&amp;query=35.046424,135.782984" target="_blank" rel="noopener noreferrer">地図で開く<span class="sr-only">（新しいタブ）</span></a></div>
+      <div class="plant-site-images"><a class="plant-image-link" href="assets/plantshop/site-03-full.webp" data-plant-image data-plant-group="sites" aria-label="03地点の路面とひび割れを拡大"><img src="assets/plantshop/site-03.webp" alt="03地点の路面とひび割れ" width="900" height="900" loading="lazy" decoding="async"></a></div>
+      <div class="plant-site-panorama"><a class="plant-image-link" href="assets/plantshop/panorama-03-full.webp" data-plant-image data-plant-group="panoramas" aria-label="03地点の植物の高さから見たパノラマを拡大"><img src="assets/plantshop/panorama-03.webp" alt="03地点の植物の高さから見たパノラマ" width="1800" height="378" loading="lazy" decoding="async"></a></div>
+    </article><article class="plant-site" id="site-04">
+      <div class="plant-site-heading"><h3>04</h3><a class="plant-map-out" href="https://www.google.com/maps/search/?api=1&amp;query=35.0525677,135.7854692" target="_blank" rel="noopener noreferrer">地図で開く<span class="sr-only">（新しいタブ）</span></a></div>
+      <div class="plant-site-images"><a class="plant-image-link" href="assets/plantshop/site-04-full.webp" data-plant-image data-plant-group="sites" aria-label="04地点の路面とひび割れを拡大"><img src="assets/plantshop/site-04.webp" alt="04地点の路面とひび割れ" width="900" height="900" loading="lazy" decoding="async"></a></div>
+      <div class="plant-site-panorama"><a class="plant-image-link" href="assets/plantshop/panorama-04-full.webp" data-plant-image data-plant-group="panoramas" aria-label="04地点の植物の高さから見たパノラマを拡大"><img src="assets/plantshop/panorama-04.webp" alt="04地点の植物の高さから見たパノラマ" width="1800" height="378" loading="lazy" decoding="async"></a></div>
+    </article><article class="plant-site" id="site-05">
+      <div class="plant-site-heading"><h3>05</h3><a class="plant-map-out" href="https://www.google.com/maps/search/?api=1&amp;query=35.044896,135.7814639" target="_blank" rel="noopener noreferrer">地図で開く<span class="sr-only">（新しいタブ）</span></a></div>
+      <div class="plant-site-images"><a class="plant-image-link" href="assets/plantshop/site-05-full.webp" data-plant-image data-plant-group="sites" aria-label="05地点の路面とひび割れを拡大"><img src="assets/plantshop/site-05.webp" alt="05地点の路面とひび割れ" width="900" height="900" loading="lazy" decoding="async"></a></div>
+      <div class="plant-site-panorama"><a class="plant-image-link" href="assets/plantshop/panorama-05-full.webp" data-plant-image data-plant-group="panoramas" aria-label="05地点の植物の高さから見たパノラマを拡大"><img src="assets/plantshop/panorama-05.webp" alt="05地点の植物の高さから見たパノラマ" width="1800" height="378" loading="lazy" decoding="async"></a></div>
+    </article><article class="plant-site" id="site-06">
+      <div class="plant-site-heading"><h3>06</h3><a class="plant-map-out" href="https://www.google.com/maps/search/?api=1&amp;query=35.0482689,135.79050569999998" target="_blank" rel="noopener noreferrer">地図で開く<span class="sr-only">（新しいタブ）</span></a></div>
+      <div class="plant-site-images"><a class="plant-image-link" href="assets/plantshop/site-06-full.webp" data-plant-image data-plant-group="sites" aria-label="06地点の路面とひび割れを拡大"><img src="assets/plantshop/site-06.webp" alt="06地点の路面とひび割れ" width="900" height="900" loading="lazy" decoding="async"></a></div>
+      <div class="plant-site-panorama"><a class="plant-image-link" href="assets/plantshop/panorama-06-full.webp" data-plant-image data-plant-group="panoramas" aria-label="06地点の植物の高さから見たパノラマを拡大"><img src="assets/plantshop/panorama-06.webp" alt="06地点の植物の高さから見たパノラマ" width="1800" height="378" loading="lazy" decoding="async"></a></div>
+    </article><article class="plant-site" id="site-07">
+      <div class="plant-site-heading"><h3>07</h3><a class="plant-map-out" href="https://www.google.com/maps/search/?api=1&amp;query=35.0504927,135.7929136" target="_blank" rel="noopener noreferrer">地図で開く<span class="sr-only">（新しいタブ）</span></a></div>
+      <div class="plant-site-images"><a class="plant-image-link" href="assets/plantshop/site-07-full.webp" data-plant-image data-plant-group="sites" aria-label="07地点の路面とひび割れを拡大"><img src="assets/plantshop/site-07.webp" alt="07地点の路面とひび割れ" width="900" height="900" loading="lazy" decoding="async"></a></div>
+      <div class="plant-site-panorama"><a class="plant-image-link" href="assets/plantshop/panorama-07-full.webp" data-plant-image data-plant-group="panoramas" aria-label="07地点の植物の高さから見たパノラマを拡大"><img src="assets/plantshop/panorama-07.webp" alt="07地点の植物の高さから見たパノラマ" width="1800" height="378" loading="lazy" decoding="async"></a></div>
+    </article></div>
+    </div>
+  </section>
+  <footer class="plant-project-footer">
+    <div class="plant-downloads"><a href="assets/plantshop/leaflet-a4.pdf" target="_blank" rel="noopener">リーフレット（PDF）</a><a href="assets/plantshop/project-a3.pdf" target="_blank" rel="noopener">作品説明（PDF）</a></div>
+    <p>第56回松ヶ崎祭：2026年11月14日 10:00–20:30／15日 10:00–16:00<br>京都工芸繊維大学 松ヶ崎キャンパス「5の4」<br><a href="https://www.matsufes.info/booth/083" target="_blank" rel="noopener noreferrer">松ヶ崎祭の出展ページ</a></p>
+    <div class="member-detail-list" id="workMemberList"></div>
+  </footer>
+</article>
+<dialog class="plant-lightbox" aria-label="作品画像の拡大表示">
+  <div class="plant-lightbox-controls"><button type="button" data-plant-zoom aria-label="画像を拡大" aria-pressed="false">＋</button><button type="button" data-plant-close aria-label="画像を閉じる">×</button></div>
+  <div class="plant-lightbox-viewport"><img alt=""></div>
+</dialog>
       `,
       participantIds: ["aoki", "umeda", "asada"],
       contributions: {

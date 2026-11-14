@@ -998,6 +998,16 @@
       url: location.href
     });
 
+    if (work.visualPage) {
+      document.body.classList.add("is-plant-project");
+      wrap.closest(".section-inner")?.classList.add("plant-project-inner");
+      wrap.innerHTML = work.detailHtml;
+      const memberList = $("#workMemberList");
+      if (memberList) work.participantIds.map(id => membersById[id]).filter(Boolean)
+        .forEach(member => memberList.appendChild(memberLink(member, work)));
+      return;
+    }
+
     wrap.innerHTML = `
       <div class="page-hero">
         <h1>${escapeHtml(work.title)}</h1>

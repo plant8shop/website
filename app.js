@@ -32,7 +32,7 @@
     document.addEventListener('click', event => { if (!event.target.closest('.site-header')) setOpen(false); });
     mobile.addEventListener('change', update);
     update();
-    const updateOffset = () => document.documentElement.style.setProperty('--anchor-offset', `${$('.nav-home').getBoundingClientRect().height + 48}px`);
+    const updateOffset = () => document.documentElement.style.setProperty('--anchor-offset', `${mobile.matches ? $('.nav-home').getBoundingClientRect().height + 48 : 32}px`);
     new ResizeObserver(updateOffset).observe($('.nav-home'));
     updateOffset();
   }

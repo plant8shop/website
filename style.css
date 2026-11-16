@@ -40,6 +40,31 @@ a, button { transition: color .18s, background-color .18s; }
 .nav-links { display: flex; align-items: center; gap: 22px; font-size: 11px; line-height: 1.6; white-space: nowrap; }
 .nav-links a { padding: 8px 0; }
 .nav-links a:hover { color: var(--violet); }
+@media (min-width: 961px) {
+  :root { --content-width: 960px; --anchor-offset: 32px; }
+  body > .site-header {
+    position: fixed;
+    inset: 44px auto 40px max(32px, calc((100vw - 1440px) / 2 + 32px));
+    width: 180px;
+    background: transparent;
+    backdrop-filter: none;
+    overflow-y: auto;
+  }
+  .nav { flex-direction: column; align-items: flex-start; gap: 46px; padding: 0; margin: 0; }
+  .nav-home { margin: 0; }
+  .nav-logo { width: 144px; }
+  .nav-links { flex-direction: column; align-items: flex-start; gap: 13px; width: 100%; font-size: 12px; white-space: normal; }
+  .nav-links a { padding: 5px 0; }
+  .nav-links a:hover { text-decoration: underline; text-underline-offset: 7px; }
+  .nav-links a:last-child { margin-top: 20px; font-size: 11px; color: var(--muted); }
+  body > main {
+    margin-left: max(244px, calc((100vw - 1440px) / 2 + 244px));
+    margin-right: max(16px, calc((100vw - 1440px) / 2 + 16px));
+  }
+  body > main.section { padding-top: 44px; }
+  body[data-page="home"] .intro-section { padding-top: 44px; }
+  body[data-page] .page-hero { max-width: 840px; }
+}
 .nav-toggle { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 7px; width: 44px; height: 44px; border: 0; padding: 10px; color: var(--violet-dark); background: transparent; }
 .nav-toggle span { width: 24px; height: 1px; background: currentColor; transition: transform .18s; }
 .nav-toggle[aria-expanded="true"] span:first-child { transform: translateY(4px) rotate(45deg); }

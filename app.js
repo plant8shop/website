@@ -1,61 +1,111 @@
 (function () {
   const data = SITE_DATA;
-  const page = document.body.dataset.page;
-
-  const GRAPH = {
-    leftX: 0,
-    cardW: 244,
-    cardH: 92,
-    railX: 340,
-    memberGap: 102,
-    memberTopY: 36,
-    memberLabelY: 12,
-    rowTop: 92,
-    rowGap: 118,
-    endPad: 72,
-    nodeR: 10
-  };
-
-  const MOBILE_BREAKPOINT = 640;
-
-  const $ = (sel, root = document) => root.querySelector(sel);
-  const svgNS = "http://www.w3.org/2000/svg";
-
+  const $ = (s, root = document) => root.querySelector(s);
   const membersById = Object.fromEntries(data.members.map(m => [m.id, m]));
   const worksById = Object.fromEntries(data.works.map(w => [w.id, w]));
-  const announcementsById = Object.fromEntries(
-    (data.site.announcements || []).map(item => [item.id, item])
-  );
-  const memberRegistrationIndex = Object.fromEntries(
-    data.members.map((member, index) => [member.id, index])
-  );
+  const getQueryParam = name => new URL(location.href).searchParams.get(name);
+  const escapeHtml = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const el = (tag, cls, html) => { const n = document.createElement(tag); n.className = cls; n.innerHTML = html; return n; };
+  const renderNotFound = (wrap, label) => { wrap.innerHTML = `<p>${label}が見つかりません。</p><a class="text-link" href="index.html">トップへ戻る</a>`; };
+  let announcementStatus = 'latest';
 
-  let activeBubbleTrigger = null;
-  let closeDialogTimer = null;
-  let announcementStatus = "latest";
-  let lastIsMobile = window.innerWidth <= MOBILE_BREAKPOINT;
-  let graphResizeObserver = null;
-
-  function el(tag, className = "", html = "") {
-    const node = document.createElement(tag);
-    if (className) node.className = className;
-    if (html) node.innerHTML = html;
-    return node;
+  function memberLink(member, work) {
+    const a = el('a', 'member-detail-link', `<span>${escapeHtml(member.name)}</span><span aria-hidden="true">↗</span>`);
+    a.href = `member.html?id=${encodeURIComponent(member.id)}`;
+    if (work?.contributions?.[member.id]) a.title = work.contributions[member.id];
+    return a;
   }
-
-  function getQueryParam(name) {
-    return new URL(location.href).searchParams.get(name);
+  function workCard(work, member) {
+    const article = el('article', 'content-card project-card', `
+      <a class="project-cover" href="work.html?id=${encodeURIComponent(work.id)}" aria-label="${escapeHtml(work.title)}の活動ページ">
+        ${work.thumbnail ? `<img src="${escapeHtml(work.thumbnail)}" alt="" loading="lazy" decoding="async">` : `<span class="project-placeholder" aria-hidden="true">${escapeHtml(work.title)}</span>`}
+      </a>
+      <div class="card-body">
+        <div class="card-meta">${escapeHtml(work.period)}${work.status ? ` <span class="card-status">${escapeHtml(work.status)}</span>` : ''}</div>
+        <h3><a class="card-title-link" href="work.html?id=${encodeURIComponent(work.id)}">${escapeHtml(work.title)}<span aria-hidden="true">↗</span></a></h3>
+        <p>${escapeHtml(work.summary)}</p>
+        ${member && work.contributions?.[member.id] ? `<p class="contribution">${escapeHtml(work.contributions[member.id])}</p>` : ''}
+        <div class="card-members"></div>
+      </div>`);
+    const list = $('.card-members', article);
+    (work.participantIds || []).map(id => membersById[id]).filter(Boolean).forEach(m => list.append(memberLink(m, work)));
+    return article;
   }
-
-  function escapeHtml(str) {
-    return String(str)
-      .replaceAll("&", "&amp;")
-      .replaceAll("<", "&lt;")
-      .replaceAll(">", "&gt;")
-      .replaceAll('"', "&quot;")
-      .replaceAll("'", "&#039;");
+  const workTile = workCard;
+  function renderWorks() {
+    const area = $('#worksGraph');
+    if (!area) return;
+    area.className = 'project-grid';
+    data.works.forEach(w => area.append(workCard(w)));
+    const people = $('#membersList');
+    data.members.forEach(m => {
+      const count = data.works.filter(w => w.participantIds.includes(m.id)).length;
+      const card = el('article', 'content-card person-card', `<div class="card-body"><h3><a class="card-title-link" href="member.html?id=${encodeURIComponent(m.id)}">${escapeHtml(m.name)}<span aria-hidden="true">↗</span></a></h3>${m.bio ? `<p>${escapeHtml(m.bio)}</p>` : ''}<div class="person-card-footer"><span class="card-meta">${count} 活動に参加</span><div class="member-links">${(m.links || []).map(l => `<a href="${escapeHtml(l.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(l.label)}</a>`).join('')}</div></div></div>`);
+      people.append(card);
+    });
   }
-
+  function renderAnnouncements() {
+    const list = $('#newsList');
+    if (!list) return;
+    const items = [...(data.site.announcements || [])].filter(x => x.status === announcementStatus).sort((a,b) => b.date.localeCompare(a.date));
+    list.innerHTML = items.length ? items.map(x => `<article class="content-card news-item" id="news-${escapeHtml(x.id)}"><div class="card-body"><time class="card-meta" datetime="${escapeHtml(x.date.replaceAll('.', '-'))}">${escapeHtml(x.date)}</time><h3>${escapeHtml(x.title)}</h3>${x.image ? `<img class="news-image" src="${escapeHtml(x.image)}" alt="" loading="lazy">` : ''}<p>${escapeHtml(x.summary)}</p>${x.body && x.body !== x.summary ? `<p>${escapeHtml(x.body)}</p>` : ''}<div class="card-links">${(x.relatedLinks || []).map(l => `<a class="text-link" href="${escapeHtml(l.url)}">${escapeHtml(l.label)} <span aria-hidden="true">↗</span></a>`).join('')}</div></div></article>`).join('') : '<p class="news-empty">現在、新しい告知はありません。</p>';
+    decorateServiceLinks(list);
+  }
+  function setupTabs() {
+    const tabs = [...document.querySelectorAll('[data-announcement-status]')];
+    tabs.forEach((button, i) => {
+      button.id = `news-tab-${button.dataset.announcementStatus}`;
+      button.tabIndex = i ? -1 : 0;
+      button.addEventListener('click', () => {
+        announcementStatus = button.dataset.announcementStatus;
+        tabs.forEach(t => { t.classList.toggle('is-active', t === button); t.setAttribute('aria-selected', t === button); t.tabIndex = t === button ? 0 : -1; });
+        $('#newsList').setAttribute('aria-labelledby', button.id);
+        renderAnnouncements();
+      });
+      button.addEventListener('keydown', e => {
+        let target;
+        if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') target = tabs[(i + 1) % tabs.length];
+        if (e.key === 'Home') target = tabs[0];
+        if (e.key === 'End') target = tabs.at(-1);
+        if (target) { e.preventDefault(); target.click(); target.focus(); }
+      });
+    });
+    $('#newsList').setAttribute('aria-labelledby', tabs[0].id);
+  }
+  const serviceDomains = {
+    'x.com':'x','twitter.com':'x','instagram.com':'instagram','note.com':'note',
+    'open.spotify.com':'spotify','spotify.com':'spotify','youtube.com':'youtube','youtu.be':'youtube',
+    'podcasts.apple.com':'applepodcasts','github.com':'github','vimeo.com':'vimeo',
+    'facebook.com':'facebook','soundcloud.com':'soundcloud','tiktok.com':'tiktok',
+    'threads.net':'threads','threads.com':'threads','forms.gle':'googleforms',
+    'maps.google.com':'googlemaps'
+  };
+  function decorateServiceLinks(root = document) {
+    root.querySelectorAll('a[href]').forEach(a => {
+      if (a.dataset.serviceLogo || a.querySelector('img,svg')) return;
+      let url; try { url = new URL(a.getAttribute('href'), location.href); } catch { return; }
+      const host = url.hostname.replace(/^www\./,'');
+      let service = serviceDomains[host];
+      if (host === 'google.com' && url.pathname.startsWith('/maps')) service = 'googlemaps';
+      if (host === 'docs.google.com' && url.pathname.startsWith('/forms')) service = 'googleforms';
+      if (!service) return;
+      const label = a.textContent.trim() || service;
+      a.dataset.serviceLogo = service;
+      a.classList.add('service-link');
+      a.setAttribute('aria-label', label);
+      a.title = label;
+      a.replaceChildren();
+      const img = document.createElement('img'); img.src = `assets/icons/${service}.svg`; img.alt = ''; img.width = 22; img.height = 22;
+      a.append(img);
+      a.target = '_blank'; a.rel = 'noopener noreferrer';
+    });
+  }
+  function renderContact() {
+    const c = data.site.contact;
+    $('#contactContent').innerHTML = `${c.text || ''}<a class="email-link" href="mailto:${escapeHtml(c.email)}">${escapeHtml(c.email)} ↗</a><div class="contact-sns">${(c.sns || []).map(l => `<a href="${escapeHtml(l.url)}">${escapeHtml(l.name)}</a>`).join('')}</div>`;
+    const share = data.site.memberShare;
+    $('#memberShareContent').innerHTML = `<p>${escapeHtml(share.description)}</p><a class="outline-link" href="${escapeHtml(share.url)}" target="_blank" rel="noopener noreferrer">共有サイトを開く <span aria-hidden="true">↗</span></a>`;
+  }
   function setMeta({ title, description, image, url }) {
     if (title) {
       document.title = title;
@@ -86,316 +136,6 @@
     }
 
     tag.setAttribute("content", content);
-  }
-
-  function bubbleHtml({ memberName, contribution }) {
-    return `
-      <div class="bubble-card">
-        <div class="bubble-card-head">
-          <div>
-            <div class="bubble-card-name" id="dialogTitle">${escapeHtml(memberName)}</div>
-          </div>
-        </div>
-        <div class="bubble-card-text">${escapeHtml(contribution || "記述なし")}</div>
-      </div>
-    `;
-  }
-
-  function membersByActivityOrder() {
-    const activityIndexesByMember = Object.fromEntries(
-      data.members.map(member => [
-        member.id,
-        data.works
-          .map((work, index) => work.participantIds.includes(member.id) ? index : -1)
-          .filter(index => index >= 0)
-      ])
-    );
-
-    return [...data.members].sort((a, b) => {
-      const aIndexes = activityIndexesByMember[a.id];
-      const bIndexes = activityIndexesByMember[b.id];
-
-      return bIndexes.length - aIndexes.length
-        || (aIndexes[0] ?? Number.POSITIVE_INFINITY) - (bIndexes[0] ?? Number.POSITIVE_INFINITY)
-        || memberRegistrationIndex[a.id] - memberRegistrationIndex[b.id];
-    });
-  }
-
-  function workBubbleHtml(work) {
-    return `
-      <div class="bubble-card">
-        <div class="bubble-card-head">
-          <div>
-            <div class="bubble-card-name" id="dialogTitle">${escapeHtml(work.title)}</div>
-            <div class="bubble-card-meta">${[work.status, work.period].filter(Boolean).map(escapeHtml).join(" ／ ")}</div>
-          </div>
-        </div>
-        <div class="bubble-card-text">${escapeHtml(work.summary)}</div>
-      </div>
-    `;
-  }
-
-  function announcementBubbleHtml(item) {
-    return `
-      <div class="bubble-card">
-        <div class="bubble-card-head">
-          <span class="status-indicator status-indicator--${escapeHtml(item.status)}" aria-hidden="true"></span>
-          <div>
-            <div class="bubble-card-name" id="dialogTitle">${escapeHtml(item.title)}</div>
-            <div class="bubble-card-meta">${escapeHtml(item.date)} · ${item.status === "done" ? "済み" : "最新"}</div>
-          </div>
-        </div>
-        <div class="bubble-card-text">${escapeHtml(item.summary)}</div>
-      </div>
-    `;
-  }
-
-  function getDialogBackdrop() {
-    return $("#tooltip");
-  }
-
-  function getDialog() {
-    return $(".tooltip", getDialogBackdrop());
-  }
-
-  function clearActiveBubbleTrigger() {
-    if (!activeBubbleTrigger) return;
-    activeBubbleTrigger.classList.remove("bubble-open");
-    activeBubbleTrigger.removeAttribute("data-bubble-open");
-    activeBubbleTrigger = null;
-  }
-
-  function hideBubble() {
-    const backdrop = getDialogBackdrop();
-    if (!backdrop || backdrop.hidden) return;
-    const returnFocus = activeBubbleTrigger;
-
-    backdrop.classList.remove("is-visible");
-    document.body.classList.remove("dialog-open");
-
-    clearTimeout(closeDialogTimer);
-    closeDialogTimer = setTimeout(() => {
-      backdrop.hidden = true;
-      const content = $("#dialogContent", backdrop);
-      if (content) content.innerHTML = "";
-    }, 180);
-
-    clearActiveBubbleTrigger();
-
-    if (returnFocus?.isConnected) returnFocus.focus();
-  }
-
-  function showBubble(html, trigger = null, href = "") {
-    const backdrop = getDialogBackdrop();
-    const dialog = getDialog();
-    const content = $("#dialogContent", backdrop);
-    if (!backdrop || !dialog || !content || !html) return;
-
-    clearTimeout(closeDialogTimer);
-    clearActiveBubbleTrigger();
-
-    content.innerHTML = `
-      ${html}
-      ${href ? `<a class="dialog-detail-link" href="${escapeHtml(href)}">詳細を見る</a>` : ""}
-    `;
-    backdrop.hidden = false;
-    document.body.classList.add("dialog-open");
-
-    if (trigger) {
-      activeBubbleTrigger = trigger;
-      trigger.classList.add("bubble-open");
-      trigger.setAttribute("data-bubble-open", "1");
-    }
-
-    requestAnimationFrame(() => {
-      backdrop.classList.add("is-visible");
-      $(".dialog-close", backdrop)?.focus();
-    });
-  }
-
-  function attachDialogNavigation(node, html, href = "", options = {}) {
-    const { ignoreNestedLinks = false } = options;
-    node.classList.add("bubble-trigger");
-    node.setAttribute("tabindex", node.getAttribute("tabindex") || "0");
-
-    const activate = event => {
-      const nestedLink = event.target.closest?.("a");
-      if (ignoreNestedLinks && nestedLink && nestedLink !== node) return;
-      event.preventDefault();
-      event.stopImmediatePropagation();
-      showBubble(html, node, href);
-    };
-
-    node.addEventListener("click", activate);
-    node.addEventListener("keydown", event => {
-      if (event.key !== "Enter" && event.key !== " ") return;
-      activate(event);
-    });
-  }
-
-  function setupBubbleSystem() {
-    const backdrop = getDialogBackdrop();
-    const dialog = getDialog();
-    if (!backdrop || !dialog) return;
-
-    $(".dialog-close", backdrop)?.addEventListener("click", hideBubble);
-    backdrop.addEventListener("click", event => {
-      if (event.target === backdrop) hideBubble();
-    });
-
-    document.addEventListener("keydown", event => {
-      if (backdrop.hidden) return;
-      if (event.key === "Escape") {
-        hideBubble();
-        return;
-      }
-      if (event.key !== "Tab") return;
-
-      const focusable = [...dialog.querySelectorAll(
-        'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])'
-      )];
-      if (!focusable.length) return;
-
-      const first = focusable[0];
-      const last = focusable.at(-1);
-      if (event.shiftKey && document.activeElement === first) {
-        event.preventDefault();
-        last.focus();
-      } else if (!event.shiftKey && document.activeElement === last) {
-        event.preventDefault();
-        first.focus();
-      }
-    });
-  }
-
-  function renderAbout() {
-    const about = $("#aboutContent");
-    if (!about) return;
-    about.innerHTML = data.site.about;
-  }
-
-  function renderAnnouncements() {
-    const wrap = $("#newsList");
-    if (!wrap) return;
-
-    const announcements = [...(data.site.announcements || [])]
-      .filter(item => item.status === announcementStatus)
-      .sort((a, b) => String(b.date).localeCompare(String(a.date)));
-
-    if (!announcements.length) {
-      wrap.innerHTML = `<p class="news-empty">${announcementStatus === "latest" ? "現在、新しい告知はありません。" : "済みの告知はありません。"}</p>`;
-      return;
-    }
-
-    wrap.innerHTML = announcements.map(item => `
-      <article
-        class="news-item announcement-item"
-        tabindex="0"
-        role="button"
-        data-announcement-id="${escapeHtml(item.id)}"
-        aria-label="${escapeHtml(item.title)}の概要を見る"
-      >
-        <time class="news-date" datetime="${escapeHtml(item.date.replaceAll(".", "-"))}">
-          ${escapeHtml(item.date)}
-        </time>
-        <h3 class="news-title">${escapeHtml(item.title)}</h3>
-        <p class="news-body">${escapeHtml(item.summary)}</p>
-        <span class="news-more">概要を見る</span>
-      </article>
-    `).join("");
-
-    wrap.querySelectorAll(".announcement-item").forEach(itemNode => {
-      const item = announcementsById[itemNode.dataset.announcementId];
-      attachDialogNavigation(
-        itemNode,
-        announcementBubbleHtml(item),
-        `announcement.html?id=${item.id}`
-      );
-    });
-  }
-
-  function setupAnnouncementTabs() {
-    document.querySelectorAll("[data-announcement-status]").forEach(button => {
-      button.addEventListener("click", () => {
-        announcementStatus = button.dataset.announcementStatus;
-        document.querySelectorAll("[data-announcement-status]").forEach(tab => {
-          const isActive = tab === button;
-          tab.classList.toggle("is-active", isActive);
-          tab.setAttribute("aria-selected", String(isActive));
-        });
-        renderAnnouncements();
-      });
-    });
-  }
-
-  function renderContact() {
-    const wrap = $("#contactContent");
-    if (!wrap) return;
-
-    const sns = data.site.contact.sns || [];
-
-    wrap.innerHTML = `
-      ${data.site.contact.text || ""}
-      <p>メール: <a href="mailto:${data.site.contact.email}">${data.site.contact.email}</a></p>
-      ${
-        sns.length
-          ? `
-            <div class="contact-sns">
-              ${sns.map(item => `
-                <a
-                  class="contact-sns-link"
-                  href="${item.url}"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  ${item.name}
-                </a>
-              `).join("")}
-            </div>
-          `
-          : ""
-      }
-    `;
-  }
-
-  function renderMemberShare() {
-    const wrap = $("#memberShareContent");
-    if (!wrap) return;
-
-    const memberShare = data.site.memberShare;
-    if (!memberShare) return;
-
-    wrap.innerHTML = `
-      <p>${escapeHtml(memberShare.description)}</p>
-      <a
-        class="contact-sns-link"
-        href="${escapeHtml(memberShare.url)}"
-        target="_blank"
-        rel="noopener noreferrer"
-      >共有サイトを開く</a>
-    `;
-  }
-
-  function renderOperatingMembers() {
-    const wrap = $("#operatingMembersContent");
-    if (!wrap) return;
-
-    const operatingMembers = data.site.operatingMembers || [];
-    wrap.innerHTML = `
-      <p class="section-lead">活動全体を継続するための役割を、メンバーで分担しています。</p>
-      <ul class="operating-member-list">
-        ${operatingMembers.map(item => {
-          const member = membersById[item.memberId];
-          if (!member) return "";
-          return `
-            <li>
-              <a class="member-detail-link" href="member.html?id=${escapeHtml(member.id)}"><span>${escapeHtml(member.name)}</span></a>
-              <span>${(item.roles || []).length ? item.roles.map(escapeHtml).join("・") : "担当なし"}</span>
-            </li>
-          `;
-        }).join("")}
-      </ul>
-    `;
   }
 
   async function renderPodcast() {
@@ -541,447 +281,6 @@
     }
   }
 
-  function addSvgText(svg, x, y, options = {}) {
-    const {
-      text = "",
-      lines = null,
-      fontSize = 16,
-      fontWeight = "400",
-      fill = "#111",
-      anchor = "start",
-      lineHeight = 1.25
-    } = options;
-
-    const textEl = document.createElementNS(svgNS, "text");
-    textEl.setAttribute("x", x);
-    textEl.setAttribute("y", y);
-    textEl.setAttribute("font-size", fontSize);
-    textEl.setAttribute("font-weight", fontWeight);
-    textEl.setAttribute("fill", fill);
-    textEl.setAttribute("text-anchor", anchor);
-    textEl.setAttribute("font-family", "inherit");
-
-    if (Array.isArray(lines)) {
-      lines.forEach((line, i) => {
-        const tspan = document.createElementNS(svgNS, "tspan");
-        tspan.setAttribute("x", x);
-        tspan.setAttribute("dy", i === 0 ? "0" : fontSize * lineHeight);
-        tspan.textContent = line;
-        textEl.appendChild(tspan);
-      });
-    } else {
-      textEl.textContent = text;
-    }
-
-    svg.appendChild(textEl);
-    return textEl;
-  }
-
-  function splitTitle(title, max = 12) {
-    if (title.length <= max) return [title];
-
-    const lines = [];
-    let current = "";
-
-    for (const ch of title) {
-      current += ch;
-      if (current.length >= max) {
-        lines.push(current);
-        current = "";
-      }
-    }
-
-    if (current) lines.push(current);
-    return lines.slice(0, 3);
-  }
-
-  function clearGraphScrollControls() {
-    graphResizeObserver?.disconnect();
-    graphResizeObserver = null;
-
-    document.querySelectorAll("[data-graph-scroll-controls]").forEach(controls => {
-      controls.hidden = true;
-      controls.innerHTML = "";
-    });
-  }
-
-  function setupGraphScrollControls(container) {
-    const controlsList = [...document.querySelectorAll("[data-graph-scroll-controls]")];
-    if (!controlsList.length) return;
-
-    clearGraphScrollControls();
-    controlsList.forEach(controls => {
-      controls.innerHTML = `
-        <div class="graph-scroll-controls" aria-label="参加メンバーの横位置を調整">
-          <button class="graph-scroll-button" type="button" data-scroll-direction="-1" aria-label="左へ移動">←</button>
-          <label class="graph-scroll-range-wrap">
-            <input class="graph-scroll-range" type="range" min="0" max="0" value="0" step="1" aria-label="参加メンバーの横位置">
-          </label>
-          <button class="graph-scroll-button" type="button" data-scroll-direction="1" aria-label="右へ移動">→</button>
-        </div>
-      `;
-    });
-
-    const ranges = controlsList.map(controls => $(".graph-scroll-range", controls));
-    const updateRange = () => {
-      const max = Math.max(0, container.scrollWidth - container.clientWidth);
-      ranges.forEach(range => {
-        range.max = String(max);
-        range.value = String(Math.min(container.scrollLeft, max));
-      });
-      controlsList.forEach(controls => {
-        controls.hidden = max <= 0;
-      });
-    };
-
-    ranges.forEach(range => {
-      range.addEventListener("input", () => {
-        container.scrollLeft = Number(range.value);
-      });
-    });
-
-    container.addEventListener("scroll", () => {
-      ranges.forEach(range => {
-        range.value = String(container.scrollLeft);
-      });
-    }, { passive: true });
-
-    controlsList.forEach(controls => controls.querySelectorAll("[data-scroll-direction]").forEach(button => {
-      button.addEventListener("click", () => {
-        const direction = Number(button.dataset.scrollDirection);
-        const distance = Math.max(180, container.clientWidth * 0.55);
-        container.scrollBy({
-          left: direction * distance,
-          behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth"
-        });
-      });
-    }));
-
-    graphResizeObserver = new ResizeObserver(updateRange);
-    graphResizeObserver.observe(container);
-    requestAnimationFrame(updateRange);
-  }
-
-  function svgEl(tag, attrs = {}) {
-    const node = document.createElementNS(svgNS, tag);
-    Object.entries(attrs).forEach(([key, value]) => node.setAttribute(key, value));
-    return node;
-  }
-
-  function renderWorksGraph() {
-    const container = $("#worksGraph");
-    if (!container) return;
-
-    const works = data.works;
-    const members = membersByActivityOrder();
-    const width = GRAPH.railX + GRAPH.memberGap * members.length + GRAPH.endPad;
-    const height = GRAPH.rowTop + GRAPH.rowGap * works.length + 20;
-
-    const svg = svgEl("svg", {
-      viewBox: `0 0 ${width} ${height}`,
-      width,
-      height,
-      class: "graph-svg"
-    });
-
-    const xByMember = Object.fromEntries(
-      members.map((member, i) => [member.id, GRAPH.railX + i * GRAPH.memberGap])
-    );
-    const yByWork = Object.fromEntries(
-      works.map((work, i) => [work.id, GRAPH.rowTop + i * GRAPH.rowGap])
-    );
-
-    works.forEach(work => {
-      const y = yByWork[work.id];
-
-      svg.appendChild(svgEl("line", {
-        x1: GRAPH.leftX + GRAPH.cardW,
-        y1: y,
-        x2: width - 28,
-        y2: y,
-        stroke: "#bbb5d7",
-        "stroke-width": "1.2"
-      }));
-
-      const link = svgEl("a", {
-        href: `work.html?id=${work.id}`,
-        class: "graph-work-link"
-      });
-
-      if (work.thumbnail) {
-        link.appendChild(svgEl("image", {
-          href: work.thumbnail,
-          x: GRAPH.leftX,
-          y: y - GRAPH.cardH / 2,
-          width: GRAPH.cardW,
-          height: GRAPH.cardH,
-          preserveAspectRatio: "xMidYMid slice",
-          class: "graph-work-image"
-        }));
-      }
-
-      link.appendChild(svgEl("rect", {
-        x: GRAPH.leftX,
-        y: y - GRAPH.cardH / 2,
-        width: GRAPH.cardW,
-        height: GRAPH.cardH,
-        fill: "rgba(239,255,248,0.62)",
-        stroke: "#aaa3cf",
-        class: "graph-work-overlay"
-      }));
-
-      attachDialogNavigation(link, workBubbleHtml(work), `work.html?id=${work.id}`);
-
-      svg.appendChild(link);
-
-      svg.appendChild(svgEl("rect", {
-        x: GRAPH.leftX + 12,
-        y: y - 30,
-        width: 118,
-        height: 60,
-        fill: "rgba(245,255,251,0.9)",
-        class: "graph-work-label-bg"
-      }));
-
-      addSvgText(svg, GRAPH.leftX + 18, y - 12, {
-        lines: splitTitle(work.title),
-        fontSize: 16,
-        fontWeight: "600",
-        fill: "#4d477f"
-      });
-
-      addSvgText(svg, GRAPH.leftX + 18, y + 20, {
-        text: work.period,
-        fontSize: 13,
-        fill: "#706b88"
-      });
-    });
-
-    members.forEach(member => {
-      const x = xByMember[member.id];
-      const ys = works
-        .filter(work => work.participantIds.includes(member.id))
-        .map(work => yByWork[work.id])
-        .sort((a, b) => a - b);
-
-      if (ys.length) {
-        svg.appendChild(svgEl("line", {
-          x1: x,
-          y1: Math.max(GRAPH.memberTopY + 22, ys[0]),
-          x2: x,
-          y2: ys.at(-1),
-          stroke: "#b9b2d6",
-          "stroke-width": "2.2",
-          "stroke-linecap": "round",
-          class: "graph-member-shaft"
-        }));
-      }
-
-      const nameLink = svgEl("a", {
-        href: `member.html?id=${member.id}`,
-        class: "graph-member-link"
-      });
-
-      const labelW = Math.max(76, Math.min(96, member.name.length * 13 + 24));
-      const labelH = 40;
-
-      nameLink.appendChild(svgEl("rect", {
-        x: x - labelW / 2,
-        y: GRAPH.memberTopY - labelH / 2,
-        width: labelW,
-        height: labelH,
-        rx: "2",
-        fill: "#fafffd",
-        stroke: "rgba(91, 83, 147, 0.24)",
-        class: "graph-member-name-box"
-      }));
-
-      addSvgText(nameLink, x, GRAPH.memberTopY + 5, {
-        text: member.name,
-        fontSize: 12,
-        fill: "#4d477f",
-        anchor: "middle"
-      });
-
-      svg.appendChild(nameLink);
-
-    });
-
-    works.forEach(work => {
-      const y = yByWork[work.id];
-
-      work.participantIds.forEach(memberId => {
-        const member = membersById[memberId];
-        if (!member) return;
-
-        const x = xByMember[memberId];
-
-        const html = bubbleHtml({
-          memberName: member.name,
-          contribution: work.contributions?.[member.id]
-        });
-
-        const group = svgEl("g", {
-          class: "graph-node-button bubble-trigger",
-          tabindex: "0",
-          role: "link",
-          "aria-label": `${member.name}が${work.title}で担当した内容を見る`
-        });
-
-        group.appendChild(svgEl("circle", {
-          cx: x,
-          cy: y,
-          r: 18,
-          fill: "transparent"
-        }));
-
-        group.appendChild(svgEl("circle", {
-          cx: x,
-          cy: y,
-          r: GRAPH.nodeR,
-          fill: "#f7fffc",
-          stroke: "#746db8",
-          "stroke-width": "1.2"
-        }));
-
-        attachDialogNavigation(group, html, `member.html?id=${member.id}`);
-
-        svg.appendChild(group);
-      });
-    });
-
-    container.innerHTML = "";
-    container.appendChild(svg);
-    setupGraphScrollControls(container);
-  }
-
-  function renderWorksListMobile() {
-    const container = $("#worksGraph");
-    if (!container) return;
-    clearGraphScrollControls();
-
-    container.innerHTML = `
-      <div class="works-mobile-list">
-        ${data.works.map(work => `
-          <article
-            class="works-mobile-card${work.thumbnail ? "" : " is-without-image"}"
-            data-href="work.html?id=${work.id}"
-            tabindex="0"
-            role="link"
-            aria-label="${escapeHtml(work.title)}の活動詳細を見る"
-          >
-            ${work.thumbnail ? `
-              <div class="works-mobile-thumb">
-                <img src="${work.thumbnail}" alt="${escapeHtml(work.title)}" loading="lazy" decoding="async">
-              </div>
-            ` : ""}
-            <div class="works-mobile-body">
-              <div class="works-mobile-period">${[work.status, work.period].filter(Boolean).map(escapeHtml).join(" ／ ")}</div>
-              <h3 class="works-mobile-title">${escapeHtml(work.title)}</h3>
-              ${work.status ? `<p class="works-mobile-summary">${escapeHtml(work.summary)}</p>` : ""}
-            </div>
-            <div class="works-mobile-participants">
-              <span class="works-mobile-members-label">参加者</span>
-              <div class="works-mobile-members">
-                ${work.participantIds.map(id => {
-                  const member = membersById[id];
-                  if (!member) return "";
-                  return `
-                    <a
-                      class="member-detail-link"
-                      href="member.html?id=${member.id}"
-                      data-member-id="${member.id}"
-                      data-work-id="${work.id}"
-                    >
-                      <span>${escapeHtml(member.name)}</span>
-                    </a>
-                  `;
-                }).join("")}
-              </div>
-            </div>
-          </article>
-        `).join("")}
-        <div class="participant-directory">
-          <h3>参加メンバー</h3>
-          <div class="member-detail-list">
-            ${membersByActivityOrder().map(member => `
-              <a class="member-detail-link" href="member.html?id=${escapeHtml(member.id)}">
-                <span>${escapeHtml(member.name)}</span>
-              </a>
-            `).join("")}
-          </div>
-        </div>
-      </div>
-    `;
-
-    container.querySelectorAll(".works-mobile-card").forEach(card => {
-      const workId = new URL(card.dataset.href, location.href).searchParams.get("id");
-      const work = worksById[workId];
-      attachDialogNavigation(card, workBubbleHtml(work), card.dataset.href, {
-        ignoreNestedLinks: true
-      });
-    });
-
-    container.querySelectorAll(".works-mobile-members .member-detail-link").forEach(link => {
-      const work = worksById[link.dataset.workId];
-      const member = membersById[link.dataset.memberId];
-      attachDialogNavigation(link, bubbleHtml({
-        memberName: member.name,
-        contribution: work.contributions?.[member.id]
-      }), link.getAttribute("href"));
-    });
-  }
-
-  function renderNotFound(wrap, label) {
-    wrap.innerHTML = `<p>${label}が見つかりません。</p>`;
-  }
-
-  function memberLink(member, work) {
-    const link = el(
-      "a",
-      "member-detail-link",
-      `<span>${escapeHtml(member.name)}</span>`
-    );
-    link.href = `member.html?id=${member.id}`;
-
-    attachDialogNavigation(link, bubbleHtml({
-      memberName: member.name,
-      memberIcon: member.icon,
-      contribution: work.contributions[member.id]
-    }), link.href);
-
-    return link;
-  }
-
-  function workTile(work, member) {
-    const tile = el("a", "work-tile", `
-      ${work.thumbnail
-        ? `<img src="${work.thumbnail}" alt="${escapeHtml(work.title)}" loading="lazy" decoding="async">`
-        : `<div class="work-tile-placeholder"></div>`
-      }
-      <div class="caption">
-        <div>${escapeHtml(work.title)}</div>
-        <div class="muted">${escapeHtml(work.period)}</div>
-      </div>
-    `);
-
-    tile.href = `work.html?id=${work.id}`;
-
-    attachDialogNavigation(tile, `
-      <div class="bubble-card">
-        <div class="bubble-card-head">
-          <div>
-            <div class="bubble-card-name" id="dialogTitle">${escapeHtml(work.title)}</div>
-            <div class="bubble-card-meta">${escapeHtml(work.period)}</div>
-          </div>
-        </div>
-        <div class="bubble-card-text">${escapeHtml(work.contributions[member.id] || "記述なし")}</div>
-      </div>
-    `, tile.href);
-
-    return tile;
-  }
-
   function renderWorkPage() {
     const wrap = $("#workPage");
     if (!wrap) return;
@@ -1097,119 +396,14 @@
     memberWorks.forEach(work => worksWrap.appendChild(workTile(work, member)));
   }
 
-  function renderAnnouncementPage() {
-    const wrap = $("#announcementPage");
-    if (!wrap) return;
 
-    const item = announcementsById[getQueryParam("id")];
-    if (!item) return renderNotFound(wrap, "告知");
-
-    const image = item.image
-      ? new URL(item.image, location.origin).href
-      : "https://plantshop.work/assets/logo-full.png";
-
-    setMeta({
-      title: `${item.title}｜告知｜プラントショップ`,
-      description: `${item.summary}`.slice(0, 120),
-      image,
-      url: location.href
-    });
-
-    wrap.innerHTML = `
-      <article class="page-hero announcement-detail">
-        <div class="announcement-detail-meta">
-          <span class="announcement-status announcement-status--${escapeHtml(item.status)}">
-            <span class="status-indicator status-indicator--${escapeHtml(item.status)}" aria-hidden="true"></span>
-            ${item.status === "done" ? "済み" : "最新"}
-          </span>
-          <time datetime="${escapeHtml(item.date.replaceAll(".", "-"))}">${escapeHtml(item.date)}</time>
-        </div>
-        <h1>${escapeHtml(item.title)}</h1>
-        ${item.image ? `<img src="${escapeHtml(item.image)}" alt="${escapeHtml(item.title)}" decoding="async">` : ""}
-        <div>
-          <h3>内容</h3>
-          <p>${escapeHtml(item.body)}</p>
-        </div>
-        ${Array.isArray(item.relatedLinks) && item.relatedLinks.length ? `
-          <div>
-            <h3>関連情報</h3>
-            <div class="announcement-related-links">
-              ${item.relatedLinks.map(link => `
-                <a class="member-external-link" href="${escapeHtml(link.url)}">
-                  ${escapeHtml(link.label)}
-                </a>
-              `).join("")}
-            </div>
-          </div>
-        ` : ""}
-        <a class="text-link announcement-back-link" href="index.html#announcements">告知一覧へ戻る</a>
-      </article>
-    `;
+  const page = document.body.dataset.page;
+  if (page === 'home') {
+    $('#aboutContent').innerHTML = data.site.about;
+    setupTabs(); renderAnnouncements(); renderWorks(); renderContact(); renderPodcast().then(() => decorateServiceLinks());
   }
-
-  function renderWorksAreaForViewport() {
-    if (window.innerWidth <= MOBILE_BREAKPOINT) {
-      renderWorksListMobile();
-    } else {
-      renderWorksGraph();
-    }
-  }
-
-  function initHome() {
-    renderAbout();
-    setupAnnouncementTabs();
-    renderAnnouncements();
-    renderWorksAreaForViewport();
-    renderOperatingMembers();
-    renderPodcast();
-    renderContact();
-    renderMemberShare();
-  }
-
-  function setupResponsiveRerender() {
-    window.addEventListener("resize", () => {
-      const isMobile = window.innerWidth <= MOBILE_BREAKPOINT;
-      if (isMobile === lastIsMobile) return;
-      lastIsMobile = isMobile;
-
-      if (document.body.dataset.page === "home") {
-        renderWorksAreaForViewport();
-      }
-    });
-  }
-
-  function setupHeaderOffset() {
-    const header = $(".site-header");
-    if (!header) return;
-
-    const update = () => {
-      const height = window.innerWidth <= MOBILE_BREAKPOINT
-        ? header.getBoundingClientRect().height
-        : 0;
-      document.documentElement.style.setProperty("--anchor-offset", `${height}px`);
-    };
-
-    update();
-
-    if ("ResizeObserver" in window) {
-      new ResizeObserver(update).observe(header);
-    }
-    addEventListener("resize", update, { passive: true });
-
-    if (location.hash) {
-      requestAnimationFrame(() => {
-        update();
-        document.querySelector(location.hash)?.scrollIntoView({ block: "start" });
-      });
-    }
-  }
-
-  setupBubbleSystem();
-  setupHeaderOffset();
-  setupResponsiveRerender();
-
-  if (page === "home") initHome();
-  if (page === "work") renderWorkPage();
-  if (page === "member") renderMemberPage();
-  if (page === "announcement") renderAnnouncementPage();
+  if (page === 'work') renderWorkPage();
+  if (page === 'member') renderMemberPage();
+  if (page === 'announcement') location.replace('index.html#announcements');
+  decorateServiceLinks();
 })();

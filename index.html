@@ -19,7 +19,7 @@
 
   <meta name="twitter:card" content="summary_large_image" />
 
-  <link rel="stylesheet" href="style.css?v=20261116-1" />
+  <link rel="stylesheet" href="style.css?v=20261116-2" />
 </head>
 <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-JRM94L2HK3"></script>
@@ -32,14 +32,15 @@
 </script>
 <body data-page="home">
   <header class="site-header">
-    <nav class="nav">
+    <nav class="nav" aria-label="メインナビゲーション">
       <a href="index.html" class="nav-home nav-logo-link">
         <img src="assets/logo-text-display.webp" alt="プラントショップ" class="nav-logo" width="480" height="157">
       </a>
-      <div class="nav-links">
+      <button class="nav-toggle" type="button" aria-label="メニューを開く" aria-expanded="false" aria-controls="siteMenu" hidden><span></span><span></span></button>
+      <div class="nav-links" id="siteMenu">
         <a href="#about">概要</a>
         <a href="#announcements">告知</a>
-        <a href="#works">活動</a><a href="#members">参加メンバー</a>
+        <a href="#works">活動</a><a href="#members">メンバー</a>
         <a href="#walking-pot">歩く植木鉢</a>
         <a href="#contact">メール・SNS</a>
         <a href="#member-share">メンバー共有サイト</a>
@@ -123,7 +124,7 @@
       </div>
     </section>
 
-    <section id="members" class="section"><div class="section-inner"><div class="section-heading"><span class="section-index">04</span><h2>参加メンバー</h2></div><div id="membersList" class="people-grid"></div></div></section>
+    <section id="members" class="section"><div class="section-inner"><div class="section-heading"><span class="section-index">04</span><h2>メンバー</h2></div><ul id="membersList" class="member-directory"></ul></div></section>
 
     <section id="walking-pot" class="section">
       <div class="section-inner">
@@ -157,6 +158,6 @@
   </main>
 
   <script src="data.js?v=2f7d049e1525"></script>
-  <script src="app.js?v=20261116-1"></script>
+  <script src="app.js?v=20261116-2"></script>
 </body>
 </html>

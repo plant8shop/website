@@ -13,13 +13,13 @@
   </script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>参加者｜プラントショップ</title>
+  <title>メンバー｜プラントショップ</title>
   <meta
     name="description"
     content="プラントショップに参加するメンバーのプロフィールと参加活動を掲載しています。"
   />
 
-  <meta property="og:title" content="参加者｜プラントショップ" />
+  <meta property="og:title" content="メンバー｜プラントショップ" />
   <meta property="og:description" content="プラントショップに参加するメンバーのプロフィールと参加活動を掲載しています。" />
   <meta property="og:type" content="profile" />
   <meta property="og:url" content="https://plantshop.work/member.html" />
@@ -27,18 +27,19 @@
 
   <meta name="twitter:card" content="summary_large_image" />
 
-  <link rel="stylesheet" href="style.css?v=20261116-1" />
+  <link rel="stylesheet" href="style.css?v=20261116-2" />
 </head>
 <body data-page="member">
   <header class="site-header">
-    <nav class="nav">
+    <nav class="nav" aria-label="メインナビゲーション">
       <a href="index.html" class="nav-home nav-logo-link">
         <img src="assets/logo-text-display.webp" alt="プラントショップ" class="nav-logo" width="480" height="157">
       </a>
-      <div class="nav-links">
+      <button class="nav-toggle" type="button" aria-label="メニューを開く" aria-expanded="false" aria-controls="siteMenu" hidden><span></span><span></span></button>
+      <div class="nav-links" id="siteMenu">
         <a href="index.html#about">概要</a>
         <a href="index.html#announcements">告知</a>
-        <a href="index.html#works">活動</a><a href="index.html#members">参加メンバー</a>
+        <a href="index.html#works">活動</a><a href="index.html#members">メンバー</a>
         <a href="index.html#walking-pot">歩く植木鉢</a>
         <a href="index.html#contact">メール・SNS</a>
         <a href="index.html#member-share">メンバー共有サイト</a>
@@ -53,6 +54,6 @@
   </main>
 
   <script src="data.js?v=2f7d049e1525"></script>
-  <script src="app.js?v=20261116-1"></script>
+  <script src="app.js?v=20261116-2"></script>
 </body>
 </html>

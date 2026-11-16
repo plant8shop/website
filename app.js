@@ -9,6 +9,34 @@
   const renderNotFound = (wrap, label) => { wrap.innerHTML = `<p>${label}が見つかりません。</p><a class="text-link" href="index.html">トップへ戻る</a>`; };
   let announcementStatus = 'latest';
 
+  function setupNavigation() {
+    const nav = $('.nav-links');
+    const toggle = $('.nav-toggle');
+    if (!nav || !toggle) return;
+    const mobile = matchMedia('(max-width: 960px)');
+    const setOpen = open => {
+      const expanded = mobile.matches && open;
+      toggle.setAttribute('aria-expanded', String(expanded));
+      toggle.setAttribute('aria-label', expanded ? 'メニューを閉じる' : 'メニューを開く');
+      nav.hidden = mobile.matches && !expanded;
+      $('.site-header').classList.toggle('menu-open', expanded);
+    };
+    const update = () => { toggle.hidden = !mobile.matches; setOpen(false); };
+    toggle.addEventListener('click', () => setOpen(toggle.getAttribute('aria-expanded') !== 'true'));
+    nav.addEventListener('click', event => { if (event.target.closest('a')) setOpen(false); });
+    document.addEventListener('keydown', event => {
+      if (event.key === 'Escape' && toggle.getAttribute('aria-expanded') === 'true') {
+        setOpen(false); toggle.focus();
+      }
+    });
+    document.addEventListener('click', event => { if (!event.target.closest('.site-header')) setOpen(false); });
+    mobile.addEventListener('change', update);
+    update();
+    const updateOffset = () => document.documentElement.style.setProperty('--anchor-offset', `${$('.nav-home').getBoundingClientRect().height + 48}px`);
+    new ResizeObserver(updateOffset).observe($('.nav-home'));
+    updateOffset();
+  }
+
   function memberLink(member, work) {
     const a = el('a', 'member-detail-link', `<span>${escapeHtml(member.name)}</span><span aria-hidden="true">↗</span>`);
     a.href = `member.html?id=${encodeURIComponent(member.id)}`;
@@ -25,10 +53,7 @@
         <h3><a class="card-title-link" href="work.html?id=${encodeURIComponent(work.id)}">${escapeHtml(work.title)}<span aria-hidden="true">↗</span></a></h3>
         <p>${escapeHtml(work.summary)}</p>
         ${member && work.contributions?.[member.id] ? `<p class="contribution">${escapeHtml(work.contributions[member.id])}</p>` : ''}
-        <div class="card-members"></div>
       </div>`);
-    const list = $('.card-members', article);
-    (work.participantIds || []).map(id => membersById[id]).filter(Boolean).forEach(m => list.append(memberLink(m, work)));
     return article;
   }
   const workTile = workCard;
@@ -38,10 +63,12 @@
     area.className = 'project-grid';
     data.works.forEach(w => area.append(workCard(w)));
     const people = $('#membersList');
-    data.members.forEach(m => {
-      const count = data.works.filter(w => w.participantIds.includes(m.id)).length;
-      const card = el('article', 'content-card person-card', `<div class="card-body"><h3><a class="card-title-link" href="member.html?id=${encodeURIComponent(m.id)}">${escapeHtml(m.name)}<span aria-hidden="true">↗</span></a></h3>${m.bio ? `<p>${escapeHtml(m.bio)}</p>` : ''}<div class="person-card-footer"><span class="card-meta">${count} 活動に参加</span><div class="member-links">${(m.links || []).map(l => `<a href="${escapeHtml(l.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(l.label)}</a>`).join('')}</div></div></div>`);
-      people.append(card);
+    const counts = Object.fromEntries(data.members.map(m => [m.id, data.works.filter(w => w.participantIds.includes(m.id)).length]));
+    people.className = 'member-directory';
+    people.setAttribute('aria-label', 'メンバー（参加活動数順）');
+    [...data.members].sort((a,b) => counts[b.id] - counts[a.id]).forEach(m => {
+      const entry = el('li', 'member-directory-entry', `<a href="member.html?id=${encodeURIComponent(m.id)}"><span class="member-directory-name">${escapeHtml(m.name)}</span><span class="member-directory-meta">${counts[m.id]} 活動<span aria-hidden="true">↗</span></span></a>`);
+      people.append(entry);
     });
   }
   function renderAnnouncements() {
@@ -147,7 +174,7 @@
 
     wrap.innerHTML = `
       <p class="podcast-description">${escapeHtml(podcast.description)}</p>
-      <div class="podcast-player" aria-live="polite">
+      <div class="podcast-player" aria-busy="true">
         <p class="podcast-player-note">エピソードを読み込んでいます。</p>
       </div>
       <div class="podcast-links" aria-label="${escapeHtml(podcast.name)}の配信先">
@@ -166,7 +193,7 @@
     if (!player || !podcast.feedUrl) return;
 
     try {
-      const response = await fetch(podcast.feedUrl);
+      const response = await fetch(podcast.feedUrl, { signal: AbortSignal.timeout(12000) });
       if (!response.ok) throw new Error("Podcast feed request failed");
 
       const documentXml = new DOMParser().parseFromString(await response.text(), "application/xml");
@@ -237,47 +264,57 @@
 
       if (!episodes.length) throw new Error("Podcast feed has no playable episodes");
 
+      const episodeDate = episode => {
+        const date = new Date(episode.publishedAt);
+        return Number.isNaN(date.getTime()) ? '' : new Intl.DateTimeFormat('ja-JP', {year:'numeric',month:'2-digit',day:'2-digit'}).format(date);
+      };
       player.innerHTML = `
-        <label class="podcast-episode-label" for="podcastEpisodeSelect">エピソード</label>
-        <select id="podcastEpisodeSelect" class="podcast-episode-select">
-          ${episodes.map((episode, index) => `
-            <option value="${index}">${escapeHtml(episode.title)}</option>
-          `).join("")}
-        </select>
-        <div class="podcast-episode-current">
-          <div class="podcast-episode-meta"></div>
-          <div class="podcast-episode-description" hidden></div>
-        </div>
+        <div class="podcast-episode-meta"></div>
+        <h3 class="podcast-current-title" id="podcastCurrentTitle"></h3>
         <audio controls preload="metadata">
           お使いのブラウザは音声再生に対応していません。
         </audio>
+        <details class="podcast-notes"><summary>この回の内容</summary><div class="podcast-episode-description"></div></details>
+        <details class="podcast-archive"><summary>エピソード一覧 <span>${episodes.length}</span></summary><ol class="podcast-episode-list">
+          ${episodes.map((episode,index) => `<li><button type="button" data-episode="${index}" aria-label="${escapeHtml(episode.title)}を選ぶ"><time>${escapeHtml(episodeDate(episode))}</time><span>${escapeHtml(episode.title)}</span><span class="episode-action" aria-hidden="true">選ぶ</span></button></li>`).join('')}
+        </ol></details>
       `;
 
-      const select = $("#podcastEpisodeSelect", player);
       const audio = $("audio", player);
       const meta = $(".podcast-episode-meta", player);
       const episodeDescription = $(".podcast-episode-description", player);
 
-      const selectEpisode = () => {
-        const episode = episodes[Number(select.value)] || episodes[0];
-        meta.textContent = [
-          episode.publishedAt
-            ? new Intl.DateTimeFormat("ja-JP", { dateStyle: "long" }).format(new Date(episode.publishedAt))
-            : "",
-          episode.duration ? `再生時間 ${episode.duration}` : ""
-        ].filter(Boolean).join(" ／ ");
+      const selectEpisode = (index = 0) => {
+        const episode = episodes[index];
+        meta.textContent = [index === 0 ? '最新エピソード' : '', episodeDate(episode), episode.duration].filter(Boolean).join(' · ');
+        $('#podcastCurrentTitle').textContent = episode.title;
+        audio.setAttribute('aria-label', episode.title);
         setSafeDescription(episodeDescription, episode.descriptionHtml);
-        episodeDescription.hidden = !episode.descriptionHtml;
+        $('.podcast-notes', player).hidden = !episode.descriptionHtml;
+        $('.podcast-notes', player).open = false;
+        player.querySelectorAll('[data-episode]').forEach(button => {
+          const active = Number(button.dataset.episode) === index;
+          button.setAttribute('aria-pressed', String(active));
+          $('.episode-action',button).textContent = active ? '選択中' : '選ぶ';
+        });
+        audio.pause();
         audio.src = episode.enclosureUrl;
         audio.load();
+        decorateServiceLinks(episodeDescription);
       };
 
-      select.addEventListener("change", selectEpisode);
+      player.querySelectorAll('[data-episode]').forEach(button => button.addEventListener('click', () => {
+        selectEpisode(Number(button.dataset.episode));
+        $('.podcast-archive',player).open = false;
+        audio.focus();
+      }));
       selectEpisode();
     } catch {
       player.innerHTML = `
         <p class="podcast-player-note">エピソード一覧を読み込めませんでした。下の配信サービスからお聴きください。</p>
       `;
+    } finally {
+      player.setAttribute('aria-busy', 'false');
     }
   }
 
@@ -302,8 +339,12 @@
       wrap.closest(".section-inner")?.classList.add("plant-project-inner");
       wrap.innerHTML = work.detailHtml;
       const memberList = $("#workMemberList");
-      if (memberList) work.participantIds.map(id => membersById[id]).filter(Boolean)
-        .forEach(member => memberList.appendChild(memberLink(member, work)));
+      if (memberList) {
+        const heading = el('h3', 'work-members-heading', '参加メンバー');
+        memberList.before(heading);
+        work.participantIds.map(id => membersById[id]).filter(Boolean)
+          .forEach(member => memberList.appendChild(memberLink(member, work)));
+      }
       return;
     }
 
@@ -315,7 +356,7 @@
         <div>
           <h3>概要</h3>
           <p>${escapeHtml(work.summary)}</p>
-          <p class="meta">参加者</p>
+          <h3 class="work-members-heading">参加メンバー</h3>
           <div class="member-detail-list" id="workMemberList"></div>
         </div>
         ${
@@ -345,10 +386,10 @@
     if (!wrap) return;
 
     const member = membersById[getQueryParam("id")];
-    if (!member) return renderNotFound(wrap, "参加者");
+    if (!member) return renderNotFound(wrap, "メンバー");
 
     setMeta({
-      title: `${member.name}｜参加者｜プラントショップ`,
+      title: `${member.name}｜メンバー｜プラントショップ`,
       description: member.bio
         ? `${member.bio}`.slice(0, 120)
         : `${member.name}のプロフィールと参加活動を掲載しています。`,
@@ -362,7 +403,7 @@
       <div class="page-hero">
         <h1>${escapeHtml(member.name)}</h1>
         <div>
-          <h3>情報</h3>
+          <h3>プロフィール</h3>
           <p class="member-profile-text">${escapeHtml(member.bio)}</p>
         </div>
         ${
@@ -398,6 +439,7 @@
 
 
   const page = document.body.dataset.page;
+  setupNavigation();
   if (page === 'home') {
     $('#aboutContent').innerHTML = data.site.about;
     setupTabs(); renderAnnouncements(); renderWorks(); renderContact(); renderPodcast().then(() => decorateServiceLinks());

@@ -212,7 +212,7 @@ const SITE_DATA = {
       "title": "Saved Space",
       "period": "2026.08-",
       "status": "進行中",
-      "thumbnail": "",
+      "thumbnail": "assets/uploads/20261125-6821a06cd670d485.jpg",
       "summary": "ロボット掃除機が動く無人のリビングや空間を徐々に変容させ、空間に別の意味や生態系が立ち上がる様子を映像にするプロジェクト。",
       "detailHtml": "\n      <section>\n        <p>音入れを進め、2026年10月に再撮影と微調整を行う予定です。卒業制作展や海外映画祭での発表を検討しています。</p>\n      </section>\n      ",
       "participantIds": [
